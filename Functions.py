@@ -52,6 +52,7 @@ def ISA(h):
                     p5 = p4*e**(-g0/(R*T4)*(h5-h4))
                     rho5 = p5/(R*T4)
                     if h <= 51000:
+                        T = T4
                         p = p5
                         rho = rho5
                     else:
