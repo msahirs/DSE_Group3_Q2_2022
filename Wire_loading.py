@@ -1,6 +1,17 @@
 import numpy as np
 import pandas as pd
 
+
+def density_at_altitude(h):
+    if h < 0:
+        return 0
+    elif h <= 11000:
+        return 1.225*(1-0.0065*h/288.15)**4.256
+    elif h <=20000:
+        return 0.3672*np.exp(-1*(h-11000)/6341.62)
+    elif h <= 32000:
+        return 0.0889*(1+0.0010*(h-20000)/216.65)**-35.163
+
 # inputs for program
 amount_of_wires = 1
 wire_segments = 100  # amount of segments
