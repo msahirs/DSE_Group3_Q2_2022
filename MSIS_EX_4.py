@@ -9,7 +9,7 @@ from pymsis import msis
 
 lons = range(-180, 185, 5)
 lats = range(-90, 95, 5)
-alt = 10
+alt = 0
 f107 = 150
 f107a = 150
 ap = 7
@@ -26,15 +26,15 @@ output = msis.run(dates, lons, lats, alt, f107s, f107as, aps)
 # Get rid of the single dimensions
 output = np.squeeze(output)
 
-i = 7  # N
+i = 0  # N
 print(output[:,:,0,0])
 fig, (ax_time, ax_mesh) = plt.subplots(
     nrows=2, gridspec_kw={"height_ratios": [1, 4]}, constrained_layout=True
 )
 xx, yy = np.meshgrid(lons, lats)
-vmin, vmax = 1e13, 8e13
-norm = matplotlib.colors.Normalize(vmin, vmax)
-mesh = ax_mesh.pcolormesh(xx, yy, output[0, :, :, i].T, shading="auto", norm=norm)
+# vmin, vmax = 1e13, 8e13
+# norm = matplotlib.colors.Normalize(vmin, vmax)
+mesh = ax_mesh.pcolormesh(xx, yy, output[0, :, :, i].T, shading="auto",)
 plt.colorbar(
     mesh, label=f"N number density at {alt} km (/m$^3$)", orientation="horizontal"
 )
@@ -42,7 +42,7 @@ plt.colorbar(
 time_data = output[:, len(lons) // 2, len(lats) // 2, :]
 ax_time.plot(dates, time_data[:, i], c="k")
 ax_time.set_xlim(dates[0], dates[-1])
-ax_time.set_ylim(vmin, vmax)
+# ax_time.set_ylim(vmin, vmax)
 ax_time.xaxis.set_major_locator(mdates.HourLocator(interval=3))
 ax_time.xaxis.set_major_formatter(mdates.DateFormatter("%H:%M"))
 time_line = ax_time.axvline(dates[0], c="r")
