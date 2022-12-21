@@ -121,12 +121,21 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     coords = np.array([x_list, y_list])
     return coords
 
+
+def gen_stifness_matrix_element(E, A, l, begin_coords, end_coords):
+    transformation_matrix = get_trans_matrix(begin_coords, end_coords)
+
+    stifness_matrix_element = E * A / l * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
+    global_matrix_element = transformation_matrix.transpose() @ stifness_matrix_element @ transformation_matrix
+    return stifness_matrix_element
+
+
 print(create_mesh(3))
 
 def get_trans_matrix(coords1, coords2):
     theta = atan2(coords2[1]-coords1[1],coords2[0]-coords1[0])
     labda = cos(theta)
-    mu - sin(theta)
+    mu = sin(theta)
     trans_matrix = np.matrix([[labda,mu,0,0],[-mu,labda,0,0],[0,0,labda,mu],[0,0,-mu,labda]])
     return trans_matrix
 
