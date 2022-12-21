@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from ISA_general import ISA, ISA_from_everything
 
+"""numbering of elements is increasing from earth to balloon"""
+
 
 def density_at_altitude(h):
     """
@@ -32,6 +34,7 @@ total_wire_length = design_altitude  # meters
 balloon_altitude = design_altitude  # meters
 density_internal_balloon = 0.2  # kg/m^3
 volume_balloon = 80000  # m^3
+wire_drag_coeff = 0.5
 
 density_of_materials = [0.8, 0.9, 1, 1.1, 1.2]  # kg/L
 density_of_material = density_of_materials[1]
@@ -67,11 +70,13 @@ class balloon():
         # self.drag_force
 
 
-class tether()
+class tether():
     def __init__(self):
-        self.nodes = dict()
-        self.density = 0.9
         self.length = total_wire_length / wire_segments
+        self.nodes = dict()  # position, angle, etc...
+        self.material = dict()  # density, E-mod, tensile strength, etc...
+        self.radius = radius_wire
+        self.drag_coeff = wire_drag_coeff
 
 
 class atmosphere():
@@ -88,12 +93,34 @@ class atmosphere():
             self.pressure = ISA_properties[1]
             self.density = ISA_properties[2]
 
-
-
     class wind():
         def __init__(self, angle):
             self.angle = angle
 
+
+def calc_force_matrix():
+    """
+    input:
+    mass =
+    drag =
+    lift_gas =
+    lift_wind =
+
+    :return:
+    """
+
+
+def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
+    """
+    create mesh for the wire
+    [[xlist], [ylist]
+    """
+    y_list = np.linspace(altitude_ground, altitude_balloon, nodes)  # using bottem as well
+    x_list = np.zeros(y_list.shape)
+    coords = np.array([x_list, y_list])
+    return coords
+
+print(create_mesh(3))
 
 
 
