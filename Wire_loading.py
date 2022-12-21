@@ -60,7 +60,7 @@ top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple ->
 bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
 
 
-def Boancy_force(balloon_altitude):
+def boancy_force(balloon_altitude):
     return (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
 
 def drag_balloon_force():
@@ -68,4 +68,33 @@ def drag_balloon_force():
 
 def lift_balloon_force():
     return q_balloon*s_balloon*lift_coeff
+
+# class balloon():
+#     def __init__(self, speed, altitude):
+#         self.q_balloon = speed*speed*0.5*density_at_altitude(altitude)
+#         self.boancy_force = density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
+
+class atmosphere():
+    """h = list of altitudes"""
+    def __init__(self, h):
+        self.ISA = self.ISA(h)
+        self.wind = self.wind(h)
+
+
+    class ISA():
+        def __init__(self, h):
+            self.temp = get_temp(h)
+            self.pressure = get_pressure(self, h)
+            self.density = get_density(h)
+
+    def get_pressure(self, h):
+        """"
+        calc thing """
+        pressure = h/10
+        return pressure
+
+    class wind():
+        def __init__(self, angle):
+            self.angle = angle
+
 
