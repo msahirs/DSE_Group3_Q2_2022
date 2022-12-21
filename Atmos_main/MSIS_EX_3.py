@@ -7,7 +7,7 @@ from pymsis import msis
 
 
 lon = 0
-lat = -90
+lat = 90
 alt = 15
 f107 = 150
 f107a = 150
@@ -50,7 +50,6 @@ variables = [
 np.savetxt("data_output.csv", output, delimiter=",", header = "".join(x+',' for x in variables))
 
 plt.ion()
-
 _, ax = plt.subplots()
 
 # for i, label in enumerate(variables):
@@ -78,29 +77,27 @@ ax.xaxis.set_major_locator(mdates.DayLocator(interval=50))
 ax.xaxis.set_major_formatter(mdates.DateFormatter("%d-%m"))
 
 plt.show()
-
 ascending = True
 while True:
     if ascending:
         lat += 1
     else:
         lat -=1
-    if lat > 90:
+    if lat > 5:
         ascending = False
-    if lat <-90:
+    if lat <-5:
         ascending = True
 
-    output = msis.run(dates, lon, lat, alt, f107s, f107as, aps)
-    output = np.squeeze(output)
-    variation = output
+    # output = msis.run(dates, lon, lat, alt, f107s, f107as, aps)
+    # output = np.squeeze(output)
+    # variation = output
     # print(alt)
     for i, label in enumerate(variables):
         if label == "Temperature":
-            # print(lat)
         # There is currently no NO data
             lines[0].set_data(dates, variation[:, i])
 
-            ax.set_xlabel(f"Longitude: {lon}, Latitude: {lat}, Altitude: {alt:3.1f} km")
+            # ax.set_xlabel(f"Longitude: {lon}, Latitude: {lat}, Altitude: {alt:3.1f} km")
             plt.draw()
     
-        plt.pause(1/240)
+    plt.pause(1/60)
