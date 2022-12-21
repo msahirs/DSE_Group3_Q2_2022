@@ -38,6 +38,67 @@ density_of_material = density_of_materials[1]
 # side-quest calculations
 area_of_segment = np.pi * radius_wire ** 2  # mm^2
 
+
+def boancy_force(balloon_altitude):
+    return (density_at_altitude(balloon_altitude) - density_internal_balloon) * volume_balloon
+
+
+def drag_balloon_force():
+    return q_balloon * s_balloon * drag_coeff
+
+
+def lift_balloon_force():
+    return q_balloon * s_balloon * lift_coeff
+
+
+class balloon():
+    def __init__(self, speed, altitude, volume_balloon, weight):
+        self.drag_coeff = 0.53
+        self.lift_coeff = 0.1
+        self.s_balloon = 50
+        self.volume = volume_balloon
+        self.altitude = altitude
+        self.speed = speed
+        self.weight = weight
+        self.q_balloon = 0.5 * density_at_altitude(altitude) * speed * speed
+
+        # self.boancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
+        # self.drag_force
+
+
+class tether()
+    def __init__(self):
+        self.nodes = dict()
+        self.density = 0.9
+        self.length = total_wire_length / wire_segments
+
+
+class atmosphere():
+    """h = list of altitudes"""
+
+    def __init__(self, h):
+        self.ISA = self.ISA(h)
+        self.wind = self.wind(h)
+
+    class ISA():
+        def __init__(self, h):
+            self.temp = get_temp(h)
+            self.pressure = get_pressure(self, h)
+            self.density = get_density(h)
+
+    def get_pressure(self, h):
+        """"
+        calc thing """
+        pressure = h / 10
+        return pressure
+
+    class wind():
+        def __init__(self, angle):
+            self.angle = angle
+
+
+
+
 ## set up dataframe for use ##
 
 # mass
@@ -58,43 +119,3 @@ angle_of_orientation_list = np.zeros(wire_segments)
 # positioning
 top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
 bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
-
-
-def boancy_force(balloon_altitude):
-    return (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
-
-def drag_balloon_force():
-    return q_balloon*s_balloon*drag_coeff
-
-def lift_balloon_force():
-    return q_balloon*s_balloon*lift_coeff
-
-# class balloon():
-#     def __init__(self, speed, altitude):
-#         self.q_balloon = speed*speed*0.5*density_at_altitude(altitude)
-#         self.boancy_force = density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
-
-class atmosphere():
-    """h = list of altitudes"""
-    def __init__(self, h):
-        self.ISA = self.ISA(h)
-        self.wind = self.wind(h)
-
-
-    class ISA():
-        def __init__(self, h):
-            self.temp = get_temp(h)
-            self.pressure = get_pressure(self, h)
-            self.density = get_density(h)
-
-    def get_pressure(self, h):
-        """"
-        calc thing """
-        pressure = h/10
-        return pressure
-
-    class wind():
-        def __init__(self, angle):
-            self.angle = angle
-
-
