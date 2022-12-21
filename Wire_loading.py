@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from ISA_general import ISA, ISA_from_everything
 
 
 def density_at_altitude(h):
@@ -39,7 +40,7 @@ density_of_material = density_of_materials[1]
 area_of_segment = np.pi * radius_wire ** 2  # mm^2
 
 
-def boancy_force(balloon_altitude):
+def buoyancy_force(balloon_altitude):
     return (density_at_altitude(balloon_altitude) - density_internal_balloon) * volume_balloon
 
 
@@ -62,7 +63,7 @@ class balloon():
         self.weight = weight
         self.q_balloon = 0.5 * density_at_altitude(altitude) * speed * speed
 
-        # self.boancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
+        # self.buoyancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
         # self.drag_force
 
 
@@ -82,15 +83,12 @@ class atmosphere():
 
     class ISA():
         def __init__(self, h):
-            self.temp = get_temp(h)
-            self.pressure = get_pressure(self, h)
-            self.density = get_density(h)
+            ISA_properties = ISA_from_everything((h))
+            self.temp = ISA_properties[0]
+            self.pressure = ISA_properties[1]
+            self.density = ISA_properties[2]
 
-    def get_pressure(self, h):
-        """"
-        calc thing """
-        pressure = h / 10
-        return pressure
+
 
     class wind():
         def __init__(self, angle):
