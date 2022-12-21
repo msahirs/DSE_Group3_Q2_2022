@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
+import csv
 
 from pymsis import msis
 
 
 lon = 0
-lat = 0
+lat = 90
 alt = 15
 f107 = 150
 f107a = 150
@@ -24,12 +25,14 @@ output = msis.run(dates, lon, lat, alt, f107s, f107as, aps)
 #  output is now of the shape (ndates, 1, 1, 1, 11)
 # Get rid of the single dimensions
 output = np.squeeze(output)
+
+
 # print(output)
 
 # Lets get the percent variation from the annual mean for each variable
 # variation = 100 * (output / output.mean(axis=0) - 1)
 variation = output
-
+print(dates.shape)
 variables = [
     "Total mass density",
     "N2",
@@ -43,6 +46,9 @@ variables = [
     "NO",
     "Temperature",
 ]
+
+np.savetxt("data_output.csv", output, delimiter=",", header = "".join(x+',' for x in variables))
+
 plt.ion()
 _, ax = plt.subplots()
 
