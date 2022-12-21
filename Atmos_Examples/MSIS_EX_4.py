@@ -9,10 +9,10 @@ from pymsis import msis
 
 lons = range(-180, 185, 5)
 lats = range(-90, 95, 5)
-alt = 0
+alt = 15
 f107 = 150
 f107a = 150
-ap = 7
+ap = 4
 # Diurnal data
 dates = np.arange("2003-01-05", "2003-01-06", dtype="datetime64[30m]")
 ndates = len(dates)
