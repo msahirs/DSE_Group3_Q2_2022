@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from ISA_general import ISA, ISA_from_everything
+from math import *
 
 """numbering of elements is increasing from earth to balloon"""
 
@@ -122,7 +123,12 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
 
 print(create_mesh(3))
 
-
+def get_trans_matrix(coords1, coords2):
+    theta = atan2(coords2[1]-coords1[1],coords2[0]-coords1[0])
+    labda = cos(theta)
+    mu - sin(theta)
+    trans_matrix = np.matrix([[labda,mu,0,0],[-mu,labda,0,0],[0,0,labda,mu],[0,0,-mu,labda]])
+    return trans_matrix
 
 ## set up dataframe for use ##
 
