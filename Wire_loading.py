@@ -133,18 +133,6 @@ class atmosphere():
             self.angle = angle
 
 
-def calc_force_matrix():
-    """
-    input:
-    mass =
-    drag =
-    lift_gas =
-    lift_wind =
-
-    :return:
-    """
-
-
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
     create mesh for the wire
@@ -157,11 +145,19 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
 
 
 def get_trans_matrix(coords1, coords2):
+    '''
+    Create the rotation matrix of one 2D line element
+    :param coords1: coordinates of first endpoint
+    :param coords2: coordinates of second endpoint
+    :return: 4x4 transformation matrix for the line element
+    '''
+
     theta = atan2(coords2[1] - coords1[1], coords2[0] - coords1[0])
     labda = cos(theta)
     mu = sin(theta)
     trans_matrix = np.matrix([[labda, mu, 0, 0], [-mu, labda, 0, 0], [0, 0, labda, mu], [0, 0, -mu, labda]])
     return trans_matrix
+
 
 def split_eq_equation(K,U,R,P,DOF=2):
     '''
@@ -231,30 +227,34 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
     return global_stiffness_matrix
 
 
-print(create_mesh(3))
+coordlst = create_mesh(3)
 
-print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
-print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
-array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
-print(make_global_stiffness_matrix(array))
+
+
+# print(create_mesh(3))
+#
+# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
+# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
+# array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
+# print(make_global_stiffness_matrix(array))
 
 ## set up dataframe for use ##
 
 # mass
-length_of_segment = total_wire_length / wire_segments
-volume_of_segment = area_of_segment * length_of_segment
-mass_of_segment = volume_of_segment * density_of_material
-mass_list = mass_of_segment * np.ones(wire_segments)
-
-# wind/gust
-wind_profile_list = np.zeros(wire_segments)
-
-# initial tension
-initial_tension_list = np.zeros(wire_segments)
-
-# orientation
-angle_of_orientation_list = np.zeros(wire_segments)
-
-# positioning
-top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
-bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
+# length_of_segment = total_wire_length / wire_segments
+# volume_of_segment = area_of_segment * length_of_segment
+# mass_of_segment = volume_of_segment * density_of_material
+# mass_list = mass_of_segment * np.ones(wire_segments)
+#
+# # wind/gust
+# wind_profile_list = np.zeros(wire_segments)
+#
+# # initial tension
+# initial_tension_list = np.zeros(wire_segments)
+#
+# # orientation
+# angle_of_orientation_list = np.zeros(wire_segments)
+#
+# # positioning
+# top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
+# bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
