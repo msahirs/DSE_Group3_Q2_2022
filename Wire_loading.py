@@ -121,23 +121,26 @@ class atmosphere():
             self.angle = angle
 
 
-def balloon_tension(phi, balloon_altitude, q_b, s_b, C_bl, C_bd, density_hydrogen, volume):
+def balloon_tension(phi, s_b, density_hydrogen, h, v_air):
+    Balloon = balloon(1, 1, 4, 1)  # TODO: placeholder values
 
-    Balloon=balloon(0,0,0,0) #TODO: placeholder values
-    lift_balloon_force=q_b*s_b*C_bl
-    drag_balloon_force=q_b*s_b*C_bd
-    buoyancy_force=(density_at_altitude(0)-density_hydrogen)*volume
+    q_b = 0.5*density_at_altitude(h)*v_air**2
 
+    lift_balloon_force=q_b*s_b*Balloon.lift_coeff
+    drag_balloon_force=q_b*s_b*Balloon.drag_coeff
+
+    buoyancy_force=(density_at_altitude(h)-density_hydrogen)*Balloon.volume
     D_bl=np.array([0, 0, lift_balloon_force])
     D_bd=np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
-    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
-    W_b=np.array(5)
+    B=np.array([0, 0, buoyancy_force])
+    W_b=np.array(Balloon.weight)
     F=D_bl+D_bd+B-W_b
 
     #CHANGING COORDINATE SYSTEM from 3d to 2d
     fx=np.take(F, 0) #towards right
     fy=np.take(F, 2) #upwards
     return fx, fy
+
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -277,6 +280,7 @@ load_vector = make_load_vector(mesh)
 print(load_vector, load_vector.shape)
 coordlst = create_mesh(3)
 
+print("Balloon tension: ", balloon_tension(0,0,0,0,0))
 # print(create_mesh(3))
 #
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
