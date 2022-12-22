@@ -88,6 +88,7 @@ class balloon():
         self.speed = speed
         self.weight = weight
         self.q_balloon = 0.5 * density_at_altitude(altitude) * speed * speed
+        self.ch_area = volume_balloon**(2/3) #characteristic area for a cube
 
         # self.buoyancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
         # self.drag_force
@@ -122,13 +123,15 @@ class atmosphere():
 
 
 # s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis
-def balloon_tension(phi, density_hydrogen, h, s_b):
+def balloon_tension(phi, density_hydrogen, h):
 
     Balloon = balloon(1, 2, 3, 4)  ##placeholder values
     q_b = Balloon.q_balloon
+    s_b = Balloon.ch_area
     lift_balloon_force = q_b * s_b * Balloon.lift_coeff
     drag_balloon_force = q_b * s_b * Balloon.drag_coeff
     buoyancy_force = (density_at_altitude(h) - density_hydrogen) * Balloon.volume
+
 
     D_bl = np.array([0, 0, lift_balloon_force])
     D_bd = np.array([drag_balloon_force * cos(phi), drag_balloon_force * sin(phi), 0])
