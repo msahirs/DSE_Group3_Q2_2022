@@ -200,7 +200,7 @@ def split_eq_equation(K,U,R,P,DOF=2):
     return split
 
 
-def gen_stifness_matrix_element(E, A, L, begin_coords, end_coords):
+def gen_stiffness_matrix_element(E, A, L, begin_coords, end_coords):
     """
     :param E: E-mod
     :param A: cross Area
@@ -209,8 +209,8 @@ def gen_stifness_matrix_element(E, A, L, begin_coords, end_coords):
     """
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
 
-    stifness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
-    global_matrix_element = transformation_matrix.transpose() @ stifness_matrix_element @ transformation_matrix
+    stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
+    global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
     return global_matrix_element
 
 
@@ -233,8 +233,8 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
 
 print(create_mesh(3))
 
-print(gen_stifness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
-print(gen_stifness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
+print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
+print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
 array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
 print(make_global_stiffness_matrix(array))
 
