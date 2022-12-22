@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import isacalc as isa
+import ISA_general
 
-atmosphere = isa.get_atmosphere()
+# atmosphere = isa.get_atmosphere()
 
 # Values
 L_charac = 1
@@ -14,9 +14,12 @@ g = 9.81
 sigma = 5.67 * 10 ** (-8)
 I = 1353
 Cp_module = 2900
+a = 295.070
+mu = 0.0000143226
+# These are done by hand for 20km as the ISA calculator does not include them
 
 # Calcues
-T_air, P, rho, a, mu = isa.calculate_at_h(h, atmosphere)
+T_air, P, rho = ISA_general.ISA(h)
 nu = mu / rho  # kinematic viscocity
 Pr = mu * Cp / k
 alpha = k / rho / Cp
