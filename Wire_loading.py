@@ -206,7 +206,7 @@ def split_eq_equation(K, U, R, P, DOF=2):
     return split
 
 
-def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
+def gen_stiffness_matrix_element(begin_coords, end_coords, E = 1e+9, A = 0.0001):
     """
     :param E: E-mod
     :param A: cross Area
@@ -215,12 +215,9 @@ def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
     L = np.sqrt((end_coords[0] - begin_coords[0]) ** 2 + (end_coords[1] - begin_coords[1]) ** 2)
     stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
-    print(stiffness_matrix_element)
     global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
-    print(global_matrix_element)
     return global_matrix_element
 
-gen_stiffness_matrix_element(30, 1, [0,0], [0, 10])
 
 def make_global_stiffness_matrix(list_of_matrix_elements):
     """
@@ -274,8 +271,20 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
             load_vector[numb] = wind_force  # to the right
     load_vector[-2] += balloon_forces[0]  # x force
     load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force balloon + half of material force at top
-
     return load_vector
+
+def sequential_element_matrices(coords):
+    '''
+    Connect the nodes of a tether, one long sequence from top to bottom
+    :param coords: array with shape (# of dimensions, # of nodes)
+    :return: list of stiffness matrices of all tether elements
+    '''
+    element_matrices = []
+    for i in range(coords.shape[1] - 1):
+        print(coords[:, i], coords[:, i + 1])
+        matrix = gen_stiffness_matrix_element(coords[:, i], coords[:, i + 1])
+        element_matrices.append(matrix)
+    return element_matrices
 
 
 def plot_displacements(mesh, displacements):
@@ -287,30 +296,22 @@ def plot_displacements(mesh, displacements):
     plt.legend()
     plt.show()
 
+nodes = 3
+dof = 2
 
-# mesh = create_mesh(3)
-# print(mesh)
-# load_vector = make_load_vector(mesh)
-# print(load_vector, load_vector.shape)
-# coordlst = create_mesh(3)
+coordlst = create_mesh(nodes, altitude_balloon=6)
+el_matrices = sequential_element_matrices(coordlst)
+print(el_matrices)
+stiff_matrix = make_global_stiffness_matrix(el_matrices)
+print(stiff_matrix)
 
-# test plot
-# mesh = create_mesh(3)
-# displacements = [[0, 4000, 4000], [0, -4000, -4000]]
-# plot_displacements(mesh, displacements)
 
 U = np.zeros(dof * nodes)
 P = np.ones(dof * nodes)
 R = np.zeros(dof * nodes)
 
 split_vars = split_eq_equation(stiff_matrix, U, R, P, dof)
-split_vars['Ur'] = np.linalg.inv(split_vars['Kr']) @ split_vars['Pr']
-split_vars['Rs'] = split_vars['Ksr'] @ split_vars['Ur'] - split_vars['Ps']
+split_vars['Ur'] = np.linalg.inv(split_vars['Kr']).dot(split_vars['Pr'])
+split_vars['Rs'] = split_vars['Ksr'].dot(split_vars['Ur']) - split_vars['Ps']
 
 print(split_vars['Ur'], split_vars['Rs'])
-print(create_mesh(3))
-#
-# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
-# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
-# array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
-# print(make_global_stiffness_matrix(array))
