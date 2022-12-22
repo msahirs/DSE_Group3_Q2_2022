@@ -121,6 +121,24 @@ class atmosphere():
             self.angle = angle
 
 
+def balloon_tension(phi, balloon_altitude, q_b, s_b, C_bl, C_bd, density_hydrogen, volume):
+
+    Balloon=balloon(0,0,0,0) #TODO: placeholder values
+    lift_balloon_force=q_b*s_b*C_bl
+    drag_balloon_force=q_b*s_b*C_bd
+    buoyancy_force=(density_at_altitude(0)-density_hydrogen)*volume
+
+    D_bl=np.array([0, 0, lift_balloon_force])
+    D_bd=np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
+    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
+    W_b=np.array(5)
+    F=D_bl+D_bd+B-W_b
+
+    #CHANGING COORDINATE SYSTEM from 3d to 2d
+    fx=np.take(F, 0) #towards right
+    fy=np.take(F, 2) #upwards
+    return fx, fy
+
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
     create mesh for the wire
