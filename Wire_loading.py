@@ -13,31 +13,31 @@ def make_material_dict():
 
     # add steel
     material_dict["steel"] = dict()
-    material_dict["steel"]["e-mod"] = 196 * 10 ** 9
-    material_dict["steel"]["density"] = 7.86 * 10 ** 3
-    material_dict["steel"]["tensile_ult"] = 860 * 10 ** 6
-    material_dict["steel"]["tensile_yield"] = 690 * 10 ** 6
+    material_dict["steel"]["e-mod"] = 196 * 10 ** 9  # Pa
+    material_dict["steel"]["density"] = 7.86 * 10 ** 3  # kg/m^3
+    material_dict["steel"]["tensile_ult"] = 860 * 10 ** 6  # Pa
+    material_dict["steel"]["tensile_yield"] = 690 * 10 ** 6  # Pa
 
     # add aluminium
     material_dict["allum"] = dict()
-    material_dict["allum"]["e-mod"] = 70 * 10 ** 9
-    material_dict["allum"]["density"] = 2.8 * 10 ** 3
-    material_dict["allum"]["tensile_ult"] = 350 * 10 ** 6
-    material_dict["allum"]["tensile_yield"] = 300 * 10 ** 6
+    material_dict["allum"]["e-mod"] = 70 * 10 ** 9  # Pa
+    material_dict["allum"]["density"] = 2.8 * 10 ** 3  # kg/m^3
+    material_dict["allum"]["tensile_ult"] = 350 * 10 ** 6  # Pa
+    material_dict["allum"]["tensile_yield"] = 300 * 10 ** 6  # Pa
 
     # add Titanium
     material_dict["titan"] = dict()
-    material_dict["titan"]["e-mod"] = 110 * 10 ** 9
-    material_dict["titan"]["density"] = 4.43 * 10 ** 3
-    material_dict["titan"]["tensile_ult"] = 900 * 10 ** 6
-    material_dict["titan"]["tensile_yield"] = 830 * 10 ** 6
+    material_dict["titan"]["e-mod"] = 110 * 10 ** 9  # Pa
+    material_dict["titan"]["density"] = 4.43 * 10 ** 3  # kg/m^3
+    material_dict["titan"]["tensile_ult"] = 900 * 10 ** 6  # Pa
+    material_dict["titan"]["tensile_yield"] = 830 * 10 ** 6  # Pa
 
     # add UHMPE
     material_dict["uhmpe"] = dict()
-    material_dict["uhmpe"]["e-mod"] = 700 * 10 ** 9
-    material_dict["uhmpe"]["density"] = 0.93 * 10 ** 3
-    material_dict["uhmpe"]["tensile_ult"] = 1100 * 10 ** 6
-    material_dict["titan"]["tensile_yield"] = 1
+    material_dict["uhmpe"]["e-mod"] = 700 * 10 ** 9  # Pa
+    material_dict["uhmpe"]["density"] = 0.93 * 10 ** 3  # kg/m^3
+    material_dict["uhmpe"]["tensile_ult"] = 1100 * 10 ** 6  # Pa
+    material_dict["titan"]["tensile_yield"] = 0
     return material_dict
 
 
@@ -82,7 +82,7 @@ class balloon():
     def __init__(self, speed, altitude, volume_balloon, weight):
         self.drag_coeff = 0.53
         self.lift_coeff = 0.1
-        self.s_balloon = 50
+        self.wind_area_balloon = 50
         self.volume = volume_balloon
         self.altitude = altitude
         self.speed = speed
@@ -154,22 +154,23 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
 
 
 def get_trans_matrix(coords1, coords2):
-    '''
+    """
     Create the rotation matrix of one 2D line element
     :param coords1: coordinates of first endpoint
     :param coords2: coordinates of second endpoint
     :return: 4x4 transformation matrix for the line element
-    '''
+    """
 
-    theta = atan2(coords2[1] - coords1[1], coords2[0] - coords1[0])
-    labda = cos(theta)
-    mu = sin(theta)
+    theta = atan2(coords2[1] - coords1[1], coords2[0] - coords1[0])  # returns angle in radians
+    # print("angle is", degrees(theta))
+    labda = round(cos(theta), 10)  # round otherwise get 10^-32 and such small values
+    mu = round(sin(theta), 10)
     trans_matrix = np.matrix([[labda, mu, 0, 0], [-mu, labda, 0, 0], [0, 0, labda, mu], [0, 0, -mu, labda]])
     return trans_matrix
 
 
 def split_eq_equation(K, U, R, P, DOF=2):
-    '''
+    """
     Split the parameters in the equilibrium equation in reduced and constrained versions.
     :param K: global stiffness matrix
     :param U: displacement vector (unknown, zero for now)
@@ -177,7 +178,7 @@ def split_eq_equation(K, U, R, P, DOF=2):
     :param P: applied forces vector (known)
     :param DOF: number of degrees of freedom
     :return: Dictionary containing the split variables
-    '''
+    """
 
     bc = np.zeros(U.shape[0])
     bc[0:DOF] = 1  # Only constrain the first point
@@ -214,9 +215,12 @@ def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
     L = np.sqrt((end_coords[0] - begin_coords[0]) ** 2 + (end_coords[1] - begin_coords[1]) ** 2)
     stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
+    print(stiffness_matrix_element)
     global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
+    print(global_matrix_element)
     return global_matrix_element
 
+gen_stiffness_matrix_element(30, 1, [0,0], [0, 10])
 
 def make_global_stiffness_matrix(list_of_matrix_elements):
     """
@@ -242,7 +246,7 @@ def get_wind_force():
 def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81)):
     """
     generate load vector, not assuming tandum balloons, just a top balloon
-    :param mesh: numpu array of shape [2, n]
+    :param mesh: numpy array of shape [2, n]
     :param material: string, material name from dictionary
     :param balloon_forces: Tuple, (x force, y force)
     :return: load vector of shape [n, 1]
@@ -284,16 +288,16 @@ def plot_displacements(mesh, displacements):
     plt.show()
 
 
-mesh = create_mesh(3)
-print(mesh)
-load_vector = make_load_vector(mesh)
-print(load_vector, load_vector.shape)
-coordlst = create_mesh(3)
+# mesh = create_mesh(3)
+# print(mesh)
+# load_vector = make_load_vector(mesh)
+# print(load_vector, load_vector.shape)
+# coordlst = create_mesh(3)
 
 # test plot
-mesh = create_mesh(3)
-displacements = [[0, 4000, 4000], [0, -4000, -4000]]
-plot_displacements(mesh, displacements)
+# mesh = create_mesh(3)
+# displacements = [[0, 4000, 4000], [0, -4000, -4000]]
+# plot_displacements(mesh, displacements)
 
 U = np.zeros(dof * nodes)
 P = np.ones(dof * nodes)
@@ -304,7 +308,7 @@ split_vars['Ur'] = np.linalg.inv(split_vars['Kr']) @ split_vars['Pr']
 split_vars['Rs'] = split_vars['Ksr'] @ split_vars['Ur'] - split_vars['Ps']
 
 print(split_vars['Ur'], split_vars['Rs'])
-# print(create_mesh(3))
+print(create_mesh(3))
 #
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
