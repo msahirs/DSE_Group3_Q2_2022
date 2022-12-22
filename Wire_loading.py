@@ -49,10 +49,16 @@ def buoyancy_force(balloon_altitude):
 
 
 def drag_balloon_force():
+    q_balloon = 1 #TODO: placeholder
+    s_balloon = 1 #TODO: placeholder
+    drag_coeff = 1 #TODO: placeholder
     return q_balloon * s_balloon * drag_coeff
 
 
 def lift_balloon_force():
+    q_balloon = 1 #TODO: placeholder
+    s_balloon = 1 #TODO: placeholder
+    lift_coeff = 1 #TODO: placeholder
     return q_balloon * s_balloon * lift_coeff
 
 
@@ -70,6 +76,20 @@ class balloon():
         # self.buoyancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
         # self.drag_force
 
+def balloon_tension(phi, balloon_altitude):
+
+    Balloon=balloon(0,0,0,0) #TODO: placeholder values
+
+    D_bl=np.array([0, 0, lift_balloon_force()])
+    D_bd=np.array([drag_balloon_force()*cos(phi), drag_balloon_force()*sin(phi), 0])
+    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
+    W_b=np.array(5)
+    F=D_bl+D_bd+B-W_b
+
+    #CHANGING COORDINATE SYSTEM from 3d to 2d
+    fx=np.take(F, 0) #towards right
+    fy=np.take(F, 2) #upwards
+    return fx, fy
 
 class tether():
     def __init__(self):
