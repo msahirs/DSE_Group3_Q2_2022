@@ -78,18 +78,6 @@ density_of_material = density_of_materials[1]
 area_of_segment = np.pi * radius_wire ** 2  # mm^2
 
 
-def buoyancy_force(balloon_altitude):
-    return (density_at_altitude(balloon_altitude) - density_internal_balloon) * volume_balloon
-
-
-def drag_balloon_force():
-    return q_balloon * s_balloon * drag_coeff
-
-
-def lift_balloon_force():
-    return q_balloon * s_balloon * lift_coeff
-
-
 class balloon():
     def __init__(self, speed, altitude, volume_balloon, weight):
         self.drag_coeff = 0.53
@@ -159,7 +147,7 @@ def get_trans_matrix(coords1, coords2):
     return trans_matrix
 
 
-def split_eq_equation(K,U,R,P,DOF=2):
+def split_eq_equation(K, U, R, P, DOF=2):
     '''
     Split the parameters in the equilibrium equation in reduced and constrained versions.
     :param K: global stiffness matrix
@@ -171,18 +159,18 @@ def split_eq_equation(K,U,R,P,DOF=2):
     '''
 
     bc = np.zeros(U.shape[0])
-    bc[0:DOF] = 1 # Only constrain the first point
-    constr_DOF = np.nonzero(bc)[0] # indices of constrained degrees of freedom
+    bc[0:DOF] = 1  # Only constrain the first point
+    constr_DOF = np.nonzero(bc)[0]  # indices of constrained degrees of freedom
 
     non_bc = np.ones(U.shape[0])
-    non_bc[constr_DOF] = 0 # non-constrain all points except the constrained points
-    free_DOF = np.nonzero(non_bc)[0] # indices of non-constrained degrees of freedom
+    non_bc[constr_DOF] = 0  # non-constrain all points except the constrained points
+    free_DOF = np.nonzero(non_bc)[0]  # indices of non-constrained degrees of freedom
 
     split = {}
-    split['Kr'] = K[np.ix_(free_DOF,free_DOF)]
-    split['Ks'] = K[np.ix_(constr_DOF,constr_DOF)]
-    split['Krs'] = K[np.ix_(free_DOF,constr_DOF)]
-    split['Ksr'] = K[np.ix_(constr_DOF,free_DOF)]
+    split['Kr'] = K[np.ix_(free_DOF, free_DOF)]
+    split['Ks'] = K[np.ix_(constr_DOF, constr_DOF)]
+    split['Krs'] = K[np.ix_(free_DOF, constr_DOF)]
+    split['Ksr'] = K[np.ix_(constr_DOF, free_DOF)]
 
     split['Pr'] = P[free_DOF]
     split['Ps'] = P[constr_DOF]
@@ -196,15 +184,14 @@ def split_eq_equation(K,U,R,P,DOF=2):
     return split
 
 
-def gen_stiffness_matrix_element(E, A, L, begin_coords, end_coords):
+def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
     """
     :param E: E-mod
     :param A: cross Area
-    :param L: length
     :return: global stiffness_matrix element
     """
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
-
+    L = np.sqrt((end_coords[0]-begin_coords[0])**2 + (end_coords[1]-begin_coords[1])**2)
     stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
     global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
     return global_matrix_element
@@ -227,6 +214,10 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
     return global_stiffness_matrix
 
 
+def make_load_vector(mesh, material):
+
+
+print(create_mesh(3))
 coordlst = create_mesh(3)
 
 
