@@ -121,26 +121,23 @@ class atmosphere():
             self.angle = angle
 
 
-def balloon_tension(phi, s_b, density_hydrogen, h, v_air):
-    Balloon = balloon(1, 1, 4, 1)  # TODO: placeholder values
+def balloon_tension(phi, balloon_altitude, q_b, s_b, C_bl, C_bd, density_hydrogen, volume):
 
-    q_b = 0.5*density_at_altitude(h)*v_air**2
+    Balloon=balloon(0,0,0,0) #TODO: placeholder values
+    lift_balloon_force=q_b*s_b*C_bl
+    drag_balloon_force=q_b*s_b*C_bd
+    buoyancy_force=(density_at_altitude(0)-density_hydrogen)*volume
 
-    lift_balloon_force=q_b*s_b*Balloon.lift_coeff
-    drag_balloon_force=q_b*s_b*Balloon.drag_coeff
-
-    buoyancy_force=(density_at_altitude(h)-density_hydrogen)*Balloon.volume
     D_bl=np.array([0, 0, lift_balloon_force])
     D_bd=np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
-    B=np.array([0, 0, buoyancy_force])
-    W_b=np.array(Balloon.weight)
+    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
+    W_b=np.array(5)
     F=D_bl+D_bd+B-W_b
 
     #CHANGING COORDINATE SYSTEM from 3d to 2d
     fx=np.take(F, 0) #towards right
     fy=np.take(F, 2) #upwards
     return fx, fy
-
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -262,14 +259,14 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
     material_force = float(density * length_of_element * area * g)  # N
 
     # construct actual load vector
-    load_vector[1] = -0.5 * material_force
+    load_vector[1] = -0.5 * material_force  # half of material force at bottom
     for numb, item in enumerate(load_vector):
         if numb % 2 == 1 and numb > 1:
             load_vector[numb] = -material_force  # downwards
         if numb % 2 == 0:
             load_vector[numb] = wind_force  # to the right
     load_vector[-2] += balloon_forces[0]  # x force
-    load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force
+    load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force balloon + half of material force at top
 
     return load_vector
 
@@ -280,7 +277,15 @@ load_vector = make_load_vector(mesh)
 print(load_vector, load_vector.shape)
 coordlst = create_mesh(3)
 
-print("Balloon tension: ", balloon_tension(0,0,0,0,0))
+U = np.zeros(dof*nodes)
+P = np.ones(dof*nodes)
+R = np.zeros(dof*nodes)
+
+split_vars = split_eq_equation(stiff_matrix, U, R, P, dof)
+split_vars['Ur'] = np.linalg.inv(split_vars['Kr']) @ split_vars['Pr']
+split_vars['Rs'] = split_vars['Ksr'] @ split_vars['Ur'] - split_vars['Ps']
+
+print(split_vars['Ur'], split_vars['Rs'])
 # print(create_mesh(3))
 #
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
