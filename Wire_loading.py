@@ -184,7 +184,7 @@ def split_eq_equation(K, U, R, P, DOF=2):
     non_bc[constr_DOF] = 0  # non-constrain all points except the constrained points
     free_DOF = np.nonzero(non_bc)[0]  # indices of non-constrained degrees of freedom
 
-    split = {}
+    split = dict()
     split['Kr'] = K[np.ix_(free_DOF, free_DOF)]
     split['Ks'] = K[np.ix_(constr_DOF, constr_DOF)]
     split['Krs'] = K[np.ix_(free_DOF, constr_DOF)]
@@ -202,7 +202,7 @@ def split_eq_equation(K, U, R, P, DOF=2):
     return split
 
 
-def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
+def gen_stiffness_matrix_element(begin_coords, end_coords, E = 1000, A = 0.0001):
     """
     :param E: E-mod
     :param A: cross Area
@@ -268,15 +268,35 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
     load_vector[-2] += balloon_forces[0]  # x force
     load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force balloon + half of material force at top
 
-    return load_vector
+def sequential_element_matrices(coords):
+    '''
+    Connect the nodes of a tether, one long sequence from top to bottom
+    :param coords: array with shape (# of dimensions, # of nodes)
+    :return: list of stiffness matrices of all tether elements
+    '''
+    element_matrices = []
+    for i in range(coords.shape[1] - 1):
+        matrix = gen_stiffness_matrix_element(coords[:, i], coords[:, i + 1])
+        element_matrices.append(matrix)
+    return element_matrices
 
 
-mesh = create_mesh(5)
-print(mesh)
-load_vector = make_load_vector(mesh)
-print(load_vector, load_vector.shape)
-coordlst = create_mesh(3)
+nodes = 6
+dof = 2
 
+coordlst = create_mesh(nodes, altitude_balloon=60)
+el_matrices = sequential_element_matrices(coordlst)
+stiff_matrix = make_global_stiffness_matrix(el_matrices)
+
+U = np.zeros(dof*nodes)
+P = np.ones(dof*nodes)
+R = np.zeros(dof*nodes)
+
+split_vars = split_eq_equation(stiff_matrix, U, R, P, dof)
+split_vars['Ur'] = np.linalg.inv(split_vars['Kr']) @ split_vars['Pr']
+split_vars['Rs'] = split_vars['Ksr'] @ split_vars['Ur'] - split_vars['Ps']
+
+print(split_vars['Ur'], split_vars['Rs'])
 # print(create_mesh(3))
 #
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
