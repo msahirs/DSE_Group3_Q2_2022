@@ -15,11 +15,9 @@ sigma = 5.67 * 10 ** (-8)
 I = 1353
 Cp_module = 2900
 a = 295.070
-mu = 0.0000143226
-# These are done by hand for 20km as the ISA calculator does not include them
 
 # Calcues
-T_air, P, rho = ISA_general.ISA(h)
+T_air, P, rho, mu = ISA_general.ISA(h)
 nu = mu / rho  # kinematic viscocity
 Pr = mu * Cp / k
 alpha = k / rho / Cp
