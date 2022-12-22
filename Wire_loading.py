@@ -122,22 +122,22 @@ class atmosphere():
 
 
 def balloon_tension(phi, balloon_altitude, q_b, s_b, C_bl, C_bd, density_hydrogen, volume):
+    Balloon = balloon(0, 0, 0, 0)  # TODO: placeholder values
+    lift_balloon_force = q_b * s_b * C_bl
+    drag_balloon_force = q_b * s_b * C_bd
+    buoyancy_force = (density_at_altitude(0) - density_hydrogen) * volume
 
-    Balloon=balloon(0,0,0,0) #TODO: placeholder values
-    lift_balloon_force=q_b*s_b*C_bl
-    drag_balloon_force=q_b*s_b*C_bd
-    buoyancy_force=(density_at_altitude(0)-density_hydrogen)*volume
+    D_bl = np.array([0, 0, lift_balloon_force])
+    D_bd = np.array([drag_balloon_force * cos(phi), drag_balloon_force * sin(phi), 0])
+    B = np.array([0, 0, buoyancy_force(balloon_altitude)])
+    W_b = np.array(5)
+    F = D_bl + D_bd + B - W_b
 
-    D_bl=np.array([0, 0, lift_balloon_force])
-    D_bd=np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
-    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
-    W_b=np.array(5)
-    F=D_bl+D_bd+B-W_b
-
-    #CHANGING COORDINATE SYSTEM from 3d to 2d
-    fx=np.take(F, 0) #towards right
-    fy=np.take(F, 2) #upwards
+    # CHANGING COORDINATE SYSTEM from 3d to 2d
+    fx = np.take(F, 0)  # towards right
+    fy = np.take(F, 2)  # upwards
     return fx, fy
+
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -271,11 +271,26 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
     return load_vector
 
 
-mesh = create_mesh(5)
+def plot_displacements(mesh, displacements):
+    plt.plot(mesh[0], mesh[1], label="initial state", c="gray", marker=".", markersize=10)
+    plt.plot(mesh[0] + displacements[0], mesh[1] + displacements[1], label="final state", c="black", marker=".",
+             markersize=10)
+    plt.xlabel("horizontal distance [meter]")
+    plt.ylabel("vertical distance [meter]")
+    plt.legend()
+    plt.show()
+
+
+mesh = create_mesh(3)
 print(mesh)
 load_vector = make_load_vector(mesh)
 print(load_vector, load_vector.shape)
 coordlst = create_mesh(3)
+
+# test plot
+mesh = create_mesh(3)
+displacements = [[0, 4000, 4000], [0, -4000, -4000]]
+plot_displacements(mesh, displacements)
 
 U = np.zeros(dof*nodes)
 P = np.ones(dof*nodes)
@@ -292,24 +307,3 @@ print(split_vars['Ur'], split_vars['Rs'])
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
 # array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
 # print(make_global_stiffness_matrix(array))
-
-## set up dataframe for use ##
-
-# mass
-# length_of_segment = total_wire_length / wire_segments
-# volume_of_segment = area_of_segment * length_of_segment
-# mass_of_segment = volume_of_segment * density_of_material
-# mass_list = mass_of_segment * np.ones(wire_segments)
-#
-# # wind/gust
-# wind_profile_list = np.zeros(wire_segments)
-#
-# # initial tension
-# initial_tension_list = np.zeros(wire_segments)
-#
-# # orientation
-# angle_of_orientation_list = np.zeros(wire_segments)
-#
-# # positioning
-# top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
-# bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
