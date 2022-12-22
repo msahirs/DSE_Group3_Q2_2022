@@ -2,27 +2,27 @@ import numpy as np
 import matplotlib.pyplot as plt
 import ISA_general
 
-# atmosphere = isa.get_atmosphere()
-
-# Values
-L_charac = 1
+# Input Values
+L_charac = 1                # definition ??
 h = 20000.0
 v_wind = 5
-Cp = 1000
-k = 2 * 10 ** (-3)  # thermal conductivity
-g = 9.81
-sigma = 5.67 * 10 ** (-8)
-I = 1353
-Cp_module = 2900
-a = 295.070
 
-# Calcues
+# Constants
+Cp = 1000                   # definition ??
+k = 2 * 10 ** (-3)          # thermal conductivity
+g = 9.81                    # gravitational acceleration
+sigma = 5.67 * 10 ** (-8)   # definition ??
+I = 1353                    # definition ??
+Cp_module = 2900            # definition ?? of PV ?
+
+# Calculations
 T_air, P, rho, mu = ISA_general.ISA(h)
-nu = mu / rho  # kinematic viscocity
+nu = mu / rho               # kinematic viscocity
 Pr = mu * Cp / k
 alpha = k / rho / Cp
-beta = 1 / T_air  # approx
+beta = 1 / T_air            # approx
 
+# Initializing
 dt = 1
 t_list = []
 T = T_air
