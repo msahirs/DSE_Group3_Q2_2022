@@ -120,24 +120,26 @@ class atmosphere():
         def __init__(self, angle):
             self.angle = angle
 
+#s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis, v_wind - wind speed at altitude
+def balloon_tension(phi, balloon_altitude, v_wind, s_b, C_bl, C_bd, density_hydrogen, volume, h):
 
-def balloon_tension(phi, balloon_altitude, q_b, s_b, C_bl, C_bd, density_hydrogen, volume):
-
+    q_b=0.5*density_at_altitude(h)*v_wind**2 #q_b - dynamic pressure of the balloon
     Balloon=balloon(0,0,0,0) #TODO: placeholder values
     lift_balloon_force=q_b*s_b*C_bl
     drag_balloon_force=q_b*s_b*C_bd
-    buoyancy_force=(density_at_altitude(0)-density_hydrogen)*volume
+    buoyancy_force=(density_at_altitude(h)-density_hydrogen)*volume
 
     D_bl=np.array([0, 0, lift_balloon_force])
     D_bd=np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
     B=np.array([0, 0, buoyancy_force(balloon_altitude)])
-    W_b=np.array(5)
+    W_b=np.array(Balloon.weight)
     F=D_bl+D_bd+B-W_b
 
     #CHANGING COORDINATE SYSTEM from 3d to 2d
     fx=np.take(F, 0) #towards right
     fy=np.take(F, 2) #upwards
     return fx, fy
+#print(balloon_tension(0,0,0,0,0,0,0,0,0))
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -232,11 +234,11 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
     return global_stiffness_matrix
 
 
-def make_load_vector(mesh, material):
+#def make_load_vector(mesh, material):
 
 
-print(create_mesh(3))
-coordlst = create_mesh(3)
+#print(create_mesh(3))
+#coordlst = create_mesh(3)
 
 
 
