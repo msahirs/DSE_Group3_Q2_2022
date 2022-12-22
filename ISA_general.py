@@ -79,7 +79,7 @@ def ISA(h):
                                 T = T7
                                 p = p7
                                 rho = rho7
-    mu = b * T**(3/2)/(T+S)
+    mu = b * T**(3/2)/(T+S) # new formula
     return T, p, rho, mu
 
 
