@@ -163,6 +163,42 @@ def get_trans_matrix(coords1, coords2):
     trans_matrix = np.matrix([[labda, mu, 0, 0], [-mu, labda, 0, 0], [0, 0, labda, mu], [0, 0, -mu, labda]])
     return trans_matrix
 
+def split_eq_equation(K,U,R,P,DOF=2):
+    '''
+    Split the parameters in the equilibrium equation in reduced and constrained versions.
+    :param K: global stiffness matrix
+    :param U: displacement vector (unknown, zero for now)
+    :param R: reaction forces vector (unknown, zero for now)
+    :param P: applied forces vector (known)
+    :param DOF: number of degrees of freedom
+    :return: Dictionary containing the split variables
+    '''
+
+    bc = np.zeros(U.shape[0])
+    bc[0:DOF] = 1 # Only constrain the first point
+    constr_DOF = np.nonzero(bc)[0] # indices of constrained degrees of freedom
+
+    non_bc = np.ones(U.shape[0])
+    non_bc[constr_DOF] = 0 # non-constrain all points except the constrained points
+    free_DOF = np.nonzero(non_bc)[0] # indices of non-constrained degrees of freedom
+
+    split = {}
+    split['Kr'] = K[np.ix_(free_DOF,free_DOF)]
+    split['Ks'] = K[np.ix_(constr_DOF,constr_DOF)]
+    split['Krs'] = K[np.ix_(free_DOF,constr_DOF)]
+    split['Ksr'] = K[np.ix_(constr_DOF,free_DOF)]
+
+    split['Pr'] = P[free_DOF]
+    split['Ps'] = P[constr_DOF]
+
+    split['Rr'] = R[free_DOF]
+    split['Rs'] = R[constr_DOF]
+
+    split['Ur'] = U[free_DOF]
+    split['Us'] = U[constr_DOF]
+
+    return split
+
 
 def gen_stifness_matrix_element(E, A, L, begin_coords, end_coords):
     """
