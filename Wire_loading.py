@@ -7,6 +7,40 @@ from math import *
 """numbering of elements is increasing from earth to balloon"""
 
 
+def make_material_dict():
+    # make dict
+    material_dict = dict()
+
+    # add steel
+    material_dict["steel"] = dict()
+    material_dict["steel"]["e-mod"] = 196 * 10 ** 9
+    material_dict["steel"]["density"] = 7.86 * 10 ** 3
+    material_dict["steel"]["tensile_ult"] = 860 * 10 ** 6
+    material_dict["steel"]["tensile_yield"] = 690 * 10 ** 6
+
+    # add aluminium
+    material_dict["allum"] = dict()
+    material_dict["allum"]["e-mod"] = 70 * 10 ** 9
+    material_dict["allum"]["density"] = 2.8 * 10 ** 3
+    material_dict["allum"]["tensile_ult"] = 350 * 10 ** 6
+    material_dict["allum"]["tensile_yield"] = 300 * 10 ** 6
+
+    # add Titanium
+    material_dict["titan"] = dict()
+    material_dict["titan"]["e-mod"] = 110 * 10 ** 9
+    material_dict["titan"]["density"] = 4.43 * 10 ** 3
+    material_dict["titan"]["tensile_ult"] = 900 * 10 ** 6
+    material_dict["titan"]["tensile_yield"] = 830 * 10 ** 6
+
+    # add UHMPE
+    material_dict["uhmpe"] = dict()
+    material_dict["uhmpe"]["e-mod"] = 700 * 10 ** 9
+    material_dict["uhmpe"]["density"] = 0.93 * 10 ** 3
+    material_dict["uhmpe"]["tensile_ult"] = 1100 * 10 ** 6
+    material_dict["titan"]["tensile_yield"] = 1
+    return material_dict
+
+
 def density_at_altitude(h):
     """
     constraints:
@@ -44,24 +78,6 @@ density_of_material = density_of_materials[1]
 area_of_segment = np.pi * radius_wire ** 2  # mm^2
 
 
-def buoyancy_force(balloon_altitude):
-    return (density_at_altitude(balloon_altitude) - density_internal_balloon) * volume_balloon
-
-
-def drag_balloon_force():
-    q_balloon = 1 #TODO: placeholder
-    s_balloon = 1 #TODO: placeholder
-    drag_coeff = 1 #TODO: placeholder
-    return q_balloon * s_balloon * drag_coeff
-
-
-def lift_balloon_force():
-    q_balloon = 1 #TODO: placeholder
-    s_balloon = 1 #TODO: placeholder
-    lift_coeff = 1 #TODO: placeholder
-    return q_balloon * s_balloon * lift_coeff
-
-
 class balloon():
     def __init__(self, speed, altitude, volume_balloon, weight):
         self.drag_coeff = 0.53
@@ -76,20 +92,6 @@ class balloon():
         # self.buoyancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
         # self.drag_force
 
-def balloon_tension(phi, balloon_altitude):
-
-    Balloon=balloon(0,0,0,0) #TODO: placeholder values
-
-    D_bl=np.array([0, 0, lift_balloon_force()])
-    D_bd=np.array([drag_balloon_force()*cos(phi), drag_balloon_force()*sin(phi), 0])
-    B=np.array([0, 0, buoyancy_force(balloon_altitude)])
-    W_b=np.array(5)
-    F=D_bl+D_bd+B-W_b
-
-    #CHANGING COORDINATE SYSTEM from 3d to 2d
-    fx=np.take(F, 0) #towards right
-    fy=np.take(F, 2) #upwards
-    return fx, fy
 
 class tether():
     def __init__(self):
@@ -119,18 +121,6 @@ class atmosphere():
             self.angle = angle
 
 
-def calc_force_matrix():
-    """
-    input:
-    mass =
-    drag =
-    lift_gas =
-    lift_wind =
-
-    :return:
-    """
-
-
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
     create mesh for the wire
@@ -142,40 +132,120 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     return coords
 
 
-def gen_stifness_matrix_element(E, A, l, begin_coords, end_coords):
-    transformation_matrix = get_trans_matrix(begin_coords, end_coords)
+def get_trans_matrix(coords1, coords2):
+    '''
+    Create the rotation matrix of one 2D line element
+    :param coords1: coordinates of first endpoint
+    :param coords2: coordinates of second endpoint
+    :return: 4x4 transformation matrix for the line element
+    '''
 
-    stifness_matrix_element = E * A / l * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
-    global_matrix_element = transformation_matrix.transpose() @ stifness_matrix_element @ transformation_matrix
-    return stifness_matrix_element
+    theta = atan2(coords2[1] - coords1[1], coords2[0] - coords1[0])
+    labda = cos(theta)
+    mu = sin(theta)
+    trans_matrix = np.matrix([[labda, mu, 0, 0], [-mu, labda, 0, 0], [0, 0, labda, mu], [0, 0, -mu, labda]])
+    return trans_matrix
+
+
+def split_eq_equation(K, U, R, P, DOF=2):
+    '''
+    Split the parameters in the equilibrium equation in reduced and constrained versions.
+    :param K: global stiffness matrix
+    :param U: displacement vector (unknown, zero for now)
+    :param R: reaction forces vector (unknown, zero for now)
+    :param P: applied forces vector (known)
+    :param DOF: number of degrees of freedom
+    :return: Dictionary containing the split variables
+    '''
+
+    bc = np.zeros(U.shape[0])
+    bc[0:DOF] = 1  # Only constrain the first point
+    constr_DOF = np.nonzero(bc)[0]  # indices of constrained degrees of freedom
+
+    non_bc = np.ones(U.shape[0])
+    non_bc[constr_DOF] = 0  # non-constrain all points except the constrained points
+    free_DOF = np.nonzero(non_bc)[0]  # indices of non-constrained degrees of freedom
+
+    split = {}
+    split['Kr'] = K[np.ix_(free_DOF, free_DOF)]
+    split['Ks'] = K[np.ix_(constr_DOF, constr_DOF)]
+    split['Krs'] = K[np.ix_(free_DOF, constr_DOF)]
+    split['Ksr'] = K[np.ix_(constr_DOF, free_DOF)]
+
+    split['Pr'] = P[free_DOF]
+    split['Ps'] = P[constr_DOF]
+
+    split['Rr'] = R[free_DOF]
+    split['Rs'] = R[constr_DOF]
+
+    split['Ur'] = U[free_DOF]
+    split['Us'] = U[constr_DOF]
+
+    return split
+
+
+def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
+    """
+    :param E: E-mod
+    :param A: cross Area
+    :return: global stiffness_matrix element
+    """
+    transformation_matrix = get_trans_matrix(begin_coords, end_coords)
+    L = np.sqrt((end_coords[0]-begin_coords[0])**2 + (end_coords[1]-begin_coords[1])**2)
+    stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
+    global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
+    return global_matrix_element
+
+
+def make_global_stiffness_matrix(list_of_matrix_elements):
+    """
+    make global matrix with one diagonal
+    :param list_of_matrix_elements:
+    :return:
+    """
+    length_of_global_matrix = int(0.5 * len(list_of_matrix_elements[0]) * (1 + len(list_of_matrix_elements)))
+    global_stiffness_matrix = np.zeros([length_of_global_matrix, length_of_global_matrix])
+    for numb, matrix_element in enumerate(list_of_matrix_elements):
+        # matrix_element = np.array(matrix_element)
+        start_index = numb * len(matrix_element) / 2
+        for i in range(len(matrix_element)):
+            for j in range(len(matrix_element)):
+                global_stiffness_matrix[int(start_index + i), int(start_index + j)] += matrix_element[i, j]
+    return global_stiffness_matrix
+
+
+def make_load_vector(mesh, material):
 
 
 print(create_mesh(3))
+coordlst = create_mesh(3)
 
-def get_trans_matrix(coords1, coords2):
-    theta = atan2(coords2[1]-coords1[1],coords2[0]-coords1[0])
-    labda = cos(theta)
-    mu = sin(theta)
-    trans_matrix = np.matrix([[labda,mu,0,0],[-mu,labda,0,0],[0,0,labda,mu],[0,0,-mu,labda]])
-    return trans_matrix
+
+
+# print(create_mesh(3))
+#
+# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
+# print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
+# array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
+# print(make_global_stiffness_matrix(array))
 
 ## set up dataframe for use ##
 
 # mass
-length_of_segment = total_wire_length / wire_segments
-volume_of_segment = area_of_segment * length_of_segment
-mass_of_segment = volume_of_segment * density_of_material
-mass_list = mass_of_segment * np.ones(wire_segments)
-
-# wind/gust
-wind_profile_list = np.zeros(wire_segments)
-
-# initial tension
-initial_tension_list = np.zeros(wire_segments)
-
-# orientation
-angle_of_orientation_list = np.zeros(wire_segments)
-
-# positioning
-top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
-bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
+# length_of_segment = total_wire_length / wire_segments
+# volume_of_segment = area_of_segment * length_of_segment
+# mass_of_segment = volume_of_segment * density_of_material
+# mass_list = mass_of_segment * np.ones(wire_segments)
+#
+# # wind/gust
+# wind_profile_list = np.zeros(wire_segments)
+#
+# # initial tension
+# initial_tension_list = np.zeros(wire_segments)
+#
+# # orientation
+# angle_of_orientation_list = np.zeros(wire_segments)
+#
+# # positioning
+# top_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
+# bottom_position_list = (np.ones(wire_segments), np.ones(wire_segments))  # tuple -> x,y
