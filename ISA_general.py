@@ -9,6 +9,8 @@ def ISA(h):
     p0 = 101325.
     h0 = 0.
     e = 2.718281828459045
+    b = 1.458*10**(-6.)
+    S = 110.4
 
     if h > 86000:
         print("I can only do altitudes up to 86000 m")
@@ -77,7 +79,8 @@ def ISA(h):
                                 T = T7
                                 p = p7
                                 rho = rho7
-    return T, p, rho
+    mu = b * T**(3/2)/(T+S)
+    return T, p, rho, mu
 
 
 def ISA_from_everything(altitude):
