@@ -64,15 +64,15 @@ def density_at_altitude(h):
 design_altitude = 20000
 amount_of_wires = 1
 wire_segments = 100  # amount of segments
-radius_wire = 1  # mm
+radius_wire = 0.005  # m
 total_wire_length = design_altitude  # meters
 balloon_altitude = design_altitude  # meters
 density_internal_balloon = 0.2  # kg/m^3
 volume_balloon = 80000  # m^3
 wire_drag_coeff = 0.5
 
-density_of_materials = [0.8, 0.9, 1, 1.1, 1.2]  # kg/L
-density_of_material = density_of_materials[1]
+material_dict = make_material_dict()
+g = 9.80665  # m/s^2
 
 # side-quest calculations
 area_of_segment = np.pi * radius_wire ** 2  # mm^2
@@ -191,7 +191,7 @@ def gen_stiffness_matrix_element(E, A, begin_coords, end_coords):
     :return: global stiffness_matrix element
     """
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
-    L = np.sqrt((end_coords[0]-begin_coords[0])**2 + (end_coords[1]-begin_coords[1])**2)
+    L = np.sqrt((end_coords[0] - begin_coords[0]) ** 2 + (end_coords[1] - begin_coords[1]) ** 2)
     stiffness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
     global_matrix_element = transformation_matrix.transpose() @ stiffness_matrix_element @ transformation_matrix
     return global_matrix_element
@@ -214,13 +214,50 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
     return global_stiffness_matrix
 
 
-def make_load_vector(mesh, material):
+def get_wind_force():
+    return 60  # N
 
 
-print(create_mesh(3))
+def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81)):
+    """
+    generate load vector, not assuming tandum balloons, just a top balloon
+    :param mesh: numpu array of shape [2, n]
+    :param material: string, material name from dictionary
+    :param balloon_forces: Tuple, (x force, y force)
+    :return: load vector of shape [n, 1]
+    """
+
+    # generate shape of load vector
+    # [Fx1, F1y, Fx2, Fy2 ...]
+    load_vector = np.zeros([2 * len(coords[0]), 1])
+
+    wind_force = get_wind_force()
+
+    density = material_dict[material]["density"]
+    length_of_element = coords[1, 1]
+    area = np.pi * radius_wire ** 2
+    print("mass of wire in [kg] =", int(area * length_of_element * density * (len(coords[0]) - 1)))
+
+    material_force = float(density * length_of_element * area * g)  # N
+
+    # construct actual load vector
+    load_vector[1] = -0.5 * material_force
+    for numb, item in enumerate(load_vector):
+        if numb % 2 == 1 and numb > 1:
+            load_vector[numb] = -material_force  # downwards
+        if numb % 2 == 0:
+            load_vector[numb] = wind_force  # to the right
+    load_vector[-2] += balloon_forces[0]  # x force
+    load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force
+
+    return load_vector
+
+
+mesh = create_mesh(5)
+print(mesh)
+load_vector = make_load_vector(mesh)
+print(load_vector, load_vector.shape)
 coordlst = create_mesh(3)
-
-
 
 # print(create_mesh(3))
 #
