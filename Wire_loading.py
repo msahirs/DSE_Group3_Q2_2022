@@ -6,41 +6,6 @@ from math import *
 
 """numbering of elements is increasing from earth to balloon"""
 
-
-def make_material_dict():
-    # make dict
-    material_dict = dict()
-
-    # add steel
-    material_dict["steel"] = dict()
-    material_dict["steel"]["e-mod"] = 196 * 10 ** 9
-    material_dict["steel"]["density"] = 7.86 * 10 ** 3
-    material_dict["steel"]["tensile_ult"] = 860 * 10 ** 6
-    material_dict["steel"]["tensile_yield"] = 690 * 10 ** 6
-
-    # add aluminium
-    material_dict["allum"] = dict()
-    material_dict["allum"]["e-mod"] = 70 * 10 ** 9
-    material_dict["allum"]["density"] = 2.8 * 10 ** 3
-    material_dict["allum"]["tensile_ult"] = 350 * 10 ** 6
-    material_dict["allum"]["tensile_yield"] = 300 * 10 ** 6
-
-    # add Titanium
-    material_dict["titan"] = dict()
-    material_dict["titan"]["e-mod"] = 110 * 10 ** 9
-    material_dict["titan"]["density"] = 4.43 * 10 ** 3
-    material_dict["titan"]["tensile_ult"] = 900 * 10 ** 6
-    material_dict["titan"]["tensile_yield"] = 830 * 10 ** 6
-
-    # add UHMPE
-    material_dict["uhmpe"] = dict()
-    material_dict["uhmpe"]["e-mod"] = 700 * 10 ** 9
-    material_dict["uhmpe"]["density"] = 0.93 * 10 ** 3
-    material_dict["uhmpe"]["tensile_ult"] = 1100 * 10 ** 6
-    material_dict["titan"]["tensile_yield"] = 1
-    return material_dict
-
-
 def density_at_altitude(h):
     """
     constraints:
@@ -116,7 +81,6 @@ class tether():
 
 class atmosphere():
     """h = list of altitudes"""
-
     def __init__(self, h):
         self.ISA = self.ISA(h)
         self.wind = self.wind(h)
@@ -133,16 +97,39 @@ class atmosphere():
             self.angle = angle
 
 
-def calc_force_matrix():
-    """
-    input:
-    mass =
-    drag =
-    lift_gas =
-    lift_wind =
 
-    :return:
-    """
+def make_material_dict():
+    # make dict
+    material_dict = dict()
+
+    # add steel
+    material_dict["steel"] = dict()
+    material_dict["steel"]["e-mod"] = 196 * 10 ** 9
+    material_dict["steel"]["density"] = 7.86 * 10 ** 3
+    material_dict["steel"]["tensile_ult"] = 860 * 10 ** 6
+    material_dict["steel"]["tensile_yield"] = 690 * 10 ** 6
+
+    # add aluminium
+    material_dict["allum"] = dict()
+    material_dict["allum"]["e-mod"] = 70 * 10 ** 9
+    material_dict["allum"]["density"] = 2.8 * 10 ** 3
+    material_dict["allum"]["tensile_ult"] = 350 * 10 ** 6
+    material_dict["allum"]["tensile_yield"] = 300 * 10 ** 6
+
+    # add Titanium
+    material_dict["titan"] = dict()
+    material_dict["titan"]["e-mod"] = 110 * 10 ** 9
+    material_dict["titan"]["density"] = 4.43 * 10 ** 3
+    material_dict["titan"]["tensile_ult"] = 900 * 10 ** 6
+    material_dict["titan"]["tensile_yield"] = 830 * 10 ** 6
+
+    # add UHMPE
+    material_dict["uhmpe"] = dict()
+    material_dict["uhmpe"]["e-mod"] = 700 * 10 ** 9
+    material_dict["uhmpe"]["density"] = 0.93 * 10 ** 3
+    material_dict["uhmpe"]["tensile_ult"] = 1100 * 10 ** 6
+    material_dict["titan"]["tensile_yield"] = 1
+    return material_dict
 
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
@@ -200,15 +187,14 @@ def split_eq_equation(K,U,R,P,DOF=2):
     return split
 
 
-def gen_stifness_matrix_element(E, A, L, begin_coords, end_coords):
+def gen_stifness_matrix_element(E, A, begin_coords, end_coords):
     """
     :param E: E-mod
     :param A: cross Area
-    :param L: length
     :return: global stiffness_matrix element
     """
     transformation_matrix = get_trans_matrix(begin_coords, end_coords)
-
+    L = np.sqrt((end_coords[0]-begin_coords[0])**2 + (end_coords[1]-begin_coords[1])**2)
     stifness_matrix_element = ((E * A) / L) * np.array([[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]])
     global_matrix_element = transformation_matrix.transpose() @ stifness_matrix_element @ transformation_matrix
     return global_matrix_element
@@ -218,7 +204,7 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
     """
     make global matrix with one diagonal
     :param list_of_matrix_elements:
-    :return:
+    :return: global_stiffness_matrix
     """
     length_of_global_matrix = int(0.5 * len(list_of_matrix_elements[0]) * (1 + len(list_of_matrix_elements)))
     global_stiffness_matrix = np.zeros([length_of_global_matrix, length_of_global_matrix])
@@ -233,10 +219,41 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
 
 print(create_mesh(3))
 
-print(gen_stifness_matrix_element(100, 10 ** -2, 1, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
-print(gen_stifness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
+print(gen_stifness_matrix_element(100, 10 ** -2, [0, 0], [np.cos(np.radians(60)), np.sin(np.radians(60))]))
+print(gen_stifness_matrix_element(100, 10 ** -2, [0, 0], [1, 1]))
 array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
 print(make_global_stiffness_matrix(array))
+
+
+
+### visualization ###
+visualize = True
+
+if visualize is True:
+    # visualize original state
+    plt.plot()
+
+    # visualize final state
+    plt.plot()
+
+    # show everything at once
+    plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## set up dataframe for use ##
 
