@@ -259,14 +259,14 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
     material_force = float(density * length_of_element * area * g)  # N
 
     # construct actual load vector
-    load_vector[1] = -0.5 * material_force
+    load_vector[1] = -0.5 * material_force  # half of material force at bottom
     for numb, item in enumerate(load_vector):
         if numb % 2 == 1 and numb > 1:
             load_vector[numb] = -material_force  # downwards
         if numb % 2 == 0:
             load_vector[numb] = wind_force  # to the right
     load_vector[-2] += balloon_forces[0]  # x force
-    load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force
+    load_vector[-1] += balloon_forces[1] + 0.5 * material_force  # y force balloon + half of material force at top
 
     return load_vector
 
