@@ -120,21 +120,21 @@ class atmosphere():
         def __init__(self, angle):
             self.angle = angle
 
-#s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis, v_wind - wind speed at altitude
-def balloon_tension(phi, v_wind, density_hydrogen, h, s_b):
 
-    q_b=0.5*density_at_altitude(h)*v_wind**2 #q_b - dynamic pressure of the balloon
-    Balloon=balloon(1,2,3,4) ##placeholder values
+# s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis
+def balloon_tension(phi, density_hydrogen, h, s_b):
 
-    lift_balloon_force=q_b*s_b*Balloon.lift_coeff
-    drag_balloon_force=q_b*s_b*Balloon.drag_coeff
-    buoyancy_force=(density_at_altitude(h)-density_hydrogen)*Balloon.volume
+    Balloon = balloon(1, 2, 3, 4)  ##placeholder values
+    q_b = Balloon.q_balloon
+    lift_balloon_force = q_b * s_b * Balloon.lift_coeff
+    drag_balloon_force = q_b * s_b * Balloon.drag_coeff
+    buoyancy_force = (density_at_altitude(h) - density_hydrogen) * Balloon.volume
 
     D_bl = np.array([0, 0, lift_balloon_force])
-    D_bd = np.array([drag_balloon_force*cos(phi), drag_balloon_force*sin(phi), 0])
+    D_bd = np.array([drag_balloon_force * cos(phi), drag_balloon_force * sin(phi), 0])
     B = np.array([0, 0, buoyancy_force(h)])
     W_b = np.array(Balloon.weight)
-    F = D_bl+D_bd+B-W_b
+    F = D_bl + D_bd + B - W_b
 
     # CHANGING COORDINATE SYSTEM from 3d to 2d
     fx = np.take(F, 0)  # towards right
@@ -295,9 +295,9 @@ mesh = create_mesh(3)
 displacements = [[0, 4000, 4000], [0, -4000, -4000]]
 plot_displacements(mesh, displacements)
 
-U = np.zeros(dof*nodes)
-P = np.ones(dof*nodes)
-R = np.zeros(dof*nodes)
+U = np.zeros(dof * nodes)
+P = np.ones(dof * nodes)
+R = np.zeros(dof * nodes)
 
 split_vars = split_eq_equation(stiff_matrix, U, R, P, dof)
 split_vars['Ur'] = np.linalg.inv(split_vars['Kr']) @ split_vars['Pr']
@@ -310,4 +310,3 @@ print(split_vars['Ur'], split_vars['Rs'])
 # print(gen_stiffness_matrix_element(100, 10 ** -2, 1, [0, 0], [1, 1]))
 # array = np.array([[[1, 0, -1, 0], [0, 0, 0, 0], [-1, 0, 1, 0], [0, 0, 0, 0]]])
 # print(make_global_stiffness_matrix(array))
-
