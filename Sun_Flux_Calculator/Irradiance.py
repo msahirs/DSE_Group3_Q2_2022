@@ -10,7 +10,7 @@ class solar_atmosphere(object):
         ## -- Start Constant Zone -- ##
         
         # Solar irradiance at exospheric conditions
-        self.I_MAX = 1371.
+        self.I_MAX = 1361.
 
         # Averaged Earth-Sun Orbit eccentricity over a year
         self.EARTH_ECC = 0.0016708 
@@ -59,8 +59,8 @@ class solar_atmosphere(object):
     def get_direct_radiance(self):
 
         I_dn = self.calc_direct_flux()
-        
-        return I_dn * math.sin(self.omega) * math.cos(math.pi - self.beta_i)
+    
+        return I_dn * math.sin(self.omega) * math.cos(self.beta_i)
         
     def get_diffuse_radiance(self):
 
@@ -77,14 +77,14 @@ class solar_atmosphere(object):
 
     def get_total_radiance(self):
 
-        sum = self.get_diffuse_radiance() + self.get_diffuse_radiance() \
+        solar_sum = self.get_direct_radiance() + self.get_diffuse_radiance() \
                                         + self.get_reflect_radiance()
-        return sum
+        
+
+        return solar_sum
 
     def calc_direct_flux(self):
 
-        air_mass_frac = self.calc_air_mass_frac()
-        
         I_dn = self.I_MAX * ((1 + self.EARTH_ECC * math.cos(self.calc_true_anomaly())) \
                                             / (1 - self.EARTH_ECC ** 2))**2 \
                                             * (self.ATM_TRANS ** self.calc_air_mass_frac())
@@ -100,8 +100,9 @@ class solar_atmosphere(object):
 
     def calc_air_mass_frac(self):
         
-        air_mass_frac = self.pressure_ratio * math.sqrt(1229 + (614*(math.sin(self.omega))**2)) - 614 * math.sin(self.omega)
-        print(air_mass_frac)
+        air_mass_frac = self.pressure_ratio * (math.sqrt(1229 + (614 * math.sin(self.omega))**2) \
+                                                                - 614 * math.sin(self.omega))
+        # print(air_mass_frac)
         return air_mass_frac
 
     def calc_true_anomaly(self):
@@ -120,9 +121,9 @@ class solar_atmosphere(object):
 
 a = solar_atmosphere()
 
-omega = math.radians(32.8)
-beta = math.radians(0.)
-theta = math.radians(46.3)
+omega = math.radians(90-29.05)
+beta = math.radians(29.05)
+theta = math.radians(0.0)
 
 a.set_angles(omega,theta,beta)
 
@@ -132,4 +133,4 @@ a.set_day(350)
 
 b = a.get_total_radiance()
 
-# print(b)
+print(b)
