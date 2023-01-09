@@ -2,24 +2,27 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, solve
+from Corona_discharge_losses_calculator import *
+from Wire_structure_calculations import *
 
-A_wire_electric = 0.07 #Single stand wire thickness necessary for power transmission
-A_wire_struc    = 0.6  #wire thickness necessary to carry loads
+A_wire_electric = Area_wire #Single stand wire thickness necessary for power transmission
+A_wire_struc    = Area_wire_cm  #wire thickness necessary to carry loads
 
 x = symbols('x')
-y = symbols('y')
 
 eq_r1 = (4/3)*np.pi*x**3-A_wire_electric
 r1 = solve(eq_r1)[0]
 print(r1)
 
-eq_r2 = ((4/3)*np.pi*y**3)-((4/3)*np.pi*r1**3) - A_wire_struc
+eq_r2 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r1**3) - A_wire_struc
 r2 = solve(eq_r2)[0]
 print(r2)
 
-eq_r3 = ((4/3)*np.pi*y**3)-((4/3)*np.pi*r2**3) - A_wire_electric
+eq_r3 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r2**3) - A_wire_electric
 r3 = solve(eq_r3)[0]
 print(r3)
+
+ins_thickness = r2-r1
 
 theta = np.arange(0, 360, 0.01)
 r1_list = [r1]*len(theta)
