@@ -2,11 +2,11 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 from sympy import symbols, solve
-from Corona_discharge_losses_calculator import *
-from Wire_structure_calculations import *
+import Corona_discharge_losses_calculator
+import Wire_structure_calculations
 
-A_wire_electric = Area_wire #Single stand wire thickness necessary for power transmission
-A_wire_struc    = Area_wire_cm  #wire thickness necessary to carry loads
+A_wire_electric = Corona_discharge_losses_calculator.Area_wire #Single stand wire thickness necessary for power transmission
+A_wire_struc    = Wire_structure_calculations.Area_wire_cm  #wire thickness necessary to carry loads
 
 x = symbols('x')
 
@@ -34,7 +34,7 @@ ax.plot(theta, r1_list)
 ax.plot(theta, r2_list)
 ax.plot(theta, r3_list)
 ax.set_rmax(0.6)
-ax.set_rticks([0.15, 0.3, 0.45, 0.6])  # Less radial ticks
+ax.set_rticks([0.15, 0.3, 0.45, 0.6, 0.75])  # Less radial ticks
 ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
 ax.grid(True)
 #ax.set_title("A line plot on a polar axis", va='bottom')

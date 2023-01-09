@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added inductive losses to the corona discharge losses file">
-      <change afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Wire_structure_calculations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/PolarPlot.py" beforeDir="false" afterPath="$PROJECT_DIR$/PolarPlot.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hello_world.py" beforeDir="false" afterPath="$PROJECT_DIR$/hello_world.py" afterDir="false" />
-    </list>
+    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added inductive losses to the corona discharge losses file" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -182,5 +176,16 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added inductive losses to the corona discharge losses file" />
     <option name="LAST_COMMIT_MESSAGE" value="Added inductive losses to the corona discharge losses file" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
+    </breakpoint-manager>
   </component>
 </project>

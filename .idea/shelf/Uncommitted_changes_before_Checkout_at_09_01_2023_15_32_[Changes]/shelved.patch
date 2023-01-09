@@ -1,0 +1,145 @@
+Index: Corona_discharge_losses_calculator.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#Corona losses calculation file\r\n#Source: http://large.stanford.edu/courses/2010/ph240/harting1/\r\nimport math\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\n\r\n\r\n\r\n\r\n#Variables\r\nP_design =  1000000  #[W] Power to be transmitted\r\nk0 = 241    #fixed constant\r\ng0 = 21.1   #[KV/cm] Disruptive Gradient in Air\r\nkd = 0.2      #Normalized air density factor (25 deg C, 76 cm pressure)\r\na  = 1    #[cm] effective(?) radius of conductor\r\nd  = 5000   #[cm] Conductor Spacing\r\nf  = 1     #[Hz] Frequency\r\nki = 0.95   #Wire irregularity factor\r\n#V0 = 442     #[KV] Line voltage to neutral\r\n#V0 = np.arange(0, 600, 0.5)\r\n\r\nDCV = g0*ki*a*kd*np.log(d/a) #KV\r\nV_design = DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value\r\n\r\nP_loss = (k0/kd)*(f+25)*math.sqrt(a/d)*(V_design-g0*ki*a*kd*np.log(d/a))**2*10**-5\r\nAmp_wire = P_design / (1000*V_design) #A\r\n\r\n#************* Ohmic Resistance / conventional resistance losses ************\r\n\r\n#Variables\r\nR_al = 2.65*10**-6 #[Ohm/cm] Resistance\r\n#Area_wire = 0.4         #[cm^2] Surface area of wire\r\nRho = 0.0027       #{kg/cm^3} Density\r\nL_wire = 2000000#[cm] Length of the wire\r\nAmp_load = 4      #amps per mm2 of wire\r\n\r\nArea_wire = (Amp_wire / (Amp_load))/100 #cm^2\r\nV_wire = L_wire * (Area_wire)\r\nM_wire = V_wire * Rho #kg\r\nP_loss_corona = P_loss * L_wire/100000\r\n\r\n# ******** Inductive losses **********\r\n\r\n#Some variables\r\nd_wire = 0.2          #[cm] diameter of wire\r\nL_wire = L_wire     #[cm] length of wire\r\nmu = 1              #permeability, 1 for non magnetic materials\r\n\r\n#Inductance calculation\r\nx = math.sqrt(1+(d_wire/(2*L_wire))**2) #substitute x in de inductance formula for readability\r\ninductance = 2*L_wire*(np.log(((2*L_wire)/d_wire)*(1+x))-x+mu/4+d_wire/(2*L_wire)) #Calculates inductance in nanohenry\r\n\r\n#print(inductance) #print inductance in nanohenries\r\nR_wire_inductance = 2*math.pi*f*(inductance*10**-9) #Calculates impedance due to inductance in ohms\r\n\r\nR_wire_ohmic = (R_al/Area_wire) * L_wire\r\nP_loss_ohmic = (R_wire_ohmic*Amp_wire**2)/1000\r\nP_loss_inductance = (R_wire_inductance*Amp_wire**2)/1000\r\nP_loss_total = P_loss_corona + P_loss_ohmic + P_loss_inductance\r\nLoss_percent = (P_loss_total / (P_design/1000)) * 100\r\n\r\nprint(\"With a design voltage of \", round(V_design, 2), \"kilovolts:\")\r\nprint(\"The corona inception voltage is \", np.round(DCV, 2), \"kilovolts.\")\r\nprint(\"Your power loss due to corona is: \", np.round(P_loss, 2), \"kilowatts per kilometer.\")\r\nprint(\"Your power loss due to ohmic losses is: \", np.round(P_loss_ohmic, 2), \"kilowatts.\")\r\nprint(\"Your power loss due to inductive losses is: \", np.round(P_loss_inductance, 2), \"kilowatts.\")\r\nprint(\"Total loss is \", np.round(Loss_percent, 3), \"percent of the total power to be transmitted.\")\r\nprint(\"The wire cross section is: \", np.round(Area_wire, 2), \"square centimeters with a weight of \", np.round(M_wire, 2), \"kilograms.\")\r\n\r\n#Plots the Voltage vs Power loss curve\r\n#plt.plot(V0, P_loss)
+===================================================================
+diff --git a/Corona_discharge_losses_calculator.py b/Corona_discharge_losses_calculator.py
+--- a/Corona_discharge_losses_calculator.py	
++++ b/Corona_discharge_losses_calculator.py	
+@@ -7,6 +7,7 @@
+ 
+ 
+ 
++
+ #Variables
+ P_design =  1000000  #[W] Power to be transmitted
+ k0 = 241    #fixed constant
+@@ -37,6 +38,7 @@
+ Area_wire = (Amp_wire / (Amp_load))/100 #cm^2
+ V_wire = L_wire * (Area_wire)
+ M_wire = V_wire * Rho #kg
++M_wire_total = 2 * M_wire
+ P_loss_corona = P_loss * L_wire/100000
+ 
+ # ******** Inductive losses **********
+@@ -65,7 +67,7 @@
+ print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
+ print("Your power loss due to inductive losses is: ", np.round(P_loss_inductance, 2), "kilowatts.")
+ print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
+-print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire, 2), "kilograms.")
++print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
+ 
+ #Plots the Voltage vs Power loss curve
+ #plt.plot(V0, P_loss)
+\ No newline at end of file
+Index: PolarPlot.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import math\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\nfrom sympy import symbols, solve\r\nfrom Corona_discharge_losses_calculator import *\r\nfrom Wire_structure_calculations import *\r\n\r\nA_wire_electric = Area_wire #Single stand wire thickness necessary for power transmission\r\nA_wire_struc    = Area_wire_cm  #wire thickness necessary to carry loads\r\n\r\nx = symbols('x')\r\n\r\neq_r1 = (4/3)*np.pi*x**3-A_wire_electric\r\nr1 = solve(eq_r1)[0]\r\nprint(r1)\r\n\r\neq_r2 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r1**3) - A_wire_struc\r\nr2 = solve(eq_r2)[0]\r\nprint(r2)\r\n\r\neq_r3 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r2**3) - A_wire_electric\r\nr3 = solve(eq_r3)[0]\r\nprint(r3)\r\n\r\nins_thickness = r2-r1\r\n\r\ntheta = np.arange(0, 360, 0.01)\r\nr1_list = [r1]*len(theta)\r\nr2_list = [r2]*len(theta)\r\nr3_list = [r3]*len(theta)\r\n\r\nfig, ax = plt.subplots(subplot_kw={'projection': 'polar'})\r\nax.plot(theta, r1_list)\r\nax.plot(theta, r2_list)\r\nax.plot(theta, r3_list)\r\nax.set_rmax(0.6)\r\nax.set_rticks([0.15, 0.3, 0.45, 0.6])  # Less radial ticks\r\nax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line\r\nax.grid(True)\r\n#ax.set_title(\"A line plot on a polar axis\", va='bottom')\r\nplt.show()
+===================================================================
+diff --git a/PolarPlot.py b/PolarPlot.py
+--- a/PolarPlot.py	
++++ b/PolarPlot.py	
+@@ -2,11 +2,11 @@
+ import numpy as np
+ import matplotlib.pyplot as plt
+ from sympy import symbols, solve
+-from Corona_discharge_losses_calculator import *
+-from Wire_structure_calculations import *
++import Corona_discharge_losses_calculator
++import Wire_structure_calculations
+ 
+-A_wire_electric = Area_wire #Single stand wire thickness necessary for power transmission
+-A_wire_struc    = Area_wire_cm  #wire thickness necessary to carry loads
++A_wire_electric = Corona_discharge_losses_calculator.Area_wire #Single stand wire thickness necessary for power transmission
++A_wire_struc    = Wire_structure_calculations.Area_wire_cm  #wire thickness necessary to carry loads
+ 
+ x = symbols('x')
+ 
+@@ -33,7 +33,7 @@
+ ax.plot(theta, r1_list)
+ ax.plot(theta, r2_list)
+ ax.plot(theta, r3_list)
+-ax.set_rmax(0.6)
++ax.set_rmax(0.75)
+ ax.set_rticks([0.15, 0.3, 0.45, 0.6])  # Less radial ticks
+ ax.set_rlabel_position(-22.5)  # Move radial labels away from plotted line
+ ax.grid(True)
+Index: Wire_structure_calculations.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>#UHMWPE Structural Calculations\r\n\r\n#Import stuff\r\nimport math\r\nimport numpy as np\r\nimport matplotlib.pyplot as plt\r\n\r\n\r\n\r\n#Variables\r\nstress_ult = 1100000000 #[Pa]\r\nsafety_factor = 4 #dimensionless\r\nmaterial_density = 980 #kg / m^3\r\ngravitational_constant = 9.80665 #m/s^2\r\nwire_length = 20000 #[m]\r\nFd = 10000 #[N], total drag working on the tether\r\nwire_electric_weight = 500 #[kg]\r\ni =1\r\n\r\n#Simple calculations\r\nF_mass_electric = wire_electric_weight * gravitational_constant\r\nwire_stress_design =  stress_ult / safety_factor #Design stress of the tether\r\nform_var_ww = gravitational_constant**2*wire_length**2*material_density**2 #For conciseness in the Area formula\r\n\r\n#Calculations\r\nArea_wire = (Fd)/(math.sqrt(wire_stress_design**2 - form_var_ww)) #m2\r\nArea_wire_cm = Area_wire * 10000 #[cm^2]\r\nVolume_wire =  Area_wire * wire_length #[m^3 ]\r\nMass_wire = Volume_wire * material_density #[kg]\r\nF_mass_wire = Mass_wire*gravitational_constant\r\n\r\nwire_stress_actual = math.sqrt((F_mass_electric+F_mass_wire)**2 + Fd**2) / Area_wire\r\nwire_stress_wiremass = F_mass_wire / Area_wire\r\nwire_stress_electricmass = F_mass_electric / Area_wire\r\n\r\n\r\nwhile wire_stress_actual > wire_stress_design:\r\n    Area_wire = Area_wire + 0.1*10**-6\r\n    Volume_wire =  Area_wire * wire_length #[m^3 ]\r\n    Mass_wire = Volume_wire * material_density #[kg]\r\n    F_mass_wire = Mass_wire*gravitational_constant\r\n    wire_stress_actual = math.sqrt((F_mass_electric+F_mass_wire)**2 + Fd**2) / Area_wire\r\n    Area_wire_cm = Area_wire *10000\r\nprint(\"Wire cross section in mm2: \",round(Area_wire*10**6, 2),\" The mass of the wire in kg is: \", round(Mass_wire, 2)) #prints the wire area in mm^2\r\n\r\n
+===================================================================
+diff --git a/Wire_structure_calculations.py b/Wire_structure_calculations.py
+--- a/Wire_structure_calculations.py	
++++ b/Wire_structure_calculations.py	
+@@ -4,7 +4,7 @@
+ import math
+ import numpy as np
+ import matplotlib.pyplot as plt
+-
++import Corona_discharge_losses_calculator
+ 
+ 
+ #Variables
+@@ -14,7 +14,8 @@
+ gravitational_constant = 9.80665 #m/s^2
+ wire_length = 20000 #[m]
+ Fd = 10000 #[N], total drag working on the tether
+-wire_electric_weight = 500 #[kg]
++#wire_electric_weight = 500 #[kg]
++wire_electric_weight =  Corona_discharge_losses_calculator.M_wire_total
+ i =1
+ 
+ #Simple calculations
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ChangeListManager\">\r\n    <list default=\"true\" id=\"35615044-fcdf-4d36-b9d5-19208efacb56\" name=\"Changes\" comment=\"Added inductive losses to the corona discharge losses file\">\r\n      <change afterPath=\"$PROJECT_DIR$/Corona_discharge_losses_calculator.py\" afterDir=\"false\" />\r\n      <change afterPath=\"$PROJECT_DIR$/Wire_structure_calculations.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/.idea/workspace.xml\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/.idea/workspace.xml\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/PolarPlot.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/PolarPlot.py\" afterDir=\"false\" />\r\n      <change beforePath=\"$PROJECT_DIR$/hello_world.py\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/hello_world.py\" afterDir=\"false\" />\r\n    </list>\r\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\r\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\r\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\r\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\r\n  </component>\r\n  <component name=\"FileTemplateManagerImpl\">\r\n    <option name=\"RECENT_TEMPLATES\">\r\n      <list>\r\n        <option value=\"Python Script\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n  <component name=\"Git.Settings\">\r\n    <option name=\"RECENT_BRANCH_BY_REPOSITORY\">\r\n      <map>\r\n        <entry key=\"$PROJECT_DIR$\" value=\"Structural_loading\" />\r\n      </map>\r\n    </option>\r\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"GitSEFilterConfiguration\">\r\n    <file-type-list>\r\n      <filtered-out-file-type name=\"LOCAL_BRANCH\" />\r\n      <filtered-out-file-type name=\"REMOTE_BRANCH\" />\r\n      <filtered-out-file-type name=\"TAG\" />\r\n      <filtered-out-file-type name=\"COMMIT_BY_MESSAGE\" />\r\n    </file-type-list>\r\n  </component>\r\n  <component name=\"MarkdownSettingsMigration\">\r\n    <option name=\"stateVersion\" value=\"1\" />\r\n  </component>\r\n  <component name=\"ProjectId\" id=\"2JGnB0wfgkMW3QRgDln5fYe3jra\" />\r\n  <component name=\"ProjectLevelVcsManager\" settingsEditedManually=\"true\" />\r\n  <component name=\"ProjectViewState\">\r\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\r\n    <option name=\"showLibraryContents\" value=\"true\" />\r\n  </component>\r\n  <component name=\"PropertiesComponent\">\r\n    <property name=\"RunOnceActivity.OpenProjectViewOnStart\" value=\"true\" />\r\n    <property name=\"RunOnceActivity.ShowReadmeOnStart\" value=\"true\" />\r\n    <property name=\"last_opened_file_path\" value=\"$PROJECT_DIR$\" />\r\n  </component>\r\n  <component name=\"RunManager\" selected=\"Python.PolarPlot\">\r\n    <configuration name=\"Corona discharge Losses Calculator\" type=\"PythonConfigurationType\" factoryName=\"Python\">\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"C:\\Users\\sirjo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <module name=\"\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/Corona discharge Losses Calculator.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"Corona_discharge_losses_calculator\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"C:\\Users\\sirjo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <module name=\"\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/Corona_discharge_losses_calculator.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"PolarPlot\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"C:\\Users\\sirjo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <module name=\"\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/PolarPlot.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <configuration name=\"Wire_structure_calculations\" type=\"PythonConfigurationType\" factoryName=\"Python\" temporary=\"true\" nameIsGenerated=\"true\">\r\n      <option name=\"INTERPRETER_OPTIONS\" value=\"\" />\r\n      <option name=\"PARENT_ENVS\" value=\"true\" />\r\n      <envs>\r\n        <env name=\"PYTHONUNBUFFERED\" value=\"1\" />\r\n      </envs>\r\n      <option name=\"SDK_HOME\" value=\"C:\\Users\\sirjo\\AppData\\Local\\Programs\\Python\\Python310\\python.exe\" />\r\n      <option name=\"WORKING_DIRECTORY\" value=\"$PROJECT_DIR$\" />\r\n      <option name=\"IS_MODULE_SDK\" value=\"false\" />\r\n      <option name=\"ADD_CONTENT_ROOTS\" value=\"true\" />\r\n      <option name=\"ADD_SOURCE_ROOTS\" value=\"true\" />\r\n      <module name=\"\" />\r\n      <option name=\"SCRIPT_NAME\" value=\"$PROJECT_DIR$/Wire_structure_calculations.py\" />\r\n      <option name=\"PARAMETERS\" value=\"\" />\r\n      <option name=\"SHOW_COMMAND_LINE\" value=\"false\" />\r\n      <option name=\"EMULATE_TERMINAL\" value=\"false\" />\r\n      <option name=\"MODULE_MODE\" value=\"false\" />\r\n      <option name=\"REDIRECT_INPUT\" value=\"false\" />\r\n      <option name=\"INPUT_FILE\" value=\"\" />\r\n      <method v=\"2\" />\r\n    </configuration>\r\n    <list>\r\n      <item itemvalue=\"Python.Corona discharge Losses Calculator\" />\r\n      <item itemvalue=\"Python.Corona_discharge_losses_calculator\" />\r\n      <item itemvalue=\"Python.PolarPlot\" />\r\n      <item itemvalue=\"Python.Wire_structure_calculations\" />\r\n    </list>\r\n    <recent_temporary>\r\n      <list>\r\n        <item itemvalue=\"Python.PolarPlot\" />\r\n        <item itemvalue=\"Python.Wire_structure_calculations\" />\r\n        <item itemvalue=\"Python.Corona_discharge_losses_calculator\" />\r\n      </list>\r\n    </recent_temporary>\r\n  </component>\r\n  <component name=\"SpellCheckerSettings\" RuntimeDictionaries=\"0\" Folders=\"0\" CustomDictionaries=\"0\" DefaultDictionary=\"application-level\" UseSingleDictionary=\"true\" transferred=\"true\" />\r\n  <component name=\"TaskManager\">\r\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\r\n      <changelist id=\"35615044-fcdf-4d36-b9d5-19208efacb56\" name=\"Changes\" comment=\"\" />\r\n      <created>1671713148401</created>\r\n      <option name=\"number\" value=\"Default\" />\r\n      <option name=\"presentableId\" value=\"Default\" />\r\n      <updated>1671713148401</updated>\r\n    </task>\r\n    <task id=\"LOCAL-00001\" summary=\"Added inductive losses to the corona discharge losses file\">\r\n      <created>1671724554024</created>\r\n      <option name=\"number\" value=\"00001\" />\r\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\r\n      <option name=\"project\" value=\"LOCAL\" />\r\n      <updated>1671724554024</updated>\r\n    </task>\r\n    <option name=\"localTasksCounter\" value=\"2\" />\r\n    <servers />\r\n  </component>\r\n  <component name=\"Vcs.Log.Tabs.Properties\">\r\n    <option name=\"TAB_STATES\">\r\n      <map>\r\n        <entry key=\"MAIN\">\r\n          <value>\r\n            <State />\r\n          </value>\r\n        </entry>\r\n      </map>\r\n    </option>\r\n  </component>\r\n  <component name=\"VcsManagerConfiguration\">\r\n    <MESSAGE value=\"Added inductive losses to the corona discharge losses file\" />\r\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Added inductive losses to the corona discharge losses file\" />\r\n  </component>\r\n</project>
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	
++++ b/.idea/workspace.xml	
+@@ -1,12 +1,11 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+   <component name="ChangeListManager">
+-    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added inductive losses to the corona discharge losses file">
+-      <change afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
+-      <change afterPath="$PROJECT_DIR$/Wire_structure_calculations.py" afterDir="false" />
++    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="">
+       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
+       <change beforePath="$PROJECT_DIR$/PolarPlot.py" beforeDir="false" afterPath="$PROJECT_DIR$/PolarPlot.py" afterDir="false" />
+-      <change beforePath="$PROJECT_DIR$/hello_world.py" beforeDir="false" afterPath="$PROJECT_DIR$/hello_world.py" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/Wire_structure_calculations.py" beforeDir="false" afterPath="$PROJECT_DIR$/Wire_structure_calculations.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -137,8 +136,8 @@
+     </configuration>
+     <list>
+       <item itemvalue="Python.Corona discharge Losses Calculator" />
+-      <item itemvalue="Python.Corona_discharge_losses_calculator" />
+       <item itemvalue="Python.PolarPlot" />
++      <item itemvalue="Python.Corona_discharge_losses_calculator" />
+       <item itemvalue="Python.Wire_structure_calculations" />
+     </list>
+     <recent_temporary>
+@@ -183,4 +182,15 @@
+     <MESSAGE value="Added inductive losses to the corona discharge losses file" />
+     <option name="LAST_COMMIT_MESSAGE" value="Added inductive losses to the corona discharge losses file" />
+   </component>
++  <component name="XDebuggerManager">
++    <breakpoint-manager>
++      <default-breakpoints>
++        <breakpoint type="python-exception">
++          <properties notifyOnTerminate="true" exception="BaseException">
++            <option name="notifyOnTerminate" value="true" />
++          </properties>
++        </breakpoint>
++      </default-breakpoints>
++    </breakpoint-manager>
++  </component>
+ </project>
+\ No newline at end of file

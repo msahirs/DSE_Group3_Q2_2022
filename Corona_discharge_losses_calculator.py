@@ -37,6 +37,7 @@ Amp_load = 4      #amps per mm2 of wire
 Area_wire = (Amp_wire / (Amp_load))/100 #cm^2
 V_wire = L_wire * (Area_wire)
 M_wire = V_wire * Rho #kg
+M_wire_total = M_wire * 2
 P_loss_corona = P_loss * L_wire/100000
 
 # ******** Inductive losses **********
@@ -65,7 +66,7 @@ print("Your power loss due to corona is: ", np.round(P_loss, 2), "kilowatts per 
 print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
 print("Your power loss due to inductive losses is: ", np.round(P_loss_inductance, 2), "kilowatts.")
 print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
-print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire, 2), "kilograms.")
+print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
 
 #Plots the Voltage vs Power loss curve
 #plt.plot(V0, P_loss)

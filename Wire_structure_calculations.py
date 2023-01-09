@@ -4,7 +4,7 @@
 import math
 import numpy as np
 import matplotlib.pyplot as plt
-
+import Corona_discharge_losses_calculator
 
 
 #Variables
@@ -14,7 +14,7 @@ material_density = 980 #kg / m^3
 gravitational_constant = 9.80665 #m/s^2
 wire_length = 20000 #[m]
 Fd = 10000 #[N], total drag working on the tether
-wire_electric_weight = 500 #[kg]
+wire_electric_weight = Corona_discharge_losses_calculator.M_wire_total #[kg]
 i =1
 
 #Simple calculations
