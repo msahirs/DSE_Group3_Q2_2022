@@ -88,6 +88,7 @@ class balloon():
         self.speed = speed
         self.weight = weight
         self.q_balloon = 0.5 * density_at_altitude(altitude) * speed * speed
+        self.ch_area = volume_balloon**(2/3) #characteristic area for a cube
 
         # self.buoyancy_force = (density_at_altitude(balloon_altitude)-density_internal_balloon)*volume_balloon
         # self.drag_force
@@ -122,12 +123,15 @@ class atmosphere():
 
 
 # s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis
+
 def balloon_tension(phi, density_hydrogen, h, s_b):
     Balloon = balloon(1, 2, 3, 4)  ##placeholder values
     q_b = Balloon.q_balloon
+    s_b = Balloon.ch_area
     lift_balloon_force = q_b * s_b * Balloon.lift_coeff
     drag_balloon_force = q_b * s_b * Balloon.drag_coeff
     buoyancy_force = (density_at_altitude(h) - density_hydrogen) * Balloon.volume
+
 
     D_bl = np.array([0, 0, lift_balloon_force])
     D_bd = np.array([drag_balloon_force * cos(phi), drag_balloon_force * sin(phi), 0])
@@ -147,7 +151,7 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     [[xlist], [ylist]
     """
     y_list = np.linspace(altitude_ground, altitude_balloon, nodes)  # using bottem as well
-    x_list = np.zeros(y_list.shape)
+    x_list = y_list #np.zeros(y_list.shape)
     coords = np.array([x_list, y_list])
     return coords
 
@@ -188,8 +192,8 @@ def split_eq_equation(K, U, R, P, DOF=3):
     free_DOF = np.nonzero(non_bc)[0]  # indices of non-constrained degrees of freedom
 
     split = {}
-    print(K)
-    print(free_DOF)
+    # print(K)
+    # print(free_DOF)
     split['Kr'] = K[np.ix_(free_DOF, free_DOF)]
     split['Ks'] = K[np.ix_(constr_DOF, constr_DOF)]
     split['Krs'] = K[np.ix_(free_DOF, constr_DOF)]
@@ -207,7 +211,7 @@ def split_eq_equation(K, U, R, P, DOF=3):
     return split
 
 
-def gen_stiffness_matrix_element(begin_coords, end_coords, E=1e+9, A=0.0001):
+def gen_stiffness_matrix_element(begin_coords, end_coords, E = 8e+3, A = 20000):
     """
     :param E: E-mod
     :param A: cross Area
@@ -319,7 +323,7 @@ def sequential_element_matrices(coords):
     """
     element_matrices = []
     for i in range(coords.shape[1] - 1):
-        matrix = gen_stiffness_matrix_beam_element(coords[:, i], coords[:, i + 1])
+        matrix = gen_stiffness_matrix_element(coords[:, i], coords[:, i + 1])
         element_matrices.append(matrix)
     return element_matrices
 
@@ -353,6 +357,16 @@ def plot_displacements(mesh, displacements):
 
 dof = 3
 nodes = 2
+coordlst = np.array([[0,1,2],[0,1,0]]) #create_mesh(nodes, altitude_balloon=6)
+# matrix = gen_stiffness_matrix_element([1,0], [1,1])
+# coordlst.append(matrix)
+# matrix = gen_stiffness_matrix_element([0,0], [1,1])
+# coordlst.append(matrix)
+el_matrices = sequential_element_matrices(coordlst)
+print(el_matrices)
+stiff_matrix = make_global_stiffness_matrix(el_matrices)
+print("this one", stiff_matrix)
+
 
 U = np.zeros(dof * nodes)
 P = np.array([0, 0, 0, 0, 1, 0])
