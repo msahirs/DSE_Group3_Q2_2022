@@ -3,30 +3,30 @@ import matplotlib.pyplot as plt
 import ISA_general
 
 # Input Values
-L_charac = 1                # Characteristic length [m]
-A = 2700                    # Area of solar cell configuration [m2]
+L_charac = 52                # Characteristic length [m]
+A = 2700                    # Area of solar cell configuration [m^2]
 h = 20000.0                 # Height [m]
 v_wind = 5                  # Wind speed [m/s]
 
 # Constants
 Cp = 1000                   # Specific heat capacity of air [J/kg/K]
 k = 2 * 10 ** (-3)          # Thermal conductivity of air [W/m/K]
-g = 9.81                    # Gravitational acceleration [m/s2]
-sigma = 5.67 * 10 ** (-8)   # Boltzmann constant
-I = 1353                    # Incident solar intensity [W/m2]
+g = 9.81                    # Gravitational acceleration [m/s^2]
+sigma = 5.67 * 10 ** (-8)   # Boltzmann constant [W/m^2/K^4]
+I_sun = 1353                # Incident solar intensity [W/m^2]
+I_earth = 237               # Earth's infrared emission [W/m^2]
+albedo = 0.1                # Earth's albedo [-]
 
 # Calculations
 T_air, P, rho, mu = ISA_general.ISA(h)
-nu = mu / rho               # Kinematic viscosity [m2/s]
+nu = mu / rho               # Kinematic viscosity [m^2/s]
 Pr = mu * Cp / k            # Prantl number [-]
-alpha = k / rho / Cp        # Thermal diffusivity of air [m2/s]
+alpha = k / rho / Cp        # Thermal diffusivity of air [m^2/s]
 beta = 1 / T_air            # Thermal expansion coefficient [1/K] (approx)
 
 # Solar cell
 epsilon = 0.9               # Ge substrate emission coefficient [-]
 refl_top = 0.02             # Reflectivity of solar cell cap [-]
-d_contact = 5*10**-6        # Bottom metal contact thickness [m]
-k_contact = 429             # Conductivity of metal contact (Ag) [W/m/K]
 Rho_Ge = 5323               # Ge substrate density
 Cp_Ge = 3200                # Specific heat capacity of  Ge
 d_Ge = 160*10**-6           # Approx thickness Ge substrate
@@ -68,9 +68,9 @@ for t in range(0, 2000, dt):
     # emission radiation
     q_emission = sigma * epsilon * (T ** 4 - T_air ** 4) * A
 
-    # direct absorption
+    # direct absorption (from sun & earth)
     alpha_ab = 0.65  # TBD
-    I_ab = I * (1 - refl_top)
+    I_ab = (I_sun * (1+albedo) + I_earth) * (1 - refl_top)
     q_abs = I_ab * alpha_ab * A
 
     # conduction to backplane
@@ -93,9 +93,20 @@ for t in range(0, 2000, dt):
     q_cfrp_free_conv = h_cfrp_free * A * (T_cfrp - T_air)
 
     # Time step
-    dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
+    dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp ) / Cp_module * dt
     T = T + dT
 
+# - q_cfrp_free_conv - q_cfrp_forced_conv
+
+print(q_abs, "absorped")
+print(q_forced_conv, "fo conv")
+print(q_free_conv, "fr conv")
+print(q_emission, "emission")
+print(q_emission_cfrp, "cfrp emission")
+print(q_cfrp_free_conv, "cfrp fr conv")
+print(q_cfrp_forced_conv, "cfrp fo conv")
+
+print(rho, mu, Re*55, (T-273.15))
 
 plt.plot(t_list, T_list)
 #plt.plot(t_list, temp)
