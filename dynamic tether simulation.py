@@ -1,16 +1,21 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-nodes = 5
-h_balloon = 50  # m
+
+nodes = 30
+h_balloon = 20000  # m
 h_ground = 0  # m
-L = 3000  # N
+L = 100000  # N
+D = 200  # N
 density = 1000  # kg/m^3
-r = 5  # mm
-wind = 50  # m/s
-Cd = 0.25
+r = 0.01  # m
+wind = 20  # m/s
+Cd = 1.2
 rho = 0.5  # kg/m^3
-E = 1000  # MPa
+E = 100e9  # Pa
 g = 9.8  # m/s
+C = 100  # Ns/m
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)
@@ -19,11 +24,13 @@ Fx = np.zeros(nodes)
 Fy = np.zeros(nodes)
 vx = np.zeros(nodes)
 vy = np.zeros(nodes)
+ax = np.zeros(nodes)
+ay = np.zeros(nodes)
 
 # Initiate segments
 segments = nodes - 1
 L0 = (h_balloon - h_ground) / (segments)
-crossA = r ** 2 * np.pi  # mm^2
+crossA = r ** 2 * np.pi  # m^2
 S_front = 2 * r * L0
 tantheta = np.zeros(segments)
 theta = np.arctan(tantheta)
@@ -35,35 +42,51 @@ m[0] = m[0] * 0.5
 m[-1] = m[-1] * 0.5
 W = m * g
 
-t = 0
-dt = 0.01
-t_end = 1
+# print('W = ', W)
 
-while t < t_end:
+t = 0
+dt = 0.001
+t_end = 500
+
+# Calculate wind force
+Fwind = Cd * 0.5 * rho * wind ** 2 * S_front
+print('Fwind = ', Fwind)
+
+while t < t_end: # and np.any(abs(ax) > 0.1):
     t += dt
     print(t)
 
     # Calculate tension forces in all segments
     for seg in range(segments):
+        if (y[seg + 1] - y[seg]) == 0:
+            print("please god help")
+        # if (x[seg + 1] - x[seg]) == 0:
+        #     print("please god help")
         T[seg] = crossA * E / L0 * (np.sqrt((y[seg + 1] - y[seg]) ** 2 + (x[seg + 1] - x[seg]) ** 2) - L0)
-        theta[seg] = np.arctan((x[seg + 1] - x[seg]) / (y[seg + 1] - y[seg]))
+        theta[seg] = np.arctan2((x[seg + 1] - x[seg]), (y[seg + 1] - y[seg]))
     Tx = T * np.sin(theta)
     Ty = T * np.cos(theta)
+    # print('Tx,Ty = ',Tx,Ty)
 
-    # Calculate wind force
-    Fwind = Cd * 0.5 * rho * wind ** 2 * S_front
+    # Calculate resisting forces
+    Fresx = C * vx
+    Fresy = C * vy
 
     # Calculate total forces on all nodes
-    Fx[0] = Tx[0] + Fwind / 2
-    Fy[0] = Ty[0] - W[0]
+    Fx[0] = Tx[0] + Fwind / 2 - Fresx[0]
+    Fy[0] = Ty[0] - W[0] - Fresy[0]
     for node in range(1, nodes - 1):
-        Fx[node] = Tx[node] - Tx[node - 1] + Fwind
-        Fy[node] = Ty[node] - Ty[node - 1] - W[node]
-    Fx[-1] = Fwind / 2 - Tx[-1]
-    Fy[-1] = L - Ty[-1] - W[-1]
+        Fx[node] = Tx[node] - Tx[node - 1] + Fwind - Fresx[node]
+        Fy[node] = Ty[node] - Ty[node - 1] - W[node] - Fresy[node]
+    Fx[-1] = D + Fwind / 2 - Tx[-1] - Fresx[-1]
+    Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1]
 
-    ax = Fx / m
-    ay = Fy / m
+    ax[1:] = Fx[1:] / m[1:] * min(t, 1)
+    ay[1:] = Fy[1:] / m[1:] * min(t, 1)
+    Rx = -Fx
+    Ry = -Fy
+    # print('Fx,Fy = ',Fx,Fy)
+    # print('ax,ay = ',ax,ay)
 
     vx = vx + ax * dt
     vy = vy + ay * dt
@@ -74,4 +97,13 @@ while t < t_end:
     x[0] = 0
     y[0] = h_ground
 
-print(x,y)
+print('Fx,Fy = ', Fx, Fy)
+# print(T)
+# print(T/(crossA * E / L0) + L0)
+print(T / crossA)
+print('ax,ay = ', ax, ay)
+print('x,y = ', x, y)
+# print(theta)
+
+plt.plot(x, y)
+plt.show()
