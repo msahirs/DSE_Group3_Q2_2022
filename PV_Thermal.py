@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import ISA_general
 
 # Input Values
-L_charac = 52                # Characteristic length [m]
+L_charac = 52               # Characteristic length [m]
 A = 2700                    # Area of solar cell configuration [m^2]
 h = 20000.0                 # Height [m]
 v_wind = 5                  # Wind speed [m/s]
@@ -27,13 +27,13 @@ beta = 1 / T_air            # Thermal expansion coefficient [1/K] (approx)
 # Solar cell
 epsilon = 0.9               # Ge substrate emission coefficient [-]
 refl_top = 0.02             # Reflectivity of solar cell cap [-]
-Rho_Ge = 5323               # Ge substrate density
-Cp_Ge = 3200                # Specific heat capacity of  Ge
-d_Ge = 160*10**-6           # Approx thickness Ge substrate
+Rho_Ge = 5323               # Ge substrate density [kg/m^3]
+Cp_Ge = 3200                # Specific heat capacity of  Ge [J/kg/K]
+d_Ge = 160 * 10 ** (-6)     # Approx thickness Ge substrate [m]
 Cp_module = Rho_Ge * Cp_Ge * d_Ge * A # Heat capacity of PV [J/K]
 
 # Backplane
-Cp_cfrp = 1040              # Specific heat capacity of CFRP [J/kg]
+Cp_cfrp = 1040              # Specific heat capacity of CFRP [J/kg/K]
 d_cfrp = 100 * 10 ** (-6)   # Thickness CFRP [m]
 k_cfrp_hor = 250            # Conductivity (hor) of CFRP [W/m/K]
 k_cfrp_ver = 3              # Conductivity (ver) of CFRP [W/m/K]
@@ -70,7 +70,8 @@ for t in range(0, 2000, dt):
 
     # direct absorption (from sun & earth)
     alpha_ab = 0.65  # TBD
-    I_ab = (I_sun * (1+albedo) + I_earth) * (1 - refl_top)
+    I_ab = I_sun * (1 - refl_top)
+    # I_ab = (I_sun * (1+albedo) + I_earth) * (1 - refl_top)
     q_abs = I_ab * alpha_ab * A
 
     # conduction to backplane
@@ -93,10 +94,9 @@ for t in range(0, 2000, dt):
     q_cfrp_free_conv = h_cfrp_free * A * (T_cfrp - T_air)
 
     # Time step
-    dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp ) / Cp_module * dt
+    dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
 
-# - q_cfrp_free_conv - q_cfrp_forced_conv
 
 print(q_abs, "absorped")
 print(q_forced_conv, "fo conv")
