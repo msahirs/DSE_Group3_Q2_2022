@@ -137,8 +137,8 @@
     </configuration>
     <list>
       <item itemvalue="Python.Corona discharge Losses Calculator" />
-      <item itemvalue="Python.PolarPlot" />
       <item itemvalue="Python.Corona_discharge_losses_calculator" />
+      <item itemvalue="Python.PolarPlot" />
       <item itemvalue="Python.Wire_structure_calculations" />
     </list>
     <recent_temporary>
