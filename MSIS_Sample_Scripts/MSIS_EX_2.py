@@ -5,8 +5,8 @@ from pymsis import msis
 
 
 lon = 0
-lat = 0
-alt = 200
+lat = 80
+alt = 15
 f107 = 150
 f107a = 150
 ap = 7

@@ -26,6 +26,7 @@
 /////////////////////////////////////////////
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "spa.h"  //include the SPA header file
 
 int main (int argc, char *argv[])
@@ -35,25 +36,52 @@ int main (int argc, char *argv[])
     float min, sec;
 
     //enter required input values into SPA structure
+    // &argv[1] -> spa.year;
 
-    spa.year          = 2022;
-    spa.month         = 7;
-    spa.day           = 1;
-    spa.hour          = 12;
-    spa.minute        = 30;
-    spa.second        = 30;
-    spa.timezone      = 2.0;
-    spa.delta_ut1     = 0;
-    spa.delta_t       = 67;
-    spa.longitude     = 4.3;
-    spa.latitude      = 51.98;
-    spa.elevation     = 10;
-    spa.pressure      = 1015.3;
-    spa.temperature   = 25;
-    spa.slope         = 0;
-    spa.azm_rotation  = 0;
-    spa.atmos_refract = 0.5667;
-    spa.function      = SPA_ALL;
+    if (argc < 18)
+    {
+        printf("Incorrect number of input arguments!\nProgram Terminated");
+        
+        return -1;
+    };
+    
+    spa.year          = atoi(argv[1]);
+    spa.month         = atoi(argv[2]);
+    spa.day           = atoi(argv[3]);
+    spa.hour          = atoi(argv[4]);
+    spa.minute        = atoi(argv[5]);
+    spa.second        = atof(argv[6]);
+    spa.timezone      = atof(argv[7]);
+    spa.delta_ut1     = atof(argv[8]);
+    spa.delta_t       = atof(argv[9]);
+    spa.longitude     = atof(argv[10]);
+    spa.latitude      = atof(argv[11]);
+    spa.elevation     = atof(argv[12]);
+    spa.pressure      = atof(argv[13]);
+    spa.temperature   = atof(argv[14]);
+    spa.slope         = atof(argv[15]);
+    spa.azm_rotation  = atof(argv[16]);
+    spa.atmos_refract = atof(argv[17]);
+    spa.function      = atof(argv[18]);
+
+    // spa.year          = 2022;
+    // spa.month         = 7;
+    // spa.day           = 1;
+    // spa.hour          = 12;
+    // spa.minute        = 30;
+    // spa.second        = 30;
+    // spa.timezone      = 2.0;
+    // spa.delta_ut1     = 0;
+    // spa.delta_t       = 67;
+    // spa.longitude     = 4.3;
+    // spa.latitude      = 51.98;
+    // spa.elevation     = 1000;
+    // spa.pressure      = 1015.3;
+    // spa.temperature   = 25;
+    // spa.slope         = 0;
+    // spa.azm_rotation  = 0;
+    // spa.atmos_refract = 0.5667;
+    // spa.function      = SPA_ZA_INC;
 
     //call the SPA calculate function and pass the SPA structure
 
@@ -63,25 +91,25 @@ int main (int argc, char *argv[])
     {
         //display the results inside the SPA structure
 
-        printf("Julian Day:    %.6f\n",spa.jd);
-        printf("L:             %.6e degrees\n",spa.l);
-        printf("B:             %.6e degrees\n",spa.b);
-        printf("R:             %.6f AU\n",spa.r);
-        printf("H:             %.6f degrees\n",spa.h);
-        printf("Delta Psi:     %.6e degrees\n",spa.del_psi);
-        printf("Delta Epsilon: %.6e degrees\n",spa.del_epsilon);
-        printf("Epsilon:       %.6f degrees\n",spa.epsilon);
-        printf("Zenith:        %.6f degrees\n",spa.zenith);
-        printf("Azimuth:       %.6f degrees\n",spa.azimuth);
-        printf("Incidence:     %.6f degrees\n",spa.incidence);
+        // printf("Julian Day:    %.6f\n",spa.jd);
+        // printf("L:             %.6e degrees\n",spa.l);
+        // printf("B:             %.6e degrees\n",spa.b);
+        // printf("R:             %.6f AU\n",spa.r);
+        // printf("H:             %.6f degrees\n",spa.h);
+        // printf("Delta Psi:     %.6e degrees\n",spa.del_psi);
+        // printf("Delta Epsilon: %.6e degrees\n",spa.del_epsilon);
+        // printf("Epsilon:       %.6f degrees\n",spa.epsilon);
+        // printf("Zenith:        %.6f degrees\n",spa.zenith);
+        // printf("Azimuth:       %.6f degrees\n",spa.azimuth);
+        // printf("Incidence:     %.6f degrees\n",spa.incidence);
 
-        min = 60.0*(spa.sunrise - (int)(spa.sunrise));
-        sec = 60.0*(min - (int)min);
-        printf("Sunrise:       %02d:%02d:%02d Local Time\n", (int)(spa.sunrise), (int)min, (int)sec);
+        // min = 60.0*(spa.sunrise - (int)(spa.sunrise));
+        // sec = 60.0*(min - (int)min);
+        // printf("Sunrise:       %02d:%02d:%02d Local Time\n", (int)(spa.sunrise), (int)min, (int)sec);
 
-        min = 60.0*(spa.sunset - (int)(spa.sunset));
-        sec = 60.0*(min - (int)min);
-        printf("Sunset:        %02d:%02d:%02d Local Time\n", (int)(spa.sunset), (int)min, (int)sec);
+        // min = 60.0*(spa.sunset - (int)(spa.sunset));
+        // sec = 60.0*(min - (int)min);
+        // printf("Sunset:        %02d:%02d:%02d Local Time\n", (int)(spa.sunset), (int)min, (int)sec);
 
     } else printf("SPA Error Code: %d\n", result);
 

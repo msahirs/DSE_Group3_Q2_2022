@@ -50,8 +50,8 @@ ax.legend(
 )
 ax.set_title(f"Longitude: {lon}, Latitude: {lat}")
 ax.set_xscale("log")
-ax.set_xlim(1e8, 1e18)
-ax.set_ylim(0, 1000)
+ax.set_xlim(1e8, 1e25)
+ax.set_ylim(0, 200)
 ax.set_xlabel("Number density (/m$^3$)")
 ax.set_ylabel("Altitude (km)")
 
