@@ -151,7 +151,7 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     [[xlist], [ylist]
     """
     y_list = np.linspace(altitude_ground, altitude_balloon, nodes)  # using bottem as well
-    x_list = np.zeros(y_list.shape)
+    x_list = y_list #np.zeros(y_list.shape)
     coords = np.array([x_list, y_list])
     return coords
 
@@ -209,7 +209,7 @@ def split_eq_equation(K, U, R, P, DOF=2):
     return split
 
 
-def gen_stiffness_matrix_element(begin_coords, end_coords, E = 1e+9, A = 0.0001):
+def gen_stiffness_matrix_element(begin_coords, end_coords, E = 8e+3, A = 20000):
     """
     :param E: E-mod
     :param A: cross Area
@@ -240,7 +240,7 @@ def make_global_stiffness_matrix(list_of_matrix_elements):
 
 
 def get_wind_force():
-    return 60  # N
+    return 60 # N
 
 
 def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81)):
@@ -277,14 +277,13 @@ def make_load_vector(coords, material="uhmpe", balloon_forces=(4000, 1500 * 9.81
     return load_vector
 
 def sequential_element_matrices(coords):
-    '''
+    """
     Connect the nodes of a tether, one long sequence from top to bottom
     :param coords: array with shape (# of dimensions, # of nodes)
     :return: list of stiffness matrices of all tether elements
-    '''
+    """
     element_matrices = []
     for i in range(coords.shape[1] - 1):
-        print(coords[:, i], coords[:, i + 1])
         matrix = gen_stiffness_matrix_element(coords[:, i], coords[:, i + 1])
         element_matrices.append(matrix)
     return element_matrices
@@ -299,14 +298,18 @@ def plot_displacements(mesh, displacements):
     plt.legend()
     plt.show()
 
-nodes = 3
+nodes = 2
 dof = 2
 
-coordlst = create_mesh(nodes, altitude_balloon=6)
+coordlst = np.array([[0,1,2],[0,1,0]]) #create_mesh(nodes, altitude_balloon=6)
+# matrix = gen_stiffness_matrix_element([1,0], [1,1])
+# coordlst.append(matrix)
+# matrix = gen_stiffness_matrix_element([0,0], [1,1])
+# coordlst.append(matrix)
 el_matrices = sequential_element_matrices(coordlst)
 print(el_matrices)
 stiff_matrix = make_global_stiffness_matrix(el_matrices)
-print(stiff_matrix)
+print("this one", stiff_matrix)
 
 
 U = np.zeros(dof * nodes)
@@ -314,6 +317,7 @@ P = np.ones(dof * nodes)
 R = np.zeros(dof * nodes)
 
 split_vars = split_eq_equation(stiff_matrix, U, R, P, dof)
+print("nope this one", split_vars['Kr'])
 split_vars['Ur'] = np.linalg.inv(split_vars['Kr']).dot(split_vars['Pr'])
 split_vars['Rs'] = split_vars['Ksr'].dot(split_vars['Ur']) - split_vars['Ps']
 
