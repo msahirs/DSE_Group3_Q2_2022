@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added inductive losses to the corona discharge losses file" />
+    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added inductive losses to the corona discharge losses file">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Corona_discharge_Losses_Calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona_discharge_Losses_Calculator.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -30,7 +33,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RunManager">
-    <configuration name="Corona discharge Losses Calculator" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+    <configuration name="Corona discharge Losses Calculator" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
