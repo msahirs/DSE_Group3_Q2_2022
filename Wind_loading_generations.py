@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from ISA_general import ISA
 from math import *
+import scipy as sc
 
 r = 0.01  # m
 cd = 1  # -

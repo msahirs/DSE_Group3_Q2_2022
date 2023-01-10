@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import Wind_loading_generations as Wind_l
 
-
-nodes = 30
+nodes = 50
 h_balloon = 20000  # m
 h_ground = 0  # m
 L = 100000  # N
@@ -16,7 +16,7 @@ rho = 0.5  # kg/m^3
 E = 100e9  # Pa
 g = 9.8  # m/s
 C = 100  # Ns/m
-wind_profile_select = 1
+wind_profile_select = 4
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -25,7 +25,7 @@ Fx = np.zeros(nodes)  # sum of x forces on node
 Fy = np.zeros(nodes)  # sum of y forces on node
 vx = np.zeros(nodes)  # node velocity
 vy = np.zeros(nodes)
-ax = np.zeros(nodes)   # node acceleration
+ax = np.zeros(nodes)  # node acceleration
 ay = np.zeros(nodes)
 
 # Initiate segments
@@ -46,24 +46,24 @@ W = m * g
 
 t = 0
 dt = 0.001
-t_end = 500
+t_end = 250
 
 # Calculate wind force
 wind_speed = Wind_l.wind_profile(y, wind_profile_select)
 Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0)
 
 counter = 0
-while t < t_end: # and np.any(abs(ax) > 0.1):
+while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
     t += dt
     counter += 1
-    if counter%10000==0:
+    if counter % 10000 == 0:
         print(f"Has run {counter} loops")
     # print(t)
 
     # Calculate tension forces in all segments
     for seg in range(segments):
-        if (y[seg + 1] - y[seg]) == 0:
-            print("please god help")
+        # if (y[seg + 1] - y[seg]) == 0:
+        #         print("please god help")
         # if (x[seg + 1] - x[seg]) == 0:
         #     print("please god help")
         T[seg] = crossA * E / L0 * (np.sqrt((y[seg + 1] - y[seg]) ** 2 + (x[seg + 1] - x[seg]) ** 2) - L0)
@@ -109,5 +109,10 @@ print('ax,ay = ', ax, ay)
 print('x,y = ', x, y)
 # print(theta)
 
-plt.plot(x, y)
+plt.plot(x, y, label="Tether")
+plt.plot(x[-1], y[-1], label="Balloon", c="black", marker=".", markersize=10)
+plt.xlabel("Horizontal distance [meters]")
+plt.ylabel("Altitude [meters]")
+plt.legend()
+plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]")
 plt.show()
