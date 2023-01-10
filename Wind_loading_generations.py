@@ -6,6 +6,24 @@ from math import *
 r = 0.01  # m
 cd = 1  # -
 
+def wind_model(h):
+    dataset = np.array([[0, 11],
+                        [2500, 15],
+                        [5000, 29],
+                        [7500, 41],
+                        [10000, 51],
+                        [12000, 43],
+                        [13500, 32],
+                        [16000, 20],
+                        [17000, 11],
+                        [20000, 9],
+                        [23000, 11],
+                        [25500, 15]])
+
+    y = dataset[:,1]  # wind speed
+    x = dataset[:,0]  # altitude
+    windspeed_from_alt = sc.interpolate.interp1d(x,y,kind='quadratic')
+    return windspeed_from_alt(h)
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -37,6 +55,10 @@ def wind_profile(heights, select=1, plot=True):
         a, b, c = 10, 2, 0
         for numb, item in enumerate(heights):
             wind_speed_array[numb] = a * item * item + b * item + c  # m/s
+
+    if select == 4:
+        "quadratic spline interpolated wind profile"
+        wind_speed_array = wind_model(heights)
 
     elif type(select) != int:
         degree = int(input("What degree is needed?\t\tAssume shape a*x^n + b*x^(n-1) + ....\n"))
