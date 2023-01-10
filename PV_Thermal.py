@@ -3,15 +3,16 @@ import numpy as np
 import math
 import ISA_general
 import datetime
+import PVIV
 
 # Input Values
 L_charac = 52           # Characteristic length [m]
 A = 2700                # Area of solar cell configuration [m^2]
 h = 20000.0             # Height [m]
-v_wind = 10             # Wind speed [m/s]
+v_wind = 5              # Wind speed [m/s]
 albedo = 0.1            # Earth's albedo [-]
 # I_sun = 1353            # Incident solar intensity [W/m^2]
-step = 72000            # Step size
+step = 7200            # Step size
 
 # Constants
 Cp = 1005                   # Specific heat capacity of air [J/kg/K]
@@ -36,15 +37,13 @@ k_cfrp_ver = 3              # Conductivity (ver) of CFRP [W/m/K]
 epsilon_cfrp = 0.88         # CFRP emission coefficient [-]
 
 # General Calculations
-print("Temperature, pressure, density and dynamic viscosity at set altitude:\n")
-
 T_air, P, rho, mu = ISA_general.ISA(h)
 nu = mu / rho               # Kinematic viscosity [m^2/s]
 Pr = mu * Cp / k            # Prantl number [-]
 alpha = k / rho / Cp        # Thermal diffusivity of air [m^2/s]
 beta = 1 / T_air            # Thermal expansion coefficient [1/K] (approx)
 
-# Data initialization
+# Data initialization (temporary)
 tstep_list = []
 tstep = math.floor(step / 24)
 for i in range(0, step, tstep):
@@ -52,7 +51,7 @@ for i in range(0, step, tstep):
 
 I_list = [0, 0, 0, 26, 109, 230, 365, 499, 615, 704, 761, 770, 740, 670, 544, 434, 304, 167, 49, 3, 0, 0, 0, 0]
 n_list = np.arange(step)
-I_new = np.interp(n_list, tstep_list, I_list)
+I_new = 1.6*np.interp(n_list, tstep_list, I_list)
 
 # Initializing
 dt = 1
@@ -125,9 +124,10 @@ max_index = np.argmax(T_list)
 print("\nMax temperature: ", T_list[max_index])
 print("At this point in time the heat balance consists of:")
 print(round(q_abs_list[max_index]), "Watts absorbed")
-print(round(q_forced_conv_list[max_index]), "Watts released trough forced conv")
-print(round(q_free_conv_list[max_index]), "Watts released trough free conv")
-print(round(q_emission_list[max_index]), "Watts released through radiation")
+print(round(q_forced_conv_list[max_index]), "Watts released trough forced conv", round(q_forced_conv_list[max_index]/q_abs_list[max_index],2), "%")
+print(round(q_free_conv_list[max_index]), "Watts released trough free conv", round(q_free_conv_list[max_index]/q_abs_list[max_index],2), "%")
+print(round(q_emission_list[max_index]), "Watts released through radiation", round(q_emission_list[max_index]/q_abs_list[max_index],2), "%")
+
 
 # Plotting
 fig, ax1 = plt.subplots()
@@ -155,4 +155,16 @@ for i in range(len(labels)):
 plt.xticks(tstep_list[initial_time::div], labels)
 
 fig.tight_layout()
+
+print("\nRelative efficiency is:", (100+PVIV.iv(T_list[max_index])[0])/100)
+
+Power_list = []
+for i in range(len(T_list)):
+    if I_new[i] > 0:
+        Power_list.append(I_new[i] * (100 + PVIV.iv(T_list[i])[0])/100)
+    else:
+        Power_list.append(0)
+
+color = 'tab:red'
+ax2.plot(t_list, Power_list, color=color)
 plt.show()
