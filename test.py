@@ -1,21 +1,38 @@
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
 import numpy as np
-from Wire_loading import split_eq_equation
 
-a = np.array([[0,1,2,3,4],[5,6,7,8,9],[3,9,2,7,4]])
-b = np.where(a>4,a,0)
+# creating a blank window
+# for the animation
+fig = plt.figure()
+axis = plt.axes(xlim=(0, 5),
+                ylim=(0, 5))
 
-K = np.array([[1,5,3,6],[9,3,7,1],[0,4,2,0],[5,3,9,8]])
-P = np.ones(4)
-R = np.zeros(4)
-U = np.zeros(4)
+line, = axis.plot([], [], lw=2)
 
-split_vars = split_eq_equation(K, U, R, P)
-print(split_vars['Kr'], split_vars['Pr'])
-split_vars['Ur'] = np.linalg.inv(split_vars['Kr']).dot(split_vars['Pr'])
-split_vars['Rs'] = split_vars['Ksr'].dot(split_vars['Ur']) - split_vars['Ps']
 
-print("Try:", split_vars['Ur'], split_vars['Rs'])
+# what will our line dataset
+# contain?
+def init():
+    line.set_data([], [])
+    return line,
 
-# tup = split_eq_equation(K,U,R,P)
-# print(K)
-# print(tup)
+
+# initializing empty values
+# for x and y co-ordinates
+xdata, ydata = [], []
+
+xlist = [[0, 1, 2], [1, 2, 3], [2, 3, 4]]
+ylist = [[0, 1, 2], [1, 2, 3], [2, 3, 4]]
+
+# animation function
+def animate(i):
+    line.set_data(xlist[i], ylist[i])
+
+    return line,
+
+
+# calling the animation function
+anim = animation.FuncAnimation(fig, animate, init_func=init,
+                               frames=3, interval=200, blit=False)
+plt.show()

@@ -3,7 +3,35 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import Wind_loading_generations as Wind_l
 
-nodes = 5
+
+def plot_response(x, y):
+    plt.clf()
+    plt.plot(x, y, label="Tether")
+    plt.plot(x[-1], y[-1], label="Balloon", c="black", marker=".", markersize=10)
+    plt.xlabel("Horizontal distance [meters]")
+    plt.ylabel("Altitude [meters]")
+    plt.legend()
+    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]")
+    plt.show()
+
+
+def init():
+    line.set_data([], [])
+    balloon.set_data([], [])
+    return line, balloon,
+
+
+def animate(i):
+    x = xlist[i]
+    y = ylist[i]
+    balloon_x = xlist[i][-1]
+    balloon_y = ylist[i][-1]
+    line.set_data(x, y)  # update the data.
+    balloon.set_data(balloon_x, balloon_y)
+    return line, balloon,
+
+
+nodes = 50
 h_balloon = 20000  # m
 h_ground = 0  # m
 L = 100000  # N
@@ -17,7 +45,7 @@ E = 100e9  # Pa
 g = 9.8  # m/s
 C = 100  # Ns/m
 wind_profile_select = 4
-plot_wind = True
+plot_wind = False
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -47,13 +75,19 @@ W = m * g
 
 t = 0
 dt = 0.001
-t_end = 250
+t_end = 5
 
+# plot_response(x, y)
+xlist = x
+ylist = y
 
 counter = 0
 while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
     t += dt
     counter += 1
+    if counter % 1000 == 0:
+        xlist = np.vstack([xlist, x])
+        ylist = np.vstack([ylist, y])
     if counter % 10000 == 0:
         print(f"Has run {counter} loops")
     # print(t)
@@ -102,20 +136,26 @@ while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
 
     x[0] = 0
     y[0] = h_ground
-    plot_wind=False
+    plot_wind = False
 
-print('Fx,Fy = ', Fx, Fy)
-# print(T)
-# print(T/(crossA * E / L0) + L0)
-print(T / crossA)
-print('ax,ay = ', ax, ay)
-print('x,y = ', x, y)
-# print(theta)
+fig = plt.figure()
 
-plt.plot(x, y, label="Tether")
-plt.plot(x[-1], y[-1], label="Balloon", c="black", marker=".", markersize=10)
-plt.xlabel("Horizontal distance [meters]")
-plt.ylabel("Altitude [meters]")
-plt.legend()
-plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]")
+title = f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]," \
+        f" animated for {t_end} [sec]"
+axis = plt.axes(xlim=(-100, 10000), xlabel="Horizontal distance [meters]",
+                ylim=(0, 25000), ylabel="Altitude [meters]", title=title)
+line, = axis.plot([], [], lw=2, label="Tether", c="blue")
+balloon, = axis.plot([], [], marker='.', label="Balloon", c="gray", markersize=10)
+legend = plt.legend()
+
+# plot_response(x, y)
+ani = animation.FuncAnimation(fig, animate, frames=int((len(xlist))), interval=20, blit=True, save_count=50)
 plt.show()
+
+# print('Fx,Fy = ', Fx, Fy)
+# # print(T)
+# # print(T/(crossA * E / L0) + L0)
+# print(T / crossA)
+# print('ax,ay = ', ax, ay)
+# print('x,y = ', x, y)
+# print(theta)
