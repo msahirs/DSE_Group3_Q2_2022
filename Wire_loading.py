@@ -125,7 +125,7 @@ class atmosphere():
 # s_b - characteristic area of the balloon, phi-angle between wind direction and x-axis
 def balloon_tension(phi, density_hydrogen, h):
 
-    Balloon = balloon(1, 2, 3, 4)  ##placeholder values
+    Balloon = balloon(0, 0, 0, 0)  ##placeholder values, check before using!
     q_b = Balloon.q_balloon
     s_b = Balloon.ch_area
     lift_balloon_force = q_b * s_b * Balloon.lift_coeff
