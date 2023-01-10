@@ -1,5 +1,4 @@
 import numpy as np
-import csv
 import os
 
 curr_dir = os.getcwd()
@@ -28,13 +27,11 @@ main_data = np.tile(ref_angle_inp, (sweep_params.shape[0],1))
 main_data[:,1] = sweep_params[:,0]
 main_data[:,10] = sweep_params[:,1]
 
-print(os.path.join(curr_dir,"data"))
 
 if not os.path.exists(os.path.join(curr_dir,"data")):
     os.mkdir("data")
 
-
-np.savetxt("./data/sweep_parameters.csv", main_data, fmt = "%.1e", delimiter= ","
+np.savetxt("./data/sweep_parameters.csv", main_data, fmt = "%.2f", delimiter= ","
             , header=','.join(REF_ANGLE_HEADERS))
 
 

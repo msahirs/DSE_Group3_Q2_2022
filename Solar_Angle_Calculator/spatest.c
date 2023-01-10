@@ -35,12 +35,15 @@ int main (int argc, char *argv[])
     int result;
     float min, sec;
 
+    int REQ_ARGS = 18;
+
     //enter required input values into SPA structure
     // &argv[1] -> spa.year;
 
-    if (argc < 18)
+    if (argc < REQ_ARGS)
     {
-        printf("Incorrect number of input arguments!\nProgram Terminated");
+        printf("Incorrect number of input arguments! Expected %2d,\
+                got%2d\n\nProgram Terminated", REQ_ARGS, argc - 1);
         
         return -1;
     };
@@ -91,17 +94,17 @@ int main (int argc, char *argv[])
     {
         //display the results inside the SPA structure
 
-        // printf("Julian Day:    %.6f\n",spa.jd);
-        // printf("L:             %.6e degrees\n",spa.l);
-        // printf("B:             %.6e degrees\n",spa.b);
-        // printf("R:             %.6f AU\n",spa.r);
-        // printf("H:             %.6f degrees\n",spa.h);
-        // printf("Delta Psi:     %.6e degrees\n",spa.del_psi);
-        // printf("Delta Epsilon: %.6e degrees\n",spa.del_epsilon);
-        // printf("Epsilon:       %.6f degrees\n",spa.epsilon);
-        // printf("Zenith:        %.6f degrees\n",spa.zenith);
-        // printf("Azimuth:       %.6f degrees\n",spa.azimuth);
-        // printf("Incidence:     %.6f degrees\n",spa.incidence);
+        printf("Julian Day:    %.6f\n",spa.jd);
+        printf("L:             %.6e degrees\n",spa.l);
+        printf("B:             %.6e degrees\n",spa.b);
+        printf("R:             %.6f AU\n",spa.r);
+        printf("H:             %.6f degrees\n",spa.h);
+        printf("Delta Psi:     %.6e degrees\n",spa.del_psi);
+        printf("Delta Epsilon: %.6e degrees\n",spa.del_epsilon);
+        printf("Epsilon:       %.6f degrees\n",spa.epsilon);
+        printf("Zenith:        %.6f degrees\n",spa.zenith);
+        printf("Azimuth:       %.6f degrees\n",spa.azimuth);
+        printf("Incidence:     %.6f degrees\n",spa.incidence);
 
         // min = 60.0*(spa.sunrise - (int)(spa.sunrise));
         // sec = 60.0*(min - (int)min);
