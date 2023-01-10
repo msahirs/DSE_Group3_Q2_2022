@@ -94,30 +94,25 @@ int main (int argc, char *argv[])
     {
         //display the results inside the SPA structure
 
-        printf("%.6f ",spa.jd); //Julian Day
-        printf("%.6e ",spa.l); //L
-        printf("%.6e ",spa.b); //B
-        printf("%.6f ",spa.r); //R
-        printf("%.6f ",spa.h); //H
-        printf("%.6e ",spa.del_psi); //Delta PSI
-        printf("%.6e ",spa.del_epsilon); //Delta Epsilon
-        printf("%.6f ",spa.epsilon); //Epsilon
-        printf("%.6f ",spa.zenith); //Zenith
-        printf("%.6f ",spa.azimuth_astro); //Azimuth
-        printf("%.6f ",spa.incidence); //Incidence
-        printf("%.6f ",spa.del_e); //zenith refraction correction
+        printf("Julian Day:    %.6f\n",spa.jd);
+        printf("L:             %.6e degrees\n",spa.l);
+        printf("B:             %.6e degrees\n",spa.b);
+        printf("R:             %.6f AU\n",spa.r);
+        printf("H:             %.6f degrees\n",spa.h);
+        printf("Delta Psi:     %.6e degrees\n",spa.del_psi);
+        printf("Delta Epsilon: %.6e degrees\n",spa.del_epsilon);
+        printf("Epsilon:       %.6f degrees\n",spa.epsilon);
+        printf("Zenith:        %.6f degrees\n",spa.zenith);
+        printf("Azimuth:       %.6f degrees\n",spa.azimuth);
+        printf("Incidence:     %.6f degrees\n",spa.incidence);
 
-        /*
-        min = 60.0*(spa.sunrise - (int)(spa.sunrise));
-        sec = 60.0*(min - (int)min);
-        printf("%02d:%02d:%02d ", (int)(spa.sunrise), (int)min, (int)sec); //Sunrise
+        // min = 60.0*(spa.sunrise - (int)(spa.sunrise));
+        // sec = 60.0*(min - (int)min);
+        // printf("Sunrise:       %02d:%02d:%02d Local Time\n", (int)(spa.sunrise), (int)min, (int)sec);
 
-        min = 60.0*(spa.sunset - (int)(spa.sunset));
-        sec = 60.0*(min - (int)min);
-        printf("%02d:%02d:%02d ", (int)(spa.sunset), (int)min, (int)sec); //Sunset
-        */
-
-        printf("\n");
+        // min = 60.0*(spa.sunset - (int)(spa.sunset));
+        // sec = 60.0*(min - (int)min);
+        // printf("Sunset:        %02d:%02d:%02d Local Time\n", (int)(spa.sunset), (int)min, (int)sec);
 
     } else printf("SPA Error Code: %d\n", result);
 

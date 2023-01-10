@@ -122,14 +122,14 @@ class solar_atmosphere(object):
 a = solar_atmosphere()
 
 omega = math.radians(90-29.05)
-beta = math.radians(29.05)
+beta = math.radians(0.0)
 theta = math.radians(0.0)
 
 a.set_angles(omega,theta,beta)
 
 a.set_pressure_ratio(1)
 
-a.set_day(350)
+a.set_day(206)
 
 b = a.get_total_radiance()
 
