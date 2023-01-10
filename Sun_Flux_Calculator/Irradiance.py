@@ -80,7 +80,6 @@ class solar_atmosphere(object):
         solar_sum = self.get_direct_radiance() + self.get_diffuse_radiance() \
                                         + self.get_reflect_radiance()
         
-
         return solar_sum
 
     def calc_direct_flux(self):
@@ -109,8 +108,9 @@ class solar_atmosphere(object):
 
         mean_anomaly = self.calc_mean_anomaly()
 
-        true_anomaly = mean_anomaly + 2 * self.EARTH_ECC * math.sin(mean_anomaly) \
-                        + 1.25 * (self.EARTH_ECC ** 2) * math.sin(2 * mean_anomaly)
+        true_anomaly = mean_anomaly + (2 * self.EARTH_ECC - 0.25*self.EARTH_ECC**3) * math.sin(mean_anomaly) \
+                        + 1.25 * (self.EARTH_ECC ** 2) * math.sin(2 * mean_anomaly) + (13/12) * (self.EARTH_ECC**3)\
+                            * math.sin(3*mean_anomaly)
 
         return true_anomaly
 
@@ -121,15 +121,15 @@ class solar_atmosphere(object):
 
 a = solar_atmosphere()
 
-omega = math.radians(90-29.05)
-beta = math.radians(0.0)
-theta = math.radians(0.0)
+omega = math.radians(90-6.814)
+beta = math.radians(180+6.814)
+theta = math.radians(180)
 
 a.set_angles(omega,theta,beta)
 
-a.set_pressure_ratio(1)
+a.set_pressure_ratio(0.054)
 
-a.set_day(206)
+a.set_day(172)
 
 b = a.get_total_radiance()
 
