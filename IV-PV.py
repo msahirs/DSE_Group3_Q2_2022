@@ -1,16 +1,16 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# Values (based on Azurspace 80 micron)
+# Values (based on V1.0)
 V_oc = 2700  # mV
-I_sc = 520.2  # mA
+I_sc = 2160  # mA
 V_mp = 2411  # mV
-I_mp = 504.4  # mA
+I_mp = 1964  # mA
 
 d_V_oc = -6.2  # mV/K
-d_I_sc = 0.36  # mA/K
+d_I_sc = 1.19  # mA/K
 d_V_mp = -6.7  # mV/K
-d_I_mp = 0.24  # mA/K
+d_I_mp = 0.79  # mA/K
 
 # Standard curves
 C2 = (V_mp / V_oc - 1) / (np.log(1 - I_mp / I_sc))
@@ -63,7 +63,7 @@ plt.title('I-V curve')
 plt.ylim(0, I_sc * 1.05)
 plt.xlim(0, V_oc * 1.05)
 plt.plot(V_list, I_list, color='b', label='28 °C')
-plt.plot(a, b, color='r', label=str(T_new) + ' °C')
+#plt.plot(a, b, color='r', label=str(T_new) + ' °C')
 plt.legend()
 # Plot PV
 plt.figure(2)
@@ -73,7 +73,9 @@ plt.title('P-V curve')
 plt.ylim(0, np.amax(P_list) * 1.05)
 plt.xlim(0, V_oc * 1.05)
 plt.plot(V_list, P_list, color='b', label='28 °C')
-plt.plot(a, c, color='r', label=str(T_new) + ' °C')
+#plt.plot(a, c, color='r', label=str(T_new) + ' °C')
 plt.legend()
-
+print((np.amax(c) - np.amax(P_list)) / np.amax(P_list) *100, '% loss')
+print(np.amax(P_list),  'mw/cell')
+print(np.amax(c), 'mw/cell')
 plt.show()
