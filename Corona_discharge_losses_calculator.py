@@ -14,13 +14,13 @@ g0 = 21.1   #[KV/cm] Disruptive Gradient in Air
 kd = 0.2      #Normalized air density factor (25 deg C, 76 cm pressure)
 a  = 1    #[cm] effective(?) radius of conductor
 d  = 5000   #[cm] Conductor Spacing
-f  = 1     #[Hz] Frequency
+f  = 5000        #[Hz] Frequency
 ki = 0.95   #Wire irregularity factor
 #V0 = 442     #[KV] Line voltage to neutral
 #V0 = np.arange(0, 600, 0.5)
 
 DCV = g0*ki*a*kd*np.log(d/a) #KV
-V_design = DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
+V_design = 180 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
 
 P_loss = (k0/kd)*(f+25)*math.sqrt(a/d)*(V_design-g0*ki*a*kd*np.log(d/a))**2*10**-5
 Amp_wire = P_design / (1000*V_design) #A
