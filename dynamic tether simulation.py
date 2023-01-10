@@ -1,7 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import Wind_loading_generations as Wind_l
 
 
 nodes = 30
@@ -31,11 +30,10 @@ ay = np.zeros(nodes)
 
 # Initiate segments
 segments = nodes - 1
-L0 = (h_balloon - h_ground) / (segments)  # length of a segment
+L0 = (h_balloon - h_ground) / segments  # length of a segment
 crossA = r ** 2 * np.pi  # m^2
 S_front = 2 * r * L0
-tantheta = np.zeros(segments)
-theta = np.arctan(tantheta)
+theta = np.arctan(np.zeros(segments))
 T = np.zeros(segments)
 
 # Initiate node mass and weight (first and last node have half the mass of the rest)

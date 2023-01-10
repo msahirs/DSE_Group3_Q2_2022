@@ -3,22 +3,28 @@ from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.pipeline import make_pipeline
 import matplotlib.pyplot as plt
 import numpy as np
+import scipy as sc
 
 # pink line
-dataset = np.array([[2500, 15],
-                    [5000, 29],
-                    [7500, 41],
-                    [10000, 51],
-                    [12000, 43],
-                    [13500, 32],
-                    [16000, 20],
-                    [17000, 11],
-                    [20000, 9],
-                    [23000, 11],
-                    [25500, 15]])
+def wind_model(h):
+    dataset = np.array([[0, 11],
+                        [2500, 15],
+                        [5000, 29],
+                        [7500, 41],
+                        [10000, 51],
+                        [12000, 43],
+                        [13500, 32],
+                        [16000, 20],
+                        [17000, 11],
+                        [20000, 9],
+                        [23000, 11],
+                        [25500, 15]])
 
-y = dataset[:,1]  # wind speed
-x = dataset[:,0]  # altitude
+    y = dataset[:,1]  # wind speed
+    x = dataset[:,0]  # altitude
+    f = sc.interpolate.interp1d(x,y,kind='quadratic')
+    return f(h)
+
 # degrees = [3, 4, 5, 6, 7, 8, 9, 10]
 # for degree in degrees:
 #     model = make_pipeline(PolynomialFeatures(degree), Ridge(alpha=1e-3))
@@ -45,7 +51,11 @@ x = dataset[:,0]  # altitude
     # # plt.plot(xvalues, yvalues)
     # print(coeff)
 
-plt.scatter(x, y)
-plt.legend()
-
-plt.show()
+# xrange = np.arange(0,25001, 100)
+# yinter = f(xrange)
+#
+# plt.scatter(x, y)
+# plt.plot(xrange,yinter)
+# plt.legend()
+#
+# plt.show()
