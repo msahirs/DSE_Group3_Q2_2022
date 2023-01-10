@@ -9,7 +9,7 @@ cd = 1  # -
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
-    create mesh for the wire
+    create mesh for the wire if needed
     [[xlist], [ylist]
     """
     y_list = np.linspace(altitude_ground, altitude_balloon, nodes)  # using bottem as well
@@ -20,7 +20,6 @@ def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
 
 def wind_profile(heights, select=1, plot=True):
     wind_speed_array = np.zeros(heights.shape)  # right is positive
-    print(heights)
     if select == 1:
         "uniform wind"
         for numb, item in enumerate(heights):
@@ -68,8 +67,7 @@ def show_wind_profile(x, y):
     plt.show()
 
 
-def calc_drag_on_wire(mesh, wind_profile, length_of_element):
-    x, y = mesh[0], mesh[1]
+def calc_drag_on_wire(x, y, wind_profile, length_of_element):
     drag_on_wire = []
     # for element_numb in range(len(mesh[0]) - 1):
     #     # calc angle between mesh point
@@ -85,8 +83,9 @@ def calc_drag_on_wire(mesh, wind_profile, length_of_element):
     return drag_on_wire
 
 
-mesh = create_mesh(500)
-config = 2
-drag_on_wire = calc_drag_on_wire(mesh, wind_profile(mesh[1], config), mesh[1][1])
-print(drag_on_wire)
-print(sum(drag_on_wire))
+# mesh = create_mesh(500)
+# x, y = mesh[0], mesh[1]
+# config = 2
+# drag_on_wire = calc_drag_on_wire(x, y, wind_profile(mesh[1], config), mesh[1][1])
+# print(drag_on_wire)
+# print(sum(drag_on_wire))

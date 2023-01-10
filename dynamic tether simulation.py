@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import Wind_loading_generations as Wind_l
 
 
 nodes = 30
@@ -16,20 +17,21 @@ rho = 0.5  # kg/m^3
 E = 100e9  # Pa
 g = 9.8  # m/s
 C = 100  # Ns/m
+wind_profile_select = 1
 
 # Initiate nodes
-y = np.linspace(h_ground, h_balloon, nodes)
-x = np.zeros(nodes)
-Fx = np.zeros(nodes)
-Fy = np.zeros(nodes)
-vx = np.zeros(nodes)
+y = np.linspace(h_ground, h_balloon, nodes)  # altitude
+x = np.zeros(nodes)  # x pos
+Fx = np.zeros(nodes)  # sum of x forces on node
+Fy = np.zeros(nodes)  # sum of y forces on node
+vx = np.zeros(nodes)  # node velocity
 vy = np.zeros(nodes)
-ax = np.zeros(nodes)
+ax = np.zeros(nodes)   # node acceleration
 ay = np.zeros(nodes)
 
 # Initiate segments
 segments = nodes - 1
-L0 = (h_balloon - h_ground) / (segments)
+L0 = (h_balloon - h_ground) / (segments)  # length of a segment
 crossA = r ** 2 * np.pi  # m^2
 S_front = 2 * r * L0
 tantheta = np.zeros(segments)
@@ -49,12 +51,16 @@ dt = 0.001
 t_end = 500
 
 # Calculate wind force
-Fwind = Cd * 0.5 * rho * wind ** 2 * S_front
-print('Fwind = ', Fwind)
+wind_speed = Wind_l.wind_profile(y, wind_profile_select)
+Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0)
 
+counter = 0
 while t < t_end: # and np.any(abs(ax) > 0.1):
     t += dt
-    print(t)
+    counter += 1
+    if counter%10000==0:
+        print(f"Has run {counter} loops")
+    # print(t)
 
     # Calculate tension forces in all segments
     for seg in range(segments):
@@ -73,12 +79,12 @@ while t < t_end: # and np.any(abs(ax) > 0.1):
     Fresy = C * vy
 
     # Calculate total forces on all nodes
-    Fx[0] = Tx[0] + Fwind / 2 - Fresx[0]
+    Fx[0] = Tx[0] + Fwind[0] / 2 - Fresx[0]
     Fy[0] = Ty[0] - W[0] - Fresy[0]
     for node in range(1, nodes - 1):
-        Fx[node] = Tx[node] - Tx[node - 1] + Fwind - Fresx[node]
+        Fx[node] = Tx[node] - Tx[node - 1] + Fwind[node] - Fresx[node]
         Fy[node] = Ty[node] - Ty[node - 1] - W[node] - Fresy[node]
-    Fx[-1] = D + Fwind / 2 - Tx[-1] - Fresx[-1]
+    Fx[-1] = D + Fwind[-1] / 2 - Tx[-1] - Fresx[-1]
     Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1]
 
     ax[1:] = Fx[1:] / m[1:] * min(t, 1)
