@@ -3,20 +3,21 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import Wind_loading_generations as Wind_l
 
-nodes = 50
+nodes = 5
 h_balloon = 20000  # m
 h_ground = 0  # m
 L = 100000  # N
 D = 200  # N
-density = 1000  # kg/m^3
+density = 1000  # tether-  kg/m^3
 r = 0.01  # m
-wind = 20  # m/s
-Cd = 1.2
+wind = 20  # uniform wind m/s
+Cd = 1.2  # tether drag coeff
 rho = 0.5  # kg/m^3
 E = 100e9  # Pa
 g = 9.8  # m/s
 C = 100  # Ns/m
 wind_profile_select = 4
+plot_wind = True
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -48,9 +49,6 @@ t = 0
 dt = 0.001
 t_end = 250
 
-# Calculate wind force
-wind_speed = Wind_l.wind_profile(y, wind_profile_select)
-Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0)
 
 counter = 0
 while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
@@ -71,6 +69,10 @@ while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
     Tx = T * np.sin(theta)
     Ty = T * np.cos(theta)
     # print('Tx,Ty = ',Tx,Ty)
+
+    # Calculate wind force
+    wind_speed = Wind_l.wind_profile(y, wind_profile_select, plot_wind)
+    Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0, r, Cd)
 
     # Calculate resisting forces
     Fresx = C * vx
@@ -100,6 +102,7 @@ while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
 
     x[0] = 0
     y[0] = h_ground
+    plot_wind=False
 
 print('Fx,Fy = ', Fx, Fy)
 # print(T)

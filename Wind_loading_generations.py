@@ -1,11 +1,12 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from ISA_general import ISA
-from math import *
 import scipy as sc
+from scipy import interpolate
 
-r = 0.01  # m
-cd = 1  # -
+# r = 0.01  # m
+# cd = 1  # -
+
 
 def wind_model(h):
     dataset = np.array([[0, 11],
@@ -21,10 +22,11 @@ def wind_model(h):
                         [23000, 11],
                         [25500, 15]])
 
-    y = dataset[:,1]  # wind speed
-    x = dataset[:,0]  # altitude
-    windspeed_from_alt = sc.interpolate.interp1d(x,y,kind='quadratic')
+    y = dataset[:, 1]  # wind speed
+    x = dataset[:, 0]  # altitude
+    windspeed_from_alt = sc.interpolate.interp1d(x, y, kind='quadratic')
     return windspeed_from_alt(h)
+
 
 def create_mesh(nodes, altitude_balloon=20000, altitude_ground=0):
     """
@@ -47,7 +49,7 @@ def wind_profile(heights, select=1, plot=True):
     if select == 2:
         "linear wind, with start point b and slope a"
         a = 0.0005
-        b = -a*heights[-1]/2
+        b = -a * heights[-1] / 2
         for numb, item in enumerate(heights):
             wind_speed_array[numb] = a * item + b  # m/s
 
@@ -90,7 +92,7 @@ def show_wind_profile(x, y):
     plt.show()
 
 
-def calc_drag_on_wire(x, y, wind_profile, length_of_element):
+def calc_drag_on_wire(x, y, wind_profile, length_of_element, r, Cd):
     drag_on_wire = []
     # for element_numb in range(len(mesh[0]) - 1):
     #     # calc angle between mesh point
@@ -101,10 +103,9 @@ def calc_drag_on_wire(x, y, wind_profile, length_of_element):
         velocity = wind_profile[node_numb]
         density = ISA(y[node_numb])[2]
         area = r * length_of_element  # should be times 2, but next equation should be halved, so it cancelled
-        drag_on_segment = cd * density * velocity * abs(velocity) * area
+        drag_on_segment = Cd * density * velocity * abs(velocity) * area
         drag_on_wire.append(drag_on_segment)
     return drag_on_wire
-
 
 # mesh = create_mesh(500)
 # x, y = mesh[0], mesh[1]
