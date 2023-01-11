@@ -3,7 +3,7 @@ import math
 from matplotlib import pyplot as plt
 
 
-class solar_atmosphere(object):
+class solar_atmosphere():
 
     def __init__(self) -> None:
 
@@ -119,18 +119,35 @@ class solar_atmosphere(object):
         return (2 * math.pi * self.day) / 365.
 
 
-a = solar_atmosphere()
+# a = solar_atmosphere()
 
-omega = math.radians(90-6.814)
-beta = math.radians(180+6.814)
-theta = math.radians(180)
+# omega = math.radians(90-6.814)
+# beta = math.radians(180+6.814)
+# theta = math.radians(180)
 
-a.set_angles(omega,theta,beta)
+# a.set_angles(omega,theta,beta)
 
-a.set_pressure_ratio(0.054)
+# a.set_pressure_ratio(0.054)
 
-a.set_day(172)
+# a.set_day(172)
 
-b = a.get_total_radiance()
+# b = a.get_total_radiance()
 
-print(b)
+def get_flux(zenith,incidence,slope,p_ratio,day):
+    
+    atmos = solar_atmosphere()
+    
+
+    omega = math.radians(90-zenith)
+    beta = math.radians(incidence)
+    theta = math.radians(slope)
+
+    atmos.set_angles(omega,theta,beta)
+
+    atmos.set_pressure_ratio(p_ratio)
+
+    atmos.set_day(day)
+
+    net_flux = atmos.get_total_radiance()
+
+    return net_flux

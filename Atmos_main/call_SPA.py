@@ -42,10 +42,8 @@ def main():
 
         for i, line in enumerate(parser):
             
-            # print(line)
-
             # subprocess.run([APP_PATH, *line], check = True)
-            raw_out = subprocess.Popen([APP_PATH, *line],stdout=subprocess.PIPE)
+            raw_out = subprocess.Popen([APP_PATH, *line], stdout=subprocess.PIPE)
             decoded_out = raw_out.communicate()[0].decode()
             # print(decoded_out)
             decoded_out = np.fromstring(decoded_out, dtype = float, sep = " ")

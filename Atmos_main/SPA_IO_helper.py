@@ -6,10 +6,10 @@ def merge_CSVs(file_a,file_b,output_dir):
         raise "Input files not present"
 
 
-    a = pd.read_csv(file_a).astype("string")
-    b = pd.read_csv(file_b).astype("string")
+    a = pd.read_csv(file_a)
+    b = pd.read_csv(file_b)
     comb = pd.concat([a,b],axis=1)
-    print(comb.shape)
+    
     with open(os.path.join(os.getcwd(),output_dir,"merged.csv"), 'w',) as f:\
         comb.to_csv(f,index = False)
 
