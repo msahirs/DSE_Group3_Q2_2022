@@ -13,7 +13,7 @@ density = 1000  # kg/m^3
 r = 0.005  # m
 Cd = 1
 E = 100e9  # Pa
-g = 9.8  # m/s
+g = 9.81  # m/s
 C = 4  # Ns/m
 
 # Initiate nodes
@@ -121,22 +121,26 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
 
     wind_speed = windspeed_from_alt(y)
     wind_perp = wind_speed * np.cos(theta_nodes)
-
+    wind_par = wind_speed * np.sin(theta_nodes)
     Fperp = Wind_l.calc_drag_on_wire(x, y, wind_perp, L0, r, Cd)
     Fperpx = Fperp * np.cos(theta_nodes)
     Fperpy = Fperp * np.sin(theta_nodes)
+
+    Fpar = Wind_l.calc_drag_on_wire(x, y, wind_par, L0, r, Cd)
+    Fparx = Fpar * np.sin(theta_nodes)
+    Fpary = Fpar * np.cos(theta_nodes)
 
     # Calculate resisting forces
     Fresx = C * vx
     Fresy = C * vy
 
     # Calculate total forces on all nodes
-    Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0]
-    Fy[0] = Ty[0] - W[0] - Fresy[0] - Fperpy[0]
-    Fx[1:-1] = Tx[1:] - Tx[0:-1] + Fperpx[1:-1] - Fresx[1:-1]
-    Fy[1:-1] = Ty[1:] - Ty[0:-1] - W[1:-1] - Fresy[1:-1] - Fperpy[1:-1]
-    Fx[-1] = D + Fperpx[-1] / 2 - Tx[-1] - Fresx[-1]
-    Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1]
+    Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0] + Fparx[0]/ 2
+    Fy[0] = Ty[0] - W[0] - Fresy[0] - Fperpy[0]/2 + Fpary[0]/2
+    Fx[1:-1] = Tx[1:] - Tx[0:-1] + Fperpx[1:-1] - Fresx[1:-1] + Fparx[1:-1]
+    Fy[1:-1] = Ty[1:] - Ty[0:-1] - W[1:-1] - Fresy[1:-1] - Fperpy[1:-1] + Fpary[1:-1]
+    Fx[-1] = D + Fperpx[-1] / 2 - Tx[-1] - Fresx[-1] + Fparx[-1]/ 2
+    Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1]/2 + Fpary[-1]/ 2
 
     # Add tandem forces
     Fx = Fx + Ftandx
