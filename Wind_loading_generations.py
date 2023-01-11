@@ -4,12 +4,9 @@ from ISA_general import ISA
 import scipy as sc
 from scipy import interpolate
 
-# r = 0.01  # m
-# cd = 1  # -
-
 
 def wind_model(h):
-    dataset = np.array([[-1000,0],
+    dataset = np.array([[-10000, 0],  # add for below ground
                         [0, 11],
                         [2500, 15],
                         [5000, 29],
