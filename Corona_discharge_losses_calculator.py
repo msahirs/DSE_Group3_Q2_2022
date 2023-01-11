@@ -8,16 +8,17 @@ import matplotlib.pyplot as plt
 P_design =  1000000  #[W] Power to be transmitted
 k0 = 241    #fixed constant
 g0 = 21.1   #[KV/cm] Disruptive Gradient in Air
-kd = 0.2      #Normalized air density factor (25 deg C, 76 cm pressure)
+kd = 0.2      #air density factor
 a  = 1    #[cm] effective(?) radius of conductor
 d  = 5000   #[cm] Conductor Spacing
-f  = 50000        #[Hz] Frequency
+f  = 0    #50000        #[Hz] Frequency
 ki = 0.95   #Wire irregularity factor
 #V0 = 442     #[KV] Line voltage to neutral
 DCV = g0*ki*a*kd*np.log(d/a) #KV
+print("The DCV is: ", DCV)
 
-V_design = np.arange(1, 600, 0.5)
-#V_design = 180 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
+#V_design = np.arange(10, 200, 0.5)
+V_design = 167 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
 
 P_loss = (k0/kd)*(f+25)*math.sqrt(a/d)*(V_design-g0*ki*a*kd*np.log(d/a))**2*10**-5
 Amp_wire = P_design / (1000*V_design) #A
@@ -40,7 +41,7 @@ P_loss_corona = P_loss * L_wire/100000
 # ******** Inductive losses **********
 
 #Some variables
-d_wire = 0.1          #[cm] diameter of wire
+d_wire = 0.15          #[cm] diameter of wire
 L_wire = L_wire     #[cm] length of wire
 mu = 1              #permeability, 1 for non magnetic materials
 
@@ -58,10 +59,11 @@ P_loss_inductance = (R_wire_inductance*Amp_wire**2)/1000
 P_loss_total = P_loss_corona + P_loss_ohmic + P_loss_inductance
 Loss_percent = (P_loss_total / (P_design/1000)) * 100
 
+#print(min(P_loss_total))
 #Plots the Voltage vs Power loss curve
-plt.plot(V_design, P_loss_corona)
-plt.show
-
+#plt.plot(V_design, P_loss)
+#plt.plot(V_design, P_loss_total)
+#plt.show()
 #print("With a design voltage of ", round(V_design, 2), "kilovolts:")
 #print("The corona inception voltage is ", np.round(DCV, 2), "kilovolts.")
 #print("Your power loss due to corona is: ", np.round(P_loss, 2), "kilowatts per kilometer.")
