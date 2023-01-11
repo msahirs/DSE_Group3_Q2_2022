@@ -52,12 +52,12 @@ def iv(T):
 
 
 # Single input
-T_new = 60  # Celcius
+T_new = 40  # Celcius
 
 eff_loss, V_list, I_list, P_list, a, b, c = iv(T_new)
-
+'''
 # Plot IV
-"""
+
 plt.figure(1)
 plt.ylabel('mA')
 plt.xlabel('mV')
@@ -83,4 +83,4 @@ print((np.amax(c) - np.amax(P_list)) / np.amax(P_list) *100, '% loss')
 print(np.amax(P_list),  'mw/cell')
 print(np.amax(c), 'mw/cell')
 plt.show()
-"""
+'''
