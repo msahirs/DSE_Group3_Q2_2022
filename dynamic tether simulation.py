@@ -23,26 +23,19 @@ colorlist = ["green", "blue", "red", "pink"]
 #     return line, balloon,
 
 
-wind_profile_select = 4
-t_end = 5
-L = 100000  # N
-
-
-
-def run_progamm(Cd=1.2):
+def run_progamm(Cd=1.2, r=0.01):
     nodes = 100
     h_balloon = 20000  # m
     h_ground = 0  # m
 
     D = 200  # N
     density = 1000  # tether-  kg/m^3
-    r = 0.01  # m
+    # r = 0.01  # m
     wind = 20  # uniform wind m/s
     # Cd = 1.2  # tether drag coeff
-    rho = 0.5  # kg/m^3
     E = 100e9  # Pa
-    g = 9.8  # m/s
-    C = 100  # Ns/m
+    g = 9.81  # m/s
+    C = 4  # Ns/m
 
     plot_wind = False
 
@@ -126,8 +119,6 @@ def run_progamm(Cd=1.2):
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
         Rx = -Fx
         Ry = -Fy
-        # print('Fx,Fy = ',Fx,Fy)
-        # print('ax,ay = ',ax,ay)
 
         vx = vx + ax * dt
         vy = vy + ay * dt
@@ -141,52 +132,70 @@ def run_progamm(Cd=1.2):
     return xlist, ylist
 
 
-xlist1, ylist1 = run_progamm()
-# for runs in range(animations):
-xlist2, ylist2 = run_progamm(2)
+wind_profile_select = 4
+t_end = 100
+L = 100000  # N
 
-xlists = [xlist1, xlist2]
-ylists = [ylist1, ylist2]
+xlists = []
+ylists = []
 
 ### animation ###
 
 animations = 2
+cd_items = [0.6, 0.6]
+radius_items = [0.01, 0.005]
+for i in range(animations):
+    xlist, ylist = run_progamm(Cd=cd_items[i], r=radius_items[i])
+    xlists.append(xlist)
+    ylists.append(ylist)
 
 
 def animate(i):
-    balloon_list = []
-    line_list = []
+    item_list = []
     for item in range(animations):
-        # line = lines[item]
-        # balloon = balloons[item]
+        line = lines[item]
+        balloon = balloons[item]
         xlist = xlists[item]
         ylist = ylists[item]
         x = xlist[i]
         y = ylist[i]
-        # axis.plot([x], [y], lw=2, c=colorlist[item])
-        balloon_x = xlist1[i][-1]
-        balloon_y = ylist1[i][-1]
+        balloon_x = x[-1]
+        balloon_y = y[-1]
         line.set_data(x, y)  # update the data.
-        # axis.plot([x[-1]], [y[-1]], marker='.', label="Balloon", c="gray", markersize=10)
         balloon.set_data(balloon_x, balloon_y)
-        balloon_list.append(balloon)
-        line_list.append(line)
+        item_list.append(line)
+        item_list.append(balloon)
 
-    return line_list[0], balloon_list[0], line_list[1], balloon_list[1]
+    # time text update
+    time_text.set_text(time_template % (i))
 
+    item_list.append(time_text)
+
+    return tuple(item_list)
 
 
 fig = plt.figure()
 title = f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]," \
         f" animated for {t_end} [sec]"
-axis = plt.axes(xlim=(-100, 10000), xlabel="Horizontal distance [meters]",
-                ylim=(0, 25000), ylabel="Altitude [meters]", title=title)
+axis = plt.axes(xlim=(-100, 20000), xlabel="Horizontal distance [meters]",
+                ylim=(-1000, 25000), ylabel="Altitude [meters]", title=title)
 
+# make lists for objects
+lines = []
+balloons = []
+
+# initialize objects
 for item in range(animations):
-    line, = axis.plot([], [], c=colorlist[item], label=f"Tether {item+1}")
-    balloon, = axis.plot([], [], marker='.', label=f"Balloon {item+1}", c="gray", markersize=10)
+    line, = axis.plot([], [], c=colorlist[item], label=f"Tether {item + 1}")
+    balloon, = axis.plot([], [], marker='.', label=f"Balloon {item + 1}", c="gray", markersize=10)
+    lines.append(line)
+    balloons.append(balloon)
+
+# initialize time text
+time_template = 'time= %.1fs'
+time_text = axis.text(00.5, 0.9, "")
 
 legend = plt.legend()
 
-ani = animation.FuncAnimation(fig, animate, frames=int((len(xlist1))), interval=1000, blit=True)
+ani = animation.FuncAnimation(fig, animate, frames=int((len(xlists[0]))), interval=60, blit=True)
 plt.show()
