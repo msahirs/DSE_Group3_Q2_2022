@@ -97,6 +97,7 @@ def calc_drag_on_wire(x, y, wind_profile, length_of_element, r, Cd):
     #     beta = atan2(x[element_numb] - x[element_numb - 1],
     #                  y[element_numb] - y[element_numb - 1])  # returns angle in radians
     #     velocity = wind_profile[element_numb]
+
     for node_numb in range(len(x)):
         velocity = wind_profile[node_numb]
         density = ISA(y[node_numb])[2]

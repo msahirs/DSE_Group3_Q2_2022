@@ -1,42 +1,59 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import Wind_loading_generations as Wind_l
+import pandas as pd
 
+import Wind_loading_generations as Wind_l
+import scipy as sc
+
+L=0
 
 def plot_response(x, y):
-    plt.plot(x, y, label="Tether")
-    plt.plot(x[-1], y[-1], label="Balloon", c="black", marker=".", markersize=10)
+    global L
+    for item in range(len(x)):
+        plt.plot(x[item][-1], y[item][-1], label=f"Tether {item}", c=colorlist[item])
+        plt.plot(x[item][-1][-1], y[item][-1][-1], label=f"Balloon {item}", c="black", marker=".", markersize=10)
     plt.xlabel("Horizontal distance [meters]")
     plt.ylabel("Altitude [meters]")
     plt.legend()
-    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]")
+    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L/1000, 2)}[kN]")
     plt.show()
 
+
+# Interpolate the wind profile function
+dataset = np.array([[-1000, 0],
+                    [0, 11],
+                    [2500, 15],
+                    [5000, 29],
+                    [7500, 41],
+                    [10000, 51],
+                    [12000, 43],
+                    [13500, 32],
+                    [16000, 20],
+                    [17000, 11],
+                    [20000, 9],
+                    [23000, 11],
+                    [25500, 15]])
+yset = 0.6 * dataset[:, 1]  # wind speed
+xset = dataset[:, 0]  # altitude
+windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 
 colorlist = ["green", "blue", "red", "pink"]
 
 
-# def init():
-#     line.set_data([], [])
-#     balloon.set_data([], [])
-#     return line, balloon,
-
-
-def run_progamm(Cd=1.2, r=0.01):
-    nodes = 100
-    h_balloon = 20000  # m
+def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
+    nodes = 50
+    # h_balloon = 15000  # m
     h_ground = 0  # m
 
-    D = 200  # N
-    density = 1000  # tether-  kg/m^3
+    D = 1000  # N
+    density = 950  # tether-  kg/m^3
     # r = 0.01  # m
     wind = 20  # uniform wind m/s
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
     g = 9.81  # m/s
     C = 4  # Ns/m
-
     plot_wind = False
 
     # Initiate nodes
@@ -48,6 +65,7 @@ def run_progamm(Cd=1.2, r=0.01):
     vy = np.zeros(nodes)
     ax = np.zeros(nodes)  # node acceleration
     ay = np.zeros(nodes)
+    theta_nodes = np.zeros(nodes)
 
     # Initiate segments
     segments = nodes - 1
@@ -62,6 +80,8 @@ def run_progamm(Cd=1.2, r=0.01):
     m[0] = m[0] * 0.5
     m[-1] = m[-1] * 0.5
     W = m * g
+    global L
+    L += np.sum(W)
 
     # print('W = ', W)
 
@@ -73,8 +93,12 @@ def run_progamm(Cd=1.2, r=0.01):
     ylist = y
 
     counter = 0
+    max_stress = 0
+    while t < t_end:  # and (np.any(abs(ax) > 0.0001) or t < 0.1):
+        if np.all(abs(ax) < 0.01) and np.all(abs(vx) < 0.1) and t > 30:
+            print("Break because of low acceleration and speed")
+            break
 
-    while t < t_end and (np.any(abs(ax) > 0.0001) or t < 0.1):
         t += dt
         counter += 1
         if counter % 1000 == 0:
@@ -87,67 +111,79 @@ def run_progamm(Cd=1.2, r=0.01):
         # print(t)
 
         # Calculate tension forces in all segments
-        for seg in range(segments):
-            # if (y[seg + 1] - y[seg]) == 0:
-            #         print("please god help")
-            # if (x[seg + 1] - x[seg]) == 0:
-            #     print("please god help")
-            T[seg] = crossA * E / L0 * (np.sqrt((y[seg + 1] - y[seg]) ** 2 + (x[seg + 1] - x[seg]) ** 2) - L0)
-            theta[seg] = np.arctan2((x[seg + 1] - x[seg]), (y[seg + 1] - y[seg]))
+        T = crossA * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
+        theta = np.arctan2((x[1:] - x[:-1]), (y[1:] - y[:-1]))
+
         Tx = T * np.sin(theta)
         Ty = T * np.cos(theta)
-        # print('Tx,Ty = ',Tx,Ty)
+
+        if np.max(T / crossA) > max_stress:
+            max_stress = np.max(T / crossA)
 
         # Calculate wind force
-        wind_speed = Wind_l.wind_profile(y, wind_profile_select, plot_wind)
-        Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0, r, Cd)
+        theta_nodes[0] = theta[0]
+        theta_nodes[1:-1] = (theta[1:] + theta[:-1]) / 2
+        theta_nodes[-1] = theta[-1]
+
+        wind_speed = windspeed_from_alt(y)
+        wind_perp = wind_speed * np.cos(theta_nodes)
+        wind_par = wind_speed * np.sin(theta_nodes)
+
+        Fperp = Wind_l.calc_drag_on_wire(x, y, wind_perp, L0, r, Cd)
+        Fperpx = Fperp * np.cos(theta_nodes)
+        Fperpy = Fperp * np.sin(theta_nodes)
+
+        Fpar = Wind_l.calc_drag_on_wire(x, y, wind_par, L0, r, Cd)
+        Fparx = Fpar * np.sin(theta_nodes)
+        Fpary = Fpar * np.cos(theta_nodes)
 
         # Calculate resisting forces
         Fresx = C * vx
         Fresy = C * vy
 
         # Calculate total forces on all nodes
-        Fx[0] = Tx[0] + Fwind[0] / 2 - Fresx[0]
-        Fy[0] = Ty[0] - W[0] - Fresy[0]
-        for node in range(1, nodes - 1):
-            Fx[node] = Tx[node] - Tx[node - 1] + Fwind[node] - Fresx[node]
-            Fy[node] = Ty[node] - Ty[node - 1] - W[node] - Fresy[node]
-        Fx[-1] = D + Fwind[-1] / 2 - Tx[-1] - Fresx[-1]
-        Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1]
+        Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0] + Fparx[0] / 2
+        Fy[0] = Ty[0] - W[0] - Fresy[0] - Fperpy[0] / 2 + Fpary[0] / 2
+        Fx[1:-1] = Tx[1:] - Tx[0:-1] + Fperpx[1:-1] - Fresx[1:-1] + Fparx[1:-1]
+        Fy[1:-1] = Ty[1:] - Ty[0:-1] - W[1:-1] - Fresy[1:-1] - Fperpy[1:-1] + Fpary[1:-1]
+        Fx[-1] = D + Fperpx[-1] / 2 - Tx[-1] - Fresx[-1] + Fparx[-1] / 2
+        Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1] / 2 + Fpary[-1] / 2
 
         ax[1:] = Fx[1:] / m[1:] * min(t, 1)
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
-        Rx = -Fx
-        Ry = -Fy
 
         vx = vx + ax * dt
         vy = vy + ay * dt
 
         x = x + vx * dt
         y = y + vy * dt
-
-        x[0] = 0
-        y[0] = h_ground
         plot_wind = False
-    return xlist, ylist
+    return xlist, ylist, max_stress
 
 
 wind_profile_select = 4
-t_end = 100
-L = 100000  # N
+t_end = 2000
+excess_L = 0  # N - excess lift
 
 xlists = []
 ylists = []
+max_stress_list = []
 
 ### animation ###
 
-animations = 2
-cd_items = [0.6, 0.6]
-radius_items = [0.01, 0.005]
+animations = 4
+cd_items = [0.6, 0.6, 0.6, 0.6]
+excess_L_list = [0, 500, 1000, 2000]
+radius_items = [0.005, 0.005, 0.005, 0.005]
+height_items = [20000, 20000, 20000, 20000]
 for i in range(animations):
-    xlist, ylist = run_progamm(Cd=cd_items[i], r=radius_items[i])
+    excess_L = excess_L_list[i]  # N - excess lift
+    xlist, ylist, max_stress = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i],)
     xlists.append(xlist)
     ylists.append(ylist)
+    max_stress_list.append(max_stress / 10 ** 6)
+    print(f"Done with tether {i + 1}")
+print(max_stress_list)
 
 
 def animate(i):
@@ -157,12 +193,18 @@ def animate(i):
         balloon = balloons[item]
         xlist = xlists[item]
         ylist = ylists[item]
-        x = xlist[i]
-        y = ylist[i]
+        # if already done reprint last state
+        if i >= len(xlist):
+            x = xlist[-1]
+            y = ylist[-1]
+        else:
+            x = xlist[i]
+            y = ylist[i]
         balloon_x = x[-1]
         balloon_y = y[-1]
         line.set_data(x, y)  # update the data.
         balloon.set_data(balloon_x, balloon_y)
+        # add to total return list
         item_list.append(line)
         item_list.append(balloon)
 
@@ -174,11 +216,33 @@ def animate(i):
     return tuple(item_list)
 
 
+# define plot scales for animation
+max_x_value = 0
+min_x_value = 0
+max_y_value = 0
+
+for i in range(len(xlists)):
+    for xlist in xlists[i]:
+        for x_time_list in xlists:
+            for xnodes in x_time_list:
+                for x in xnodes:
+                    if x > max_x_value:
+                        max_x_value = x
+                    if x < min_x_value:
+                        min_x_value = x
+
+    for ylist in ylists[i]:
+        for y_time_list in ylists:
+            for ynodes in y_time_list:
+                for y in ynodes:
+                    if y > max_x_value:
+                        max_y_value = y
+
 fig = plt.figure()
-title = f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[N]," \
+title = f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L/1000, 2)}[kN]," \
         f" animated for {t_end} [sec]"
-axis = plt.axes(xlim=(-100, 20000), xlabel="Horizontal distance [meters]",
-                ylim=(-1000, 25000), ylabel="Altitude [meters]", title=title)
+axis = plt.axes(xlim=(min_x_value-100, max_x_value+100), xlabel="Horizontal distance [meters]",
+                ylim=(-100, max_y_value+2000), ylabel="Altitude [meters]", title=title)
 
 # make lists for objects
 lines = []
@@ -186,8 +250,9 @@ balloons = []
 
 # initialize objects
 for item in range(animations):
-    line, = axis.plot([], [], c=colorlist[item], label=f"Tether {item + 1}")
-    balloon, = axis.plot([], [], marker='.', label=f"Balloon {item + 1}", c="gray", markersize=10)
+    label = f"Tether {item + 1}, with Cd of {cd_items[item]}, and radius of {radius_items[item]}"
+    line, = axis.plot([], [], c=colorlist[item], label=label)
+    balloon, = axis.plot([], [], marker='.', label=f"Balloon {item + 1}", c="black", markersize=10)
     lines.append(line)
     balloons.append(balloon)
 
@@ -197,5 +262,15 @@ time_text = axis.text(00.5, 0.9, "")
 
 legend = plt.legend()
 
-ani = animation.FuncAnimation(fig, animate, frames=int((len(xlists[0]))), interval=60, blit=True)
+# check longest time duration
+t_longest = 0
+for i in xlists:
+    if len(i) > t_longest:
+        t_longest = len(i)
+
+ani = animation.FuncAnimation(fig, animate, frames=t_longest, interval=60, blit=True)
 plt.show()
+plot_response(xlists, ylists)
+
+# saving animation in github
+f = r""
