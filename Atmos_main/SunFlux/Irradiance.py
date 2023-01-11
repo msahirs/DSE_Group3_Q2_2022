@@ -26,7 +26,7 @@ class solar_atmosphere():
         # Solar elevation angle
         self.omega = 0
 
-        # Incidence angle
+        # Slope relative to ground plane
         self.theta_i = 0
 
         # Day
@@ -38,7 +38,7 @@ class solar_atmosphere():
 
         ## -- Start local-based variables -- ##
 
-        # Slope relative to ground plane
+        # Incidence Angle
         self.beta_i = 0
 
         # Air mass ratio
@@ -73,10 +73,11 @@ class solar_atmosphere():
         I_dh = self.calc_diffuse_flux()
         I_dn = self.calc_direct_flux()
 
+
         return (I_dn * math.sin(self.omega) + I_dh)*(0.5 - 0.5 * math.cos(self.theta_i))
 
     def get_total_radiance(self):
-
+        
         solar_sum = self.get_direct_radiance() + self.get_diffuse_radiance() \
                                         + self.get_reflect_radiance()
         
@@ -93,8 +94,13 @@ class solar_atmosphere():
 
         I_dn = self.calc_direct_flux()
 
-        i_dh = 0.5 * I_dn * math.sin(self.omega) * ((1 - self.ATM_TRANS ** self.calc_air_mass_frac()) \
+        sun_elev = math.sin(self.omega)
+
+        if sun_elev < 0: return 0.
+
+        i_dh = 0.5 * I_dn * sun_elev * ((1 - self.ATM_TRANS ** self.calc_air_mass_frac()) \
                                                 / (1 - 1.4 * math.log(self.ATM_TRANS)))
+        
         return i_dh                                        
 
     def calc_air_mass_frac(self):
