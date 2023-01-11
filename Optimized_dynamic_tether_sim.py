@@ -7,11 +7,11 @@ import scipy as sc
 nodes = 50
 h_balloon = 20000  # m
 h_ground = 0  # m
-L = 40000  # N
+L_excess = 15000  # N
 D = 4000  # N
 density = 1000  # kg/m^3
 r = 0.005  # m
-Cd = 1
+Cd = 0.3
 E = 100e9  # Pa
 g = 9.81  # m/s
 C = 4  # Ns/m
@@ -48,9 +48,13 @@ W = m * g
 # Set up animation
 # Create the figure and axes to animate
 fig, axs = plt.subplots(1)
+
+
 # init_func() is called at the beginning of the animation
 def init_func():
     axs.clear()
+
+
 # update_plot() is called between frames
 def update_plot(i):
     axs.clear()
@@ -58,13 +62,14 @@ def update_plot(i):
 
 
 # Create tandem balloon force
-L1 = 0*20000  # Lift force [N] of the tandem balloon
-D1 = 0*800  # Drag force [N] of the tandem balloon
-loc1 = 0.7  # Fraction of the tether where the tandem balloon is located
-node1 = round(nodes*loc1)
-
-Ftandx[node1 - 1] = D1
-Ftandy[node1 - 1] = L1
+L_tandem = 1200  # Lift force [N] of the tandem balloon
+D_tandem = 200  # Drag force [N] of the tandem balloon
+loc_lst = [0.4, 0.5, 0.6, 0.7, 0.8]  # Fractions of the tether where the tandem balloon is located
+for loc in loc_lst:
+    tandem_node = round(nodes * loc)
+    Ftandx[tandem_node - 1] = D_tandem
+    Ftandy[tandem_node - 1] = L_tandem
+L = L_excess + np.sum(W) - len(loc_lst) * L_tandem
 
 # Interpolate the wind profile function
 dataset = np.array([[-1000, 0],
@@ -87,7 +92,7 @@ windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 # Set up simulation
 t = 0
 dt = 0.001
-t_end = 100
+t_end = 200
 max_stress = 0
 counter = 0
 while t < t_end:  # and np.any(abs(ax) > 0.1):
@@ -113,6 +118,7 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     if np.max(T / crossA) > max_stress:
         max_stress = np.max(T / crossA)
         max_node = np.argmax(T / crossA)
+        tmax = t
 
     # Calculate wind force
     theta_nodes[0] = theta[0]
@@ -162,7 +168,7 @@ plt.show()
 
 # print(xframes, yframes)
 # print('Fx,Fy = ', Fx, Fy)
-print(T)
+# print(T)
 # print(T/(crossA * E / L0) + L0)
 # print(T / crossA)
 # print('ax,ay = ', ax, ay)
@@ -170,7 +176,9 @@ print(T)
 # print('x,y = ', x, y)
 # print(theta)
 print(np.sum(Fperpx))
-print(f'Maximum stress is {max_stress} Pa at node {max_node}')
+print(f'Final location is ({x[-1]}, {y[-1]})')
+print(f'Maximum stress is {max_stress} Pa at node {max_node} at {tmax} s')
+print(f'Maximum stress in the steady solution is {np.max(T / crossA)} Pa at node {np.argmax(T / crossA)}')
 
-plt.plot(range(1,nodes),T)
+plt.plot(range(nodes - 1), T)
 plt.show()
