@@ -6,17 +6,16 @@ import pandas as pd
 import Wind_loading_generations as Wind_l
 import scipy as sc
 
-L=0
-
 def plot_response(x, y):
     global L
     for item in range(len(x)):
-        plt.plot(x[item][-1], y[item][-1], label=f"Tether {item}", c=colorlist[item])
-        plt.plot(x[item][-1][-1], y[item][-1][-1], label=f"Balloon {item}", c="black", marker=".", markersize=10)
+        label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
+        plt.plot(x[item][-1], y[item][-1], label=label, c=colorlist[item])
+        plt.plot(x[item][-1][-1], y[item][-1][-1], c="black", marker=".", markersize=10)
     plt.xlabel("Horizontal distance [meters]")
     plt.ylabel("Altitude [meters]")
     plt.legend()
-    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L/1000, 2)}[kN]")
+    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[kN]")
     plt.show()
 
 
@@ -42,6 +41,7 @@ colorlist = ["green", "blue", "red", "pink"]
 
 
 def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
+
     nodes = 50
     # h_balloon = 15000  # m
     h_ground = 0  # m
@@ -81,9 +81,7 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
     m[-1] = m[-1] * 0.5
     W = m * g
     global L
-    L += np.sum(W)
-
-    # print('W = ', W)
+    L = np.sum(W) + excess_L
 
     t = 0
     dt = 0.001
@@ -126,6 +124,8 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
         theta_nodes[-1] = theta[-1]
 
         wind_speed = windspeed_from_alt(y)
+        if plot_wind:
+            Wind_l.show_wind_profile(wind_speed, y)
         wind_perp = wind_speed * np.cos(theta_nodes)
         wind_par = wind_speed * np.sin(theta_nodes)
 
@@ -162,8 +162,7 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
 
 
 wind_profile_select = 4
-t_end = 2000
-excess_L = 0  # N - excess lift
+t_end = 500
 
 xlists = []
 ylists = []
@@ -173,8 +172,8 @@ max_stress_list = []
 
 animations = 4
 cd_items = [0.6, 0.6, 0.6, 0.6]
-excess_L_list = [0, 500, 1000, 2000]
-radius_items = [0.005, 0.005, 0.005, 0.005]
+excess_L_list = [750, 1250, 1500, 1500]
+radius_items = [0.005, 0.005, 0.005, 0.0088]
 height_items = [20000, 20000, 20000, 20000]
 for i in range(animations):
     excess_L = excess_L_list[i]  # N - excess lift
@@ -239,8 +238,8 @@ for i in range(len(xlists)):
                         max_y_value = y
 
 fig = plt.figure()
-title = f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L/1000, 2)}[kN]," \
-        f" animated for {t_end} [sec]"
+title = f"Final dynamic response to wind profile {wind_profile_select}\n"\
+        f" animated for a total of {t_end} [sec]"
 axis = plt.axes(xlim=(min_x_value-100, max_x_value+100), xlabel="Horizontal distance [meters]",
                 ylim=(-100, max_y_value+2000), ylabel="Altitude [meters]", title=title)
 
@@ -250,7 +249,7 @@ balloons = []
 
 # initialize objects
 for item in range(animations):
-    label = f"Tether {item + 1}, with Cd of {cd_items[item]}, and radius of {radius_items[item]}"
+    label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
     line, = axis.plot([], [], c=colorlist[item], label=label)
     balloon, = axis.plot([], [], marker='.', label=f"Balloon {item + 1}", c="black", markersize=10)
     lines.append(line)
@@ -260,6 +259,8 @@ for item in range(animations):
 time_template = 'time= %.1fs'
 time_text = axis.text(00.5, 0.9, "")
 
+gridlines_big = axis.grid(which="major")
+gridlines_small = axis.grid(which="minor", linestyle="--")
 legend = plt.legend()
 
 # check longest time duration
