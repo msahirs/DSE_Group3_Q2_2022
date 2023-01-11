@@ -5,8 +5,8 @@ import Wind_loading_generations as Wind_l
 
 nodes = 50
 h_balloon = 20000  # m
-h_ground = 0  # m
-L = 80000  # N
+h_ground = 500  # m
+L = 40000  # N
 D = 1000  # N
 density = 1000  # kg/m^3
 r = 0.005  # m
@@ -29,6 +29,7 @@ ax = np.zeros(nodes)  # node acceleration
 ay = np.zeros(nodes)
 xframes = np.zeros((1, nodes))
 yframes = np.zeros((1, nodes))
+theta_nodes = np.zeros(nodes)
 
 # Initiate segments
 segments = nodes - 1
@@ -64,7 +65,7 @@ def update_plot(i):
     axs.clear()
     axs.plot(xframes[i, :], yframes[i, :], color='k')
 
-
+max_stress = 0
 counter = 0
 while t < t_end:  # and np.any(abs(ax) > 0.1):
 
@@ -76,39 +77,43 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     counter += 1
     if counter % 10000 == 0:
         print(f"Has run {counter} loops")
-        # print(y)
         xframes = np.append(xframes, [x], axis=0)
         yframes = np.append(yframes, [y], axis=0)
-    # print(t)
 
     # Calculate tension forces in all segments
-    for seg in range(segments):
-        if (y[seg + 1] - y[seg]) == 0:
-            print("please god help")
-        # if (x[seg + 1] - x[seg]) == 0:
-        #     print("please god help")
-        T[seg] = crossA * E / L0 * (np.sqrt((y[seg + 1] - y[seg]) ** 2 + (x[seg + 1] - x[seg]) ** 2) - L0)
-        theta[seg] = np.arctan2((x[seg + 1] - x[seg]), (y[seg + 1] - y[seg]))
+    T = crossA * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
+    theta = np.arctan2((x[1:] - x[:-1]), (y[1:] - y[:-1]))
+
     Tx = T * np.sin(theta)
     Ty = T * np.cos(theta)
-    # print('Tx,Ty = ',Tx,Ty)
+
+    if np.max(T / crossA) > max_stress:
+        max_stress = np.max(T / crossA)
 
     # Calculate wind force
+    theta_nodes[0] = theta[0]
+    theta_nodes[1:-1] = (theta[1:] + theta[:-1]) / 2
+    theta_nodes[-1] = theta[-1]
+
     wind_speed = Wind_l.wind_profile(y, wind_profile_select, plot=False)
-    Fwind = Wind_l.calc_drag_on_wire(x, y, wind_speed, L0, r, Cd)
+    wind_perp = wind_speed * np.cos(theta_nodes)
+    wind_par = wind_speed * np.sin(theta_nodes)
+
+    Fperp = Wind_l.calc_drag_on_wire(x, y, wind_perp, L0, r, Cd)
+    Fperpx = Fperp * np.cos(theta_nodes)
+    Fperpy = Fperp * np.sin(theta_nodes)
 
     # Calculate resisting forces
     Fresx = C * vx
     Fresy = C * vy
 
     # Calculate total forces on all nodes
-    Fx[0] = Tx[0] + Fwind[0] / 2 - Fresx[0]
-    Fy[0] = Ty[0] - W[0] - Fresy[0]
-    for node in range(1, nodes - 1):
-        Fx[node] = Tx[node] - Tx[node - 1] + Fwind[node] - Fresx[node]
-        Fy[node] = Ty[node] - Ty[node - 1] - W[node] - Fresy[node]
-    Fx[-1] = D + Fwind[-1] / 2 - Tx[-1] - Fresx[-1]
-    Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1]
+    Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0]
+    Fy[0] = Ty[0] - W[0] - Fresy[0] - Fperpy[0]
+    Fx[1:-1] = Tx[1:] - Tx[0:-1] + Fperpx[1:-1] - Fresx[1:-1]
+    Fy[1:-1] = Ty[1:] - Ty[0:-1] - W[1:-1] - Fresy[1:-1] - Fperpy[1:-1]
+    Fx[-1] = D + Fperpx[-1] / 2 - Tx[-1] - Fresx[-1]
+    Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1]
 
     ax[1:] = Fx[1:] / m[1:] * min(t, 1)
     ay[1:] = Fy[1:] / m[1:] * min(t, 1)
@@ -125,14 +130,15 @@ anim = animation.FuncAnimation(fig, update_plot, frames=xframes.shape[0], init_f
 plt.show()
 
 # print(xframes, yframes)
-print('Fx,Fy = ', Fx, Fy)
+# print('Fx,Fy = ', Fx, Fy)
 # print(T)
 # print(T/(crossA * E / L0) + L0)
-print(T / crossA)
-print('ax,ay = ', ax, ay)
-print('vx,vy = ', vx, vy)
-print('x,y = ', x, y)
+# print(T / crossA)
+# print('ax,ay = ', ax, ay)
+# print('vx,vy = ', vx, vy)
+# print('x,y = ', x, y)
 # print(theta)
+print('Maximum stress is {} Pa'.format(max_stress))
 
 plt.plot(x, y)
 plt.show()

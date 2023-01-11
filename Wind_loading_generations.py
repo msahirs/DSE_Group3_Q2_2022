@@ -9,7 +9,8 @@ from scipy import interpolate
 
 
 def wind_model(h):
-    dataset = np.array([[0, 11],
+    dataset = np.array([[-1000,0],
+                        [0, 11],
                         [2500, 15],
                         [5000, 29],
                         [7500, 41],
@@ -22,7 +23,7 @@ def wind_model(h):
                         [23000, 11],
                         [25500, 15]])
 
-    y = dataset[:, 1]  # wind speed
+    y = 0.6 * dataset[:, 1]  # wind speed
     x = dataset[:, 0]  # altitude
     windspeed_from_alt = sc.interpolate.interp1d(x, y, kind='quadratic')
     return windspeed_from_alt(h)
