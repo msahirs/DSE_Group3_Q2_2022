@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import Wind_loading_generations as Wind_l
+import scipy as sc
 
 nodes = 50
 h_balloon = 20000  # m
@@ -16,7 +17,6 @@ rho = 0.5  # kg/m^3
 E = 100e9  # Pa
 g = 9.8  # m/s
 C = 4  # Ns/m
-wind_profile_select = 4
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -65,6 +65,24 @@ def update_plot(i):
     axs.clear()
     axs.plot(xframes[i, :], yframes[i, :], color='k')
 
+# Interpolate the wind profile function
+dataset = np.array([[-1000,0],
+                        [0, 11],
+                        [2500, 15],
+                        [5000, 29],
+                        [7500, 41],
+                        [10000, 51],
+                        [12000, 43],
+                        [13500, 32],
+                        [16000, 20],
+                        [17000, 11],
+                        [20000, 9],
+                        [23000, 11],
+                        [25500, 15]])
+yset = 0.6 * dataset[:, 1]  # wind speed
+xset = dataset[:, 0]  # altitude
+windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
+
 max_stress = 0
 counter = 0
 while t < t_end:  # and np.any(abs(ax) > 0.1):
@@ -95,7 +113,7 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     theta_nodes[1:-1] = (theta[1:] + theta[:-1]) / 2
     theta_nodes[-1] = theta[-1]
 
-    wind_speed = Wind_l.wind_profile(y, wind_profile_select, plot=False)
+    wind_speed = windspeed_from_alt(y)
     wind_perp = wind_speed * np.cos(theta_nodes)
     wind_par = wind_speed * np.sin(theta_nodes)
 
@@ -138,7 +156,7 @@ plt.show()
 # print('vx,vy = ', vx, vy)
 # print('x,y = ', x, y)
 # print(theta)
-print('Maximum stress is {} Pa'.format(max_stress))
+print(f'Maximum stress is {max_stress} Pa')
 
 plt.plot(x, y)
 plt.show()
