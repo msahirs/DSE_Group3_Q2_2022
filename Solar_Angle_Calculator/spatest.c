@@ -103,7 +103,7 @@ int main (int argc, char *argv[])
         printf("%.6e ",spa.del_epsilon); //Delta Epsilon
         printf("%.6f ",spa.epsilon); //Epsilon
         printf("%.6f ",spa.zenith); //Zenith
-        printf("%.6f ",spa.azimuth_astro); //Azimuth
+        printf("%.6f ",spa.azimuth_astro); //Azimuth (westward from south facing)
         printf("%.6f ",spa.incidence); //Incidence
         printf("%.6f ",spa.del_e); //zenith refraction correction
 
