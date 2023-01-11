@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 # Values (based on V1.0)
 V_oc = 2700  # mV
-I_sc = 2160  # mA
 V_mp = 2411  # mV
-I_mp = 1964  # mA
+I_mp = 1938  # mA
+I_sc = I_mp * 1.1  # mA
 
 d_V_oc = -6.2  # mV/K
 d_I_sc = 1.19  # mA/K
