@@ -3,14 +3,14 @@ import matplotlib.pyplot as plt
 
 # Values (based on V1.0)
 V_oc = 2700  # mV
-I_sc = 2160  # mA
+I_sc = 2132  # mA
 V_mp = 2411  # mV
-I_mp = 1964  # mA
+I_mp = 1938  # mA
 
 d_V_oc = -6.2  # mV/K
-d_I_sc = 1.19  # mA/K
+d_I_sc = 1.387  # mA/K
 d_V_mp = -6.7  # mV/K
-d_I_mp = 0.79  # mA/K
+d_I_mp = 0.924  # mA/K
 
 # Higher T curves
 def iv(T):
@@ -52,10 +52,10 @@ def iv(T):
 
 
 # Single input
-T_new = 40  # Celcius
+T_new = 42.84  # Celcius
 
 eff_loss, V_list, I_list, P_list, a, b, c = iv(T_new)
-'''
+
 # Plot IV
 
 plt.figure(1)
@@ -83,4 +83,3 @@ print((np.amax(c) - np.amax(P_list)) / np.amax(P_list) *100, '% loss')
 print(np.amax(P_list),  'mw/cell')
 print(np.amax(c), 'mw/cell')
 plt.show()
-'''
