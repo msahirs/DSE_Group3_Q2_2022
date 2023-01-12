@@ -3,18 +3,23 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import Wind_loading_generations as Wind_l
 import scipy as sc
+import ISA_general
 
 nodes = 50
 h_balloon = 20000  # m
 h_ground = 0  # m
-L_excess = 15000  # N
+L_excess = 8000  # N
 D = 4000  # N
-density = 1000  # kg/m^3
-r = 0.005  # m
+density = 950  # kg/m^3
+r = 0.008  # m
 Cd = 0.3
 E = 100e9  # Pa
 g = 9.81  # m/s
 C = 4  # Ns/m
+
+L_tandem = 2400  # Lift force [N] of the tandem balloon
+D_tandem = 400  # Drag force [N] of the tandem balloon
+loc_lst = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]  # Fractions of the tether where the tandem balloon is located
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -62,14 +67,35 @@ def update_plot(i):
 
 
 # Create tandem balloon force
-L_tandem = 1200  # Lift force [N] of the tandem balloon
-D_tandem = 200  # Drag force [N] of the tandem balloon
-loc_lst = [0.4, 0.5, 0.6, 0.7, 0.8]  # Fractions of the tether where the tandem balloon is located
+node_lst = []
 for loc in loc_lst:
-    tandem_node = round(nodes * loc)
-    Ftandx[tandem_node - 1] = D_tandem
-    Ftandy[tandem_node - 1] = L_tandem
+    tandem_node = round(nodes * loc) - 1
+    node_lst.append(tandem_node)
+    Ftandx[tandem_node] = D_tandem
+    Ftandy[tandem_node] = L_tandem
 L = L_excess + np.sum(W) - len(loc_lst) * L_tandem
+
+R = 8.31446261815324 # J/K/mol
+MH2 = 2 * 1.00784 # u = g/mol
+RH2 = R/MH2 # J/K/mol / [g/mol] = J*mol/K/mol/g = J/K/g = kJ/K.kg
+def tandem_volume(h,l):
+    T, p, rho = ISA_general.ISA(h)
+    rhoH = p/RH2/T # [J/m3] / [kJ/kg.K] / [K] = [J/m3].[kg] / [kJ] = [kg/m3]/[J/kJ] = [g/m3]
+    rhoH = rhoH/1000
+    # print(rhoH)
+
+    rhodif = rho-rhoH # [kg/m3], Difference in weight between air and hydrogen at altitude h
+    L_over_V = rhodif * g # [N/m3], lift force per m3 of hydrogen
+    V = l/L_over_V
+    return V, rho
+
+def update_tandem(cd_tandem):
+    for i in range(len(loc_lst)):
+        vol, rho = tandem_volume(y[node_lst[i]], L_tandem)
+        R = (vol * 3 / 4 / np.pi) ** (1/3)
+        D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst[i]] - vx[node_lst[i]]) * abs((wind_speed[node_lst[i]] - vx[node_lst[i]])) * np.pi * R ** 2
+        Ftandx[tandem_node] = D_tandem
+
 
 # Interpolate the wind profile function
 dataset = np.array([[-1000, 0],
@@ -94,6 +120,7 @@ t = 0
 dt = 0.001
 t_end = 200
 max_stress = 0
+max_v = 0
 counter = 0
 while t < t_end:  # and np.any(abs(ax) > 0.1):
 
@@ -103,7 +130,7 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
 
     t += dt
     counter += 1
-    if counter % 10000 == 0:
+    if counter % 1000 == 0:
         print(f"Has run {counter} loops")
         xframes = np.append(xframes, [x], axis=0)
         yframes = np.append(yframes, [y], axis=0)
@@ -119,6 +146,10 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
         max_stress = np.max(T / crossA)
         max_node = np.argmax(T / crossA)
         tmax = t
+
+    if np.max(vx) > max_v:
+        max_v = np.max(vx)
+        tmaxv = t
 
     # Calculate wind force
     theta_nodes[0] = theta[0]
@@ -149,6 +180,8 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1]/2 + Fpary[-1]/ 2
 
     # Add tandem forces
+    if counter % 100 == 0:
+        update_tandem(0.3)
     Fx = Fx + Ftandx
     Fy = Fy + Ftandy
 
@@ -168,16 +201,17 @@ plt.show()
 
 # print(xframes, yframes)
 # print('Fx,Fy = ', Fx, Fy)
-# print(T)
+print(T)
 # print(T/(crossA * E / L0) + L0)
 # print(T / crossA)
 # print('ax,ay = ', ax, ay)
 # print('vx,vy = ', vx, vy)
 # print('x,y = ', x, y)
 # print(theta)
-print(np.sum(Fperpx))
+# print(np.sum(Fperpx))
 print(f'Final location is ({x[-1]}, {y[-1]})')
 print(f'Maximum stress is {max_stress} Pa at node {max_node} at {tmax} s')
+print(f'Maximum speed is {max_v} Pa at {tmaxv} s')
 print(f'Maximum stress in the steady solution is {np.max(T / crossA)} Pa at node {np.argmax(T / crossA)}')
 
 plt.plot(range(nodes - 1), T)
