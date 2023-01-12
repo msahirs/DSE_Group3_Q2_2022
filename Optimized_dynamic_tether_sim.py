@@ -5,9 +5,8 @@ import Wind_loading_generations as Wind_l
 import scipy as sc
 import ISA_general
 
-nodes = 150
+nodes = 10
 h_balloon = 20000  # m
-h_ground = 0  # m
 L_excess = 15000  # N
 D = 4000  # N
 density = 950  # kg/m^3
@@ -122,7 +121,7 @@ windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 # Set up simulation
 t = 0
 dt = 0.001
-t_end = 200
+t_end = 300
 max_stress = 0
 max_v = 0
 counter = 0
@@ -190,6 +189,9 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     Fx = Fx + Ftandx
     Fy = Fy + Ftandy
 
+    if t > 10 and counter % 10000 == 0:
+        L += (250e6 - np.max(T / crossA)) * crossA
+
     ax[1:] = Fx[1:] / m[1:] * min(t, 1)
     ay[1:] = Fy[1:] / m[1:] * min(t, 1)
     Rx = -Fx
@@ -218,6 +220,8 @@ print(f'Final location is ({x[-1]}, {y[-1]})')
 print(f'Maximum stress is {max_stress} Pa at node {max_node} at {tmax} s')
 print(f'Maximum speed is {max_v} Pa at {tmaxv} s')
 print(f'Maximum stress in the steady solution is {np.max(T / crossA)} Pa at node {np.argmax(T / crossA)}')
+print(f'Applied lift is {L} N')
+print(f'Excess lift is {L - np.sum(W)} N')
 
 plt.plot(range(nodes - 1), T)
 plt.show()
