@@ -1,8 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.animation import PillowWriter
 import pandas as pd
-
+import time
 import Wind_loading_generations as Wind_l
 import scipy as sc
 
@@ -15,7 +16,9 @@ def plot_response(x, y):
     plt.xlabel("Horizontal distance [meters]")
     plt.ylabel("Altitude [meters]")
     plt.legend()
-    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {L}[kN]")
+    plt.title(f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L/1000, 2)}[kN]")
+    figure_name = f"Final dynamic response to wind profile {wind_profile_select}. Balloon has a lift force of {round(L/1000, 2)}[kN]"
+    plt.savefig("./Figures/"+figure_name+".png")
     plt.show()
 
 
@@ -40,16 +43,29 @@ windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 colorlist = ["green", "blue", "red", "pink"]
 
 
-def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
+def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50):
 
-    nodes = 50
+    # nodes = 50
     # h_balloon = 15000  # m
     h_ground = 0  # m
 
-    D = 1000  # N
+    # top balloon parameters
+    diameter_top_balloon = 50  # meters
+    Cd_top_balloon = 0.1
+
+    # tandem balloon parameters
+    diameter_tan_balloon = 10  # meters
+    Cd_tan_balloon = 0.1
+
+    # Create tandem balloon force
+    L_tandem = 10000  # Lift force [N] of the tandem balloon
+    D_tandem = 50
+    loc_lst = [0.5]  # Fractions of the tether where the tandem balloon is located
+
+
+    D = 0  # N
     density = 950  # tether-  kg/m^3
     # r = 0.01  # m
-    wind = 20  # uniform wind m/s
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
     g = 9.81  # m/s
@@ -61,6 +77,8 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
     x = np.zeros(nodes)  # x pos
     Fx = np.zeros(nodes)  # sum of x forces on node
     Fy = np.zeros(nodes)  # sum of y forces on node
+    Ftandx = np.zeros(nodes)  # vector containing forces from tandem balloon in x
+    Ftandy = np.zeros(nodes)  # vector containing forces from tandem balloon in y
     vx = np.zeros(nodes)  # node velocity
     vy = np.zeros(nodes)
     ax = np.zeros(nodes)  # node acceleration
@@ -81,8 +99,12 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
     m[-1] = m[-1] * 0.5
     W = m * g
     global L
-    L = np.sum(W) + excess_L
+    L = np.sum(W) + excess_L - len(loc_lst)*L_tandem
 
+    for loc in loc_lst:
+        tandem_node = round(nodes * loc)
+        Ftandx[tandem_node - 1] = D_tandem
+        Ftandy[tandem_node - 1] = L_tandem
     t = 0
     dt = 0.001
 
@@ -149,6 +171,10 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
         Fx[-1] = D + Fperpx[-1] / 2 - Tx[-1] - Fresx[-1] + Fparx[-1] / 2
         Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1] / 2 + Fpary[-1] / 2
 
+        # Add tandem forces
+        Fx = Fx + Ftandx  # note! these are 2 vectors
+        Fy = Fy + Ftandy  # note! these are 2 vectors
+
         ax[1:] = Fx[1:] / m[1:] * min(t, 1)
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
 
@@ -162,26 +188,29 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000):
 
 
 wind_profile_select = 4
-t_end = 500
+t_end = 20
 
 xlists = []
 ylists = []
 max_stress_list = []
 
+
 ### animation ###
 
-animations = 4
+animations = 2
 cd_items = [0.6, 0.6, 0.6, 0.6]
-excess_L_list = [750, 1250, 1500, 1500]
-radius_items = [0.005, 0.005, 0.005, 0.0088]
+excess_L_list = [750, 750, 750, 750]
+radius_items = [0.005, 0.005, 0.005, 0.005]
 height_items = [20000, 20000, 20000, 20000]
+node_amount = [50, 75, 100, 150]
 for i in range(animations):
+    begin_time = time.time()
     excess_L = excess_L_list[i]  # N - excess lift
-    xlist, ylist, max_stress = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i],)
+    xlist, ylist, max_stress = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i], nodes=node_amount[i])
     xlists.append(xlist)
     ylists.append(ylist)
     max_stress_list.append(max_stress / 10 ** 6)
-    print(f"Done with tether {i + 1}")
+    print(f"Done with tether {i + 1}, it took {time.time()-begin_time}")
 print(max_stress_list)
 
 
@@ -218,7 +247,6 @@ def animate(i):
 # define plot scales for animation
 max_x_value = 0
 min_x_value = 0
-max_y_value = 0
 
 for i in range(len(xlists)):
     for xlist in xlists[i]:
@@ -230,18 +258,11 @@ for i in range(len(xlists)):
                     if x < min_x_value:
                         min_x_value = x
 
-    for ylist in ylists[i]:
-        for y_time_list in ylists:
-            for ynodes in y_time_list:
-                for y in ynodes:
-                    if y > max_x_value:
-                        max_y_value = y
-
 fig = plt.figure()
 title = f"Final dynamic response to wind profile {wind_profile_select}\n"\
         f" animated for a total of {t_end} [sec]"
 axis = plt.axes(xlim=(min_x_value-100, max_x_value+100), xlabel="Horizontal distance [meters]",
-                ylim=(-100, max_y_value+2000), ylabel="Altitude [meters]", title=title)
+                ylim=(-100, 20000+2000), ylabel="Altitude [meters]", title=title)
 
 # make lists for objects
 lines = []
@@ -260,7 +281,6 @@ time_template = 'time= %.1fs'
 time_text = axis.text(00.5, 0.9, "")
 
 gridlines_big = axis.grid(which="major")
-gridlines_small = axis.grid(which="minor", linestyle="--")
 legend = plt.legend()
 
 # check longest time duration
@@ -270,8 +290,10 @@ for i in xlists:
         t_longest = len(i)
 
 ani = animation.FuncAnimation(fig, animate, frames=t_longest, interval=60, blit=True)
+
+# save animation to Animations folder
+name = f'prr {t_longest}'
+save_name = ("./Animations/"+name+".gif")
+ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
 plt.show()
 plot_response(xlists, ylists)
-
-# saving animation in github
-f = r""
