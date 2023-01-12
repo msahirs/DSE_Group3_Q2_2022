@@ -30,7 +30,7 @@ def row_count(input):
     return i
 
 def main():
-
+    
     line_count = row_count(EXP_DATA)
 
     with open(EXP_DATA, 'r') as datafile:
@@ -54,7 +54,9 @@ def main():
         os.mkdir("data")
 
     np.savetxt("./data/SPA_output.csv", SPA_output, fmt = "%.3f", delimiter= ","
-            , header=','.join(SPA_OUTPUT_HEADERS))  
+            , header=','.join(SPA_OUTPUT_HEADERS)) 
+
+    print("SPA done! Data file successfully written") 
 
 if __name__ == '__main__':
     main()
