@@ -18,7 +18,7 @@ DCV = g0*ki*a*kd*np.log(d/a) #KV
 print("The DCV is: ", DCV)
 
 #V_design = np.arange(10, 200, 0.5)
-V_design = 167 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
+V_design = 35 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
 
 P_loss = (k0/kd)*(f+25)*math.sqrt(a/d)*(V_design-g0*ki*a*kd*np.log(d/a))**2*10**-5
 Amp_wire = P_design / (1000*V_design) #A
@@ -69,6 +69,6 @@ Loss_percent = (P_loss_total / (P_design/1000)) * 100
 #print("Your power loss due to corona is: ", np.round(P_loss, 2), "kilowatts per kilometer.")
 #print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
 #print("Your power loss due to inductive losses is: ", np.round(P_loss_inductance, 2), "kilowatts.")
-#print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
-#print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
+print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
+print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
 
