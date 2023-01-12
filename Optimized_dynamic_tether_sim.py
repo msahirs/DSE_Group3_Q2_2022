@@ -5,21 +5,17 @@ import Wind_loading_generations as Wind_l
 import scipy as sc
 import ISA_general
 
-nodes = 50
+nodes = 150
 h_balloon = 20000  # m
 h_ground = 0  # m
-L_excess = 8000  # N
+L_excess = 15000  # N
 D = 4000  # N
 density = 950  # kg/m^3
-r = 0.008  # m
+r = 0.005  # m
 Cd = 0.3
 E = 100e9  # Pa
 g = 9.81  # m/s
 C = 4  # Ns/m
-
-L_tandem = 2400  # Lift force [N] of the tandem balloon
-D_tandem = 400  # Drag force [N] of the tandem balloon
-loc_lst = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]  # Fractions of the tether where the tandem balloon is located
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -49,6 +45,14 @@ m = L0 * crossA * density * np.ones(nodes)
 m[0] = m[0] * 0.5
 m[-1] = m[-1] * 0.5
 W = m * g
+
+# Initiate tandem balloons
+tandem_spacing = 0.05
+D_tandem = 400  # Initial estimate for the drag force [N] of the tandem balloon (updated later)
+loc_lst = np.arange(0.1, 1., tandem_spacing)  # Fractions of the tether where the tandem balloon is located
+L_tandem = 0 * (h_balloon - h_ground) * tandem_spacing * crossA * density * g
+# Lift force [N] of the tandem balloon needed to lift the tether section between two balloons
+
 
 # Set up animation
 # Create the figure and axes to animate
@@ -94,7 +98,7 @@ def update_tandem(cd_tandem):
         vol, rho = tandem_volume(y[node_lst[i]], L_tandem)
         R = (vol * 3 / 4 / np.pi) ** (1/3)
         D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst[i]] - vx[node_lst[i]]) * abs((wind_speed[node_lst[i]] - vx[node_lst[i]])) * np.pi * R ** 2
-        Ftandx[tandem_node] = D_tandem
+        Ftandx[node_lst[i]] = D_tandem
 
 
 # Interpolate the wind profile function
@@ -157,8 +161,9 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     theta_nodes[-1] = theta[-1]
 
     wind_speed = windspeed_from_alt(y)
-    wind_perp = wind_speed * np.cos(theta_nodes)
-    wind_par = wind_speed * np.sin(theta_nodes)
+    rel_speed = wind_speed - vx
+    wind_perp = rel_speed * np.cos(theta_nodes)
+    wind_par = rel_speed * np.sin(theta_nodes)
     Fperp = Wind_l.calc_drag_on_wire(x, y, wind_perp, L0, r, Cd)
     Fperpx = Fperp * np.cos(theta_nodes)
     Fperpy = Fperp * np.sin(theta_nodes)
