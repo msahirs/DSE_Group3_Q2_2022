@@ -7,7 +7,7 @@ import PVIV
 
 
 # Input Variables
-A = 2700  # Area of solar cell configuration [m^2]
+A = 2200  # Area of solar cell configuration [m^2]
 dh = 1 # Distance between pv array and balloon [m]
 h = 20000.0  # Height [m]
 v_wind = 5  # Wind speed [m/s]
@@ -117,12 +117,16 @@ for t in range(len(t_list)):
     q[6].append(q_cfrp_forced_conv)
 
     # Time step
+    '''
     dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
     dT_bottom = (q_emission_cfrp + q_cfrp_free_conv + q_cfrp_forced_conv) / Cp_bottom * dt
     T_bottom = (T_bottom + dT_bottom) * (1-New_air_ps) + T_air * New_air_ps
+    '''
+    dT = (q_abs - q_forced_conv - q_free_conv - q_emission) / Cp_module * dt
+    T = T + dT
+    T_bottom = 0
 
-    #print(T, dT, T_bottom, dT_bottom, Ra_cfrp, q_emission_cfrp)
 
 
 # Finding maxima and printing
@@ -150,17 +154,17 @@ print(round(q[6][max_index]), "Watts released trough bottom forced conv",
 fig, ax1 = plt.subplots()
 
 # First graph
-color = 'tab:blue'
-ax1.set_xlabel('time')
-ax1.set_ylabel('temperature (C)', color=color)
-ax1.plot(t_list, T_list, color=color)
+color = 'tab:red'
+ax1.set_xlabel('Time of day (hh:mm)')
+ax1.set_ylabel('Solar Irradiance (W/m^2)', color=color)
+ax1.plot(t_list, flux_interp, color=color)
 ax1.tick_params(axis='y', labelcolor=color)
 
 # Second graph
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
-color = 'tab:orange'
-ax2.set_ylabel('solar irradiance (W/m^2)', color=color)  # we already handled the x-label with ax1
-ax2.plot(t_list, flux_interp, color=color)
+color = 'tab:blue'
+ax2.set_ylabel('Temperature (C)', color=color)  # we already handled the x-label with ax1
+ax2.plot(t_list, T_list, color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 
 # Set x-axis labels
