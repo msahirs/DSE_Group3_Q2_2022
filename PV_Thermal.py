@@ -67,7 +67,7 @@ T_bottom = T_air
 T_bottom_list = []
 q = [[], [], [], [], [], [], []]  # list of all heat flows: absorption, emission, free, forced, emission, free, forced
 
-for t in t_list:
+for t in range(len(t_list)):
     T_list.append(T - 273.15)
     T_bottom_list.append(T_bottom - 273.15)
     I_sun = flux_interp[t]
@@ -162,15 +162,20 @@ color = 'tab:orange'
 ax2.set_ylabel('solar irradiance (W/m^2)', color=color)  # we already handled the x-label with ax1
 ax2.plot(t_list, flux_interp, color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-'''
+
 # Set x-axis labels
 div = 4
 initial_time = 2
-labels = np.array([datetime.time(initial_time + div * i, 0) for i in range(math.floor(len(t_list) / div))])
+labels = []
+zero = datetime.datetime.min
+for i in range(math.floor(len(t_list) / (div * 3600))):
+    timestep = datetime.timedelta(hours = initial_time, seconds = i * div * 3600)
+    labels.append((zero + timestep).time())
+
+# labels = np.array([datetime.time(initial_time + div * i, 0) for i in range(math.floor(len(t_list) / div))])
 for i in range(len(labels)):
     labels[i] = labels[i].strftime("%H:%M")
-plt.xticks(t_list[initial_time::div], labels)
-'''
+plt.xticks(np.arange(initial_time * 3600, t_max, t_max / (24 / div)), labels)
 fig.tight_layout()
 
 print(PVIV.iv(np.amax(T_list))[0], 'mpp eff loss')
