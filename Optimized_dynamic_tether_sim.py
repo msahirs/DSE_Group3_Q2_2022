@@ -5,16 +5,17 @@ import Wind_loading_generations as Wind_l
 import scipy as sc
 import ISA_general
 
-nodes = 10
+nodes = 50
 h_balloon = 20000  # m
-L_excess = 15000  # N
-D = 4000  # N
+h_ground = 0  # m
+L_excess = 8000  # N
 density = 950  # kg/m^3
 r = 0.005  # m
 Cd = 0.3
 E = 100e9  # Pa
 g = 9.81  # m/s
 C = 4  # Ns/m
+A = 593.2 # m^2 balloon frontal area
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -121,7 +122,7 @@ windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 # Set up simulation
 t = 0
 dt = 0.001
-t_end = 300
+t_end = 200
 max_stress = 0
 max_v = 0
 counter = 0
@@ -153,6 +154,7 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     if np.max(vx) > max_v:
         max_v = np.max(vx)
         tmaxv = t
+        max_v_pos = np.argmax(vx)
 
     # Calculate wind force
     theta_nodes[0] = theta[0]
@@ -174,6 +176,10 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     # Calculate resisting forces
     Fresx = C * vx
     Fresy = C * vy
+
+    # Calculate drag due to balloon
+
+    D = 0.5 * ISA_general.ISA(y[-1])[2] * (wind_speed[-1] - vx[-1]) * abs((wind_speed[-1] - vx[-1])) * A * 0.04
 
     # Calculate total forces on all nodes
     Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0] + Fparx[0]/ 2
@@ -218,8 +224,9 @@ print(T)
 # print(np.sum(Fperpx))
 print(f'Final location is ({x[-1]}, {y[-1]})')
 print(f'Maximum stress is {max_stress} Pa at node {max_node} at {tmax} s')
-print(f'Maximum speed is {max_v} Pa at {tmaxv} s')
+print(f'Maximum speed is {max_v} m/s at {tmaxv} s and node {max_v_pos}')
 print(f'Maximum stress in the steady solution is {np.max(T / crossA)} Pa at node {np.argmax(T / crossA)}')
+print(f'{D}')
 print(f'Applied lift is {L} N')
 print(f'Excess lift is {L - np.sum(W)} N')
 
