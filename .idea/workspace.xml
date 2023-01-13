@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Gezeik en ellende">
-      <change afterPath="$PROJECT_DIR$/FlappyBird.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added ChatGTP Flappy Bird">
       <change beforePath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Wire_structure_calculations.py" beforeDir="false" afterPath="$PROJECT_DIR$/Wire_structure_calculations.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -238,7 +235,14 @@
       <option name="project" value="LOCAL" />
       <updated>1673544432616</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Added ChatGTP Flappy Bird">
+      <created>1673621955412</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1673621955412</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -257,7 +261,8 @@
     <MESSAGE value="A summary" />
     <MESSAGE value="messing around" />
     <MESSAGE value="Gezeik en ellende" />
-    <option name="LAST_COMMIT_MESSAGE" value="Gezeik en ellende" />
+    <MESSAGE value="Added ChatGTP Flappy Bird" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added ChatGTP Flappy Bird" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

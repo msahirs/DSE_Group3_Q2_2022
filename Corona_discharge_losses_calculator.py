@@ -17,8 +17,8 @@ ki = 0.95   #Wire irregularity factor
 DCV = g0*ki*a*kd*np.log(d/a) #KV
 print("The DCV is: ", DCV)
 
-#V_design = np.arange(35, 200, 0.5)
-V_design = 130 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
+V_design = np.arange(10, 200, 0.5)
+#V_design = 130 #DCV   #FOR CALCULATING LOSSES AT DIFFERENT VOLTAGES, Change value
 
 P_loss = (k0/kd)*(f+25)*math.sqrt(a/d)*(V_design-g0*ki*a*kd*np.log(d/a))**2*10**-5
 Amp_wire = P_design / (1000*V_design) #A
@@ -65,8 +65,8 @@ Loss_percent = (P_loss_total / (P_design/1000)) * 100
 
 
 fig, ax = plt.subplots()
-ax.plot(f, P_loss_corona)
-ax.set_xlabel('Frequency [Hz]')
+ax.plot(V_design, P_loss_ohmic)
+ax.set_xlabel('Voltage [KV]')
 ax.set_ylabel('Loss [KW]')
 #ax.set_title('Line Graph')
 plt.show()
