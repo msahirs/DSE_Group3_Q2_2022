@@ -59,6 +59,30 @@ def comment_out ():
 
     #print("Mass, square config.:", rho*b**2*t)
 
+def plate_load ():
+    l=5 #m
+    #position vector
+    X=np.linspace(0, 3, 5)
+    Y=np.linspace(0, 3, 5)
+    elem_no_in = (len(X)-1)*(len(Y)-2)+(len(Y)-1)*(len(X)-2)
+    elem_no_out = (len(X)-1)*(len(Y)-1)
+    print(elem_no_in, elem_no_out)
+
+    #loads
+    F_payload=1000*9.81
+    F_tension=1000*9.81 #will vary
+    F_resultant=F_payload+F_tension
+
+    F_element_in=F_payload/elem_no_in
+    F_element_out=F_resultant/elem_no_out
+
+    #load acting at nodes
+    P_c=-F_element_out #corners, forces act up
+    P_s=-F_element_out+F_element_in/2 #sides, forces act up
+    P_m=2*F_element_in #middle, forces down
+
+    print(P_c, P_s, P_m)
+    return
 
 #Rod loading
 def rod_load (W_panels, W_payload, W_wire, safety_f, tensile_str, compress_str, density):
@@ -94,9 +118,9 @@ def rod_load (W_panels, W_payload, W_wire, safety_f, tensile_str, compress_str, 
 
 #Design parameters
 g=9.81
-W_panels = 1000 * g
-W_payload = 1300 * g
-W_wire = 2300 * g
+W_panels = 1200 * g
+W_payload = 400 * g
+W_wire = 1200 * g
 safety_f=0.2
 
 #Aluminium parameters
@@ -124,34 +148,3 @@ r0=math.sqrt(A/3.14+ri**2)
 print(r0)
 print("Carbon composite rod: mass ", m_rod,"kg, radius ", radius,"m, cross-sectional area ", A, "m^3")
 
-def plate_load ():
-    l=5 #m
-    #position vector
-    X=np.linspace(0, 3, 5)
-    Y=np.linspace(0, 3, 5)
-    elem_no_in = (len(X)-1)*(len(Y)-2)+(len(Y)-1)*(len(X)-2)
-    elem_no_out = (len(X)-1)*(len(Y)-1)
-    print(elem_no_in, elem_no_out)
-
-    #loads
-    F_payload=1000*9.81
-    F_tension=1000*9.81 #will vary
-    F_resultant=F_payload+F_tension
-
-    F_element_in=F_payload/elem_no_in
-    F_element_out=F_resultant/elem_no_out
-
-    #load acting at nodes
-    P_c=-F_element_out #corners, forces act up
-    P_s=-F_element_out+F_element_in/2 #sides, forces act up
-    P_m=2*F_element_in #middle, forces down
-
-    print(P_c, P_s, P_m)
-
-    #
-
-    return
-
-#plate_load()
-
-comment_out()
