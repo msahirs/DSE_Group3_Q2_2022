@@ -5,20 +5,19 @@ import Wind_loading_generations as Wind_l
 import scipy as sc
 import ISA_general
 
-nodes = 50
+nodes = 150
 h_balloon = 20000  # m
 h_ground = 0  # m
-L_excess = 8000  # N
+L_excess = 5000  # N
+D = 4000  # N
 density = 950  # kg/m^3
 r = 0.005  # m
+cd_balloon = 0.112
 Cd = 0.3
 E = 100e9  # Pa
 g = 9.81  # m/s
-C = 4  # Ns/m
-
-L_tandem = 2400  # Lift force [N] of the tandem balloon
-D_tandem = 400  # Drag force [N] of the tandem balloon
-loc_lst = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]  # Fractions of the tether where the tandem balloon is located
+C = 0.1  # Ns/m
+A = 1225.2  # m^2
 
 # Initiate nodes
 y = np.linspace(h_ground, h_balloon, nodes)  # altitude
@@ -51,7 +50,6 @@ W = m * g
 
 # Initiate tandem balloons
 tandem_spacing = 0.05
-A = 973.5
 D_tandem = 400  # Initial estimate for the drag force [N] of the tandem balloon (updated later)
 loc_lst = np.arange(0.1, 1., tandem_spacing)  # Fractions of the tether where the tandem balloon is located
 L_tandem = 0 * (h_balloon - h_ground) * tandem_spacing * crossA * density * g
@@ -75,10 +73,10 @@ def update_plot(i):
 
 
 # Create tandem balloon force
-node_lst_tandum = []
+node_lst_tandem = []
 for loc in loc_lst:
     tandem_node = round(nodes * loc) - 1
-    node_lst_tandum.append(tandem_node)
+    node_lst_tandem.append(tandem_node)
     Ftandx[tandem_node] = D_tandem
     Ftandy[tandem_node] = L_tandem
 L = L_excess + np.sum(W) - len(loc_lst) * L_tandem
@@ -102,11 +100,10 @@ def tandem_volume(h, l):
 
 def update_tandem(cd_tandem):
     for i in range(len(loc_lst)):
-        vol, rho = tandem_volume(y[node_lst_tandum[i]], L_tandem)
-        R = (vol * 3 / 4 / np.pi) ** (1 / 3)
-        D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst_tandum[i]] - vx[node_lst_tandum[i]]) * abs(
-            (wind_speed[node_lst_tandum[i]] - vx[node_lst_tandum[i]])) * np.pi * R ** 2
-        Ftandx[node_lst_tandum[i]] = D_tandem
+        vol, rho = tandem_volume(y[node_lst_tandem[i]], L_tandem)
+        R = (vol * 3 / 4 / np.pi) ** (1/3)
+        D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst_tandem[i]] - vx[node_lst_tandem[i]]) * abs((wind_speed[node_lst_tandem[i]] - vx[node_lst_tandem[i]])) * np.pi * R ** 2
+        Ftandx[node_lst_tandem[i]] = D_tandem
 
 
 # Interpolate the wind profile function
@@ -130,7 +127,7 @@ windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 # Set up simulation
 t = 0
 dt = 0.001
-t_end = 200
+t_end = 300
 max_stress = 0
 max_v = 0
 counter = 0
@@ -162,7 +159,6 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     if np.max(vx) > max_v:
         max_v = np.max(vx)
         tmaxv = t
-        max_v_pos = np.argmax(vx)
 
     # Calculate wind force
     theta_nodes[0] = theta[0]
@@ -185,10 +181,6 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
     Fresx = C * vx
     Fresy = C * vy
 
-    # Calculate drag due to balloon
-
-    D = 0.5 * ISA_general.ISA(y[-1])[2] * (wind_speed[-1] - vx[-1]) * abs((wind_speed[-1] - vx[-1])) * A * 0.04
-
     # Calculate total forces on all nodes
     Fx[0] = Tx[0] + Fperpx[0] / 2 - Fresx[0] + Fparx[0] / 2
     Fy[0] = Ty[0] - W[0] - Fresy[0] - Fperpy[0] / 2 + Fpary[0] / 2
@@ -199,12 +191,12 @@ while t < t_end:  # and np.any(abs(ax) > 0.1):
 
     # Add tandem forces
     if counter % 100 == 0:
-        update_tandem(0.3)
+        update_tandem(0.2)
     Fx = Fx + Ftandx
     Fy = Fy + Ftandy
 
     if t > 10 and counter % 10000 == 0:
-        L += (250e6 - np.max(T / crossA)) * crossA
+        L = min(L_initial, L + (250e6 - np.max(T / crossA)) * crossA)
 
     ax[1:] = Fx[1:] / m[1:] * min(t, 1)
     ay[1:] = Fy[1:] / m[1:] * min(t, 1)
@@ -234,7 +226,6 @@ print(f'Final location is ({x[-1]}, {y[-1]})')
 print(f'Maximum stress is {max_stress} Pa at node {max_node} at {tmax} s')
 print(f'Maximum speed is {max_v} m/s at {tmaxv} s and node {max_v_pos}')
 print(f'Maximum stress in the steady solution is {np.max(T / crossA)} Pa at node {np.argmax(T / crossA)}')
-print(f'{D}')
 print(f'Applied lift is {L} N')
 print(f'Excess lift is {L - np.sum(W)} N')
 

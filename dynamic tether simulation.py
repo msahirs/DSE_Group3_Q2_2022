@@ -79,12 +79,15 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     D_tandem = 50
     # loc_lst = [0.2]  # Fractions of the tether where the tandem balloon is located
 
-    density = 950  # tether-  kg/m^3
-    # r = 0.01  # m
+    rho_umpf = 950  # UHMWPE density, kg/m^3
+    rho_al = 70  # aluminium density, kg/m^3
+    A_umpf = 100e-6  # initial guess, m^2
+    A_al = 16e-6  # m^2
+    sigma_max = 250e6  # maximum allowable stress, Pa
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
     g = 9.81  # m/s
-    C = 4  # Ns/m
+    C = 0.1  # Ns/m
     plot_wind = False
 
     # Initiate nodes
@@ -103,17 +106,6 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     # Initiate segments
     segments = nodes - 1
     L0 = (h_balloon - h_ground) / segments  # length of a segment
-    crossA = r ** 2 * np.pi  # m^2
-    S_front = 2 * r * L0
-    theta = np.arctan(np.zeros(segments))
-
-    # Initiate node mass and weight (first and last node have half the mass of the rest)
-    m = L0 * crossA * density * np.ones(nodes)
-    m[0] = m[0] * 0.5
-    m[-1] = m[-1] * 0.5
-    W = m * g
-    global L
-    L = np.sum(W) + excess_L - len(loc_lst) * L_tandem  # lift top balloon
 
     node_lst = []
     for loc in loc_lst:
@@ -145,6 +137,14 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         # if counter % 1000 == 0:
         #     print(f"Has run for {t} sec in animation")
 
+        # Calculate new area and mass
+        crossA = A_umpf + A_al  # m^2
+        r = np.sqrt(crossA / np.pi)
+        m = L0 * (rho_umpf * A_umpf + rho_al * A_al) * np.ones(nodes)
+        m[0] = m[0] * 0.5
+        m[-1] = m[-1] * 0.5
+        W = m * g
+
         # Calculate tension forces in all segments
         Tension = crossA * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
         theta = np.arctan2((x[1:] - x[:-1]), (y[1:] - y[:-1]))
@@ -161,7 +161,6 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         theta_nodes[-1] = theta[-1]
 
         wind_speed = windspeed_from_alt(y)
-        # wind_speed = Wind_l.wind_profile(y, 2, False)
         if plot_wind:
             Wind_l.show_wind_profile(wind_speed, y)
         wind_perp = wind_speed * np.cos(theta_nodes)
@@ -174,8 +173,13 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         Fpar = Wind_l.calc_drag_on_wire(x, y, wind_par, L0, r, Cd)
         Fparx = Fpar * np.sin(theta_nodes)
         Fpary = Fpar * np.cos(theta_nodes)
+
+        # Balloon lift and drag
         D = 0.5 * ISA_general.ISA(y[[-1]])[2] * (wind_speed[-1] - vx[-1]) * abs(
             wind_speed[-1] - vx[-1]) * Frontal_area * Cd_top_balloon
+        global L
+        L = np.sum(W) + excess_L - len(loc_lst) * L_tandem  # lift top balloon
+
         # Calculate resisting forces
         Fresx = C * vx
         Fresy = C * vy
@@ -189,16 +193,16 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         Fy[-1] = L - Ty[-1] - W[-1] - Fresy[-1] - Fperpy[-1] / 2 + Fpary[-1] / 2
 
         # Add tandem forces
-        def update_tandem(cd_tandem):
-            for i in range(len(loc_lst)):
-                vol, rho = tandem_volume(y[node_lst[i]], L_tandem)
-                R = (vol * 3 / 4 / np.pi) ** (1 / 3)
-                D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst[i]] - vx[node_lst[i]]) * abs(
-                    (wind_speed[node_lst[i]] - vx[node_lst[i]])) * np.pi * R ** 2
-                Ftandx[tandem_node] = D_tandem
+        # def update_tandem(cd_tandem):
+        #     for i in range(len(loc_lst)):
+        #         vol, rho = tandem_volume(y[node_lst[i]], L_tandem)
+        #         R = (vol * 3 / 4 / np.pi) ** (1 / 3)
+        #         D_tandem = cd_tandem * 0.5 * rho * (wind_speed[node_lst[i]] - vx[node_lst[i]]) * abs(
+        #             (wind_speed[node_lst[i]] - vx[node_lst[i]])) * np.pi * R ** 2
+        #         Ftandx[tandem_node] = D_tandem
+        # if counter % 100 == 0:
+        #     update_tandem(Cd_tan_balloon)
 
-        if counter % 100 == 0:
-            update_tandem(Cd_tan_balloon)
         Fx = Fx + Ftandx  # note! these are 2 vectors
         Fy = Fy + Ftandy  # note! these are 2 vectors
 
@@ -206,7 +210,9 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
 
         if t > 10 and counter % 10000 == 0:
-            L += (250e6 - np.max(Tension / crossA)) * crossA
+            A_umpf = A_umpf * np.max(Tension / A_umpf) / sigma_max
+            print(f'Area of the UHMWPE is {A_umpf} m^2')
+            # L += (250e6 - np.max(Tension / crossA)) * crossA
 
         vx = vx + ax * dt
         vy = vy + ay * dt
@@ -218,7 +224,7 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
 
 
 wind_profile_select = 2
-t_end = 1000
+t_end = 500
 xlists = []
 ylists = []
 max_stress_list = []
@@ -227,14 +233,14 @@ end_tension_list = []
 
 ### animation ###
 
-animations = 4
-cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [5000, 5000, 5000, 5000]  # excess lift of top balloon
-radius_items = [0.004, 0.005, 0.006, 0.007]  # radius of tether
-height_items = [20000, 20000, 20000, 20000]  # top balloon height
-node_amount = [75, 75, 75, 75]  # amount of nodes to use
-dt_list = [0.0025, 0.0025, 0.005, 0.01]
-loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
+animations = 1
+cd_items = [0.3]  #[0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
+excess_L_list = [5000]  #[5000, 5000, 5000, 5000]  # excess lift of top balloon
+radius_items = [0.003]  #[0.004, 0.005, 0.006, 0.007]  # radius of tether
+height_items = [20000]  #[20000, 20000, 20000, 20000]  # top balloon height
+node_amount = [75]  #[75, 75, 75, 75]  # amount of nodes to use
+dt_list = [0.0025]  #[0.0025, 0.0025, 0.005, 0.01]
+loc_lsts = [[]]  #[[], [], [], []]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
     excess_L = excess_L_list[i]  # N - excess lift
@@ -347,15 +353,15 @@ for i in xlists:
 ani = animation.FuncAnimation(fig, animate, frames=t_longest, interval=60, blit=True)
 
 # save animation to Animations folder
-name = f'prr {t_longest}'
-save_name = ("./Animations/" + name + ".gif")
-ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
+# name = f'prr {t_longest}'
+# save_name = ("./Animations/" + name + ".gif")
+# ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
 print(f"Animating took {time.time() - begin_time} [sec]")
 plt.show()
-plot_response(xlists, ylists, loc_lsts)
-
-for numb, end_tension in enumerate(end_tension_list):
-    label = f"Max tension = {max(end_tension)}"
-    plt.plot(range(len(end_tension)), end_tension, c=colorlist[numb], label=label)
-plt.legend()
-plt.show()
+# plot_response(xlists, ylists, loc_lsts)
+#
+# for numb, end_tension in enumerate(end_tension_list):
+#     label = f"Max tension = {max(end_tension)}"
+#     plt.plot(range(len(end_tension)), end_tension, c=colorlist[numb], label=label)
+# plt.legend()
+# plt.show()
