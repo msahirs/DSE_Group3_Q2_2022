@@ -1,4 +1,5 @@
 import time
+
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,7 +13,7 @@ import Wind_loading_generations as Wind_l
 def plot_response(x, y, loc_lists, end_tension_list, end_lift_list):
     ax, fig = plt.subplots(1, 2, gridspec_kw={'width_ratios': [2, 1]})
     global L
-    plt.subplot(1,2,1)
+    plt.subplot(1, 2, 1)
     for item in range(len(x)):
         label = f"Tether {item + 1}, radius = {radius_items[item]} [m]"
         plt.plot(x[item][-1], y[item][-1], label=label, c=colorlist[item])
@@ -30,7 +31,7 @@ def plot_response(x, y, loc_lists, end_tension_list, end_lift_list):
     figure_name = f"Final dynamic response to realistic windprofile, change on wire radius "
     plt.subplot(1, 2, 2)
     for numb, end_tension in enumerate(end_tension_list):
-        rounded_lift = round(end_lift_list[numb]/1000, 2)
+        rounded_lift = round(end_lift_list[numb] / 1000, 2)
         label = f"Max tension = {round(max(end_tension) / 10 ** 6, 2)} \nLift needed is going to be {rounded_lift} [kN]"
         plt.plot(end_tension / 10 ** 6, range(len(end_tension)), c=colorlist[numb], label=label)
     plt.xlabel("Stress [Mpa]")
@@ -136,7 +137,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         Ftandx[tandem_node - 1] = D_tandem
         Ftandy[tandem_node - 1] = L_tandem
     t = 0
-    radius_list=[]
+    radius_list = []
     # dt = 0.001
 
     # plot_response(x, y)
@@ -163,7 +164,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         # Calculate new area and mass
         crossA = A_umpf + A_al  # m^2
         r = np.sqrt(crossA / np.pi)
-        radius_list.append(r)
+        radius_list.append(r*100)
         m = L0 * (rho_umpf * A_umpf + rho_al * A_al) * np.ones(nodes)
         m[0] = m[0] * 0.5
         m[-1] = m[-1] * 0.5
@@ -175,9 +176,6 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
 
         Tx = Tension * np.sin(theta)
         Ty = Tension * np.cos(theta)
-
-        if np.max(Tension / crossA) > max_stress and t > 10:
-            max_stress = np.max(Tension / crossA)
 
         # Calculate wind force
         theta_nodes[0] = theta[0]
@@ -235,9 +233,9 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         ax[1:] = Fx[1:] / m[1:] * min(t, 1)
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
 
-        if t > 10 and counter % 10000 == 0:
+        if t > 10 and counter % 100 == 0:
             A_umpf = A_umpf * np.max(Tension / A_umpf) / sigma_max
-            print(f'Area of the UHMWPE is {A_umpf} m^2')
+            # print(f'Area of the UHMWPE is {A_umpf} m^2')
             # L += (250e6 - np.max(Tension / crossA)) * crossA
 
         vx = vx + ax * dt
@@ -246,22 +244,23 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         x = x + vx * dt
         y = y + vy * dt
         plot_wind = False
-    return xlist, ylist, max_stress, Tension / crossA, L
+    return xlist, ylist, Tension / A_umpf, L, radius_list
 
 
-wind_profile_select = 2
-t_end = 100
+wind_profile_select = 4
+t_end = 200
 xlists = []
 ylists = []
 max_stress_list = []
 end_tension_list = []
 end_lift_list = []
+radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 2
+animations = 1
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [5000, 5000, 5000, 5000]  # excess lift of top balloon
+excess_L_list = [2000, 5000, 5000, 5000]  # excess lift of top balloon
 radius_items = [0.004, 0.007, 0.006, 0.007]  # radius of tether
 height_items = [20000, 20000, 20000, 20000]  # top balloon height
 node_amount = [75, 75, 75, 75]  # amount of nodes to use
@@ -270,20 +269,23 @@ loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
     excess_L = excess_L_list[i]  # N - excess lift
-    xlist, ylist, max_stress, End_Tension, end_lift = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i],
-                                                        nodes=node_amount[i], loc_lst=loc_lsts[i], dt=dt_list[i])
+    xlist, ylist, End_Tension, end_lift, radius_list_during_program = run_progamm(Cd=cd_items[i],
+                                                                                  r=radius_items[i],
+                                                                                  h_balloon=height_items[i],
+                                                                                  nodes=node_amount[i],
+                                                                                  loc_lst=loc_lsts[i],
+                                                                                  dt=dt_list[i])
     xlists.append(xlist)
     ylists.append(ylist)
-    max_stress_list.append(max_stress / 10 ** 6)
     end_tension_list.append(End_Tension)
     end_lift_list.append(end_lift)
+    radius_lists_during_programm.append(radius_list_during_program)
     time_in_sec = round(time.time() - begin_time)
     time_in_min = 0
-    if time_in_sec>59:
-        time_in_min = round((time.time() - begin_time)/60)
-    time_in_sec -= time_in_min*60
+    if time_in_sec > 59:
+        time_in_min = round((time.time() - begin_time) / 60)
+    time_in_sec = time_in_sec - time_in_min * 60
     print(f"Done with tether {i + 1}, it took {time_in_min} min and {time_in_sec} sec")
-print(max_stress_list)
 begin_time = time.time()
 
 
@@ -394,3 +396,8 @@ ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
 plt.show()
 plot_response(xlists, ylists, loc_lsts, end_tension_list, end_lift_list)
 
+for item in range(len(radius_lists_during_programm)):
+    label = f"Tether {item + 1}, excess lift = {excess_L_list[item]} [m]"
+    plt.plot(np.array(radius_lists_during_programm[item]) / 1000, label=label, c=colorlist[item])
+plt.legend()
+plt.show()
