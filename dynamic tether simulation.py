@@ -1,30 +1,44 @@
-import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib.animation import PillowWriter
-import pandas as pd
 import time
-import Wind_loading_generations as Wind_l
+import matplotlib.animation as animation
+import matplotlib.pyplot as plt
+import numpy as np
 import scipy as sc
+from matplotlib.animation import PillowWriter
+
 import ISA_general
+import Wind_loading_generations as Wind_l
 
 
-def plot_response(x, y, loc_lists):
+def plot_response(x, y, loc_lists, end_tension_list, end_lift_list):
+    ax, fig = plt.subplots(1, 2, gridspec_kw={'width_ratios': [2, 1]})
     global L
+    plt.subplot(1,2,1)
     for item in range(len(x)):
-        label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
+        label = f"Tether {item + 1}, radius = {radius_items[item]} [m]"
         plt.plot(x[item][-1], y[item][-1], label=label, c=colorlist[item])
         plt.plot(x[item][-1][-1], y[item][-1][-1], c="black", marker=".", markersize=20, linestyle="None")
         for loc_frac in loc_lists[item]:
-            loc = round(loc_frac * len(x[item][-1]))
-            plt.plot(x[item][-1][loc], y[item][-1][loc], c="gray", marker=".", markersize=10, linestyle="None")
+            if loc_frac:
+                loc = round(loc_frac * len(x[item][-1]))
+                plt.plot(x[item][-1][loc], y[item][-1][loc], c="gray", marker=".", markersize=10, linestyle="None")
     plt.xlabel("Horizontal distance [meters]")
     plt.ylabel("Altitude [meters]")
-    plt.legend()
+    plt.xlim(-100, 11000)
+    plt.legend(loc="lower right")
     plt.grid()
-    plt.title(
-        f"Final dynamic response to wind profile {wind_profile_select}\nBalloon has a lift force of {round(L / 1000, 2)}[kN]")
-    figure_name = f"Final dynamic response to wind profile {wind_profile_select}. Balloon has a lift force of {round(L / 1000, 2)}[kN]"
+    plt.title(f"Final dynamic response")
+    figure_name = f"Final dynamic response to realistic windprofile, change on wire radius "
+    plt.subplot(1, 2, 2)
+    for numb, end_tension in enumerate(end_tension_list):
+        rounded_lift = round(end_lift_list[numb]/1000, 2)
+        label = f"Max tension = {round(max(end_tension) / 10 ** 6, 2)} \nLift needed is going to be {rounded_lift} [kN]"
+        plt.plot(end_tension / 10 ** 6, range(len(end_tension)), c=colorlist[numb], label=label)
+    plt.xlabel("Stress [Mpa]")
+    # plt.ylabel("Node numb")
+    plt.title("Max tension in nodes")
+    plt.legend(loc="lower right")
+    plt.grid()
+    plt.suptitle("Left, plot showing final steady state solution. Right showing tension over altitude")
     plt.savefig("./Figures/" + figure_name + ".png")
     plt.show()
 
@@ -47,10 +61,10 @@ yset = 0.6 * dataset[:, 1]  # wind speed
 xset = dataset[:, 0]  # altitude
 windspeed_from_alt = sc.interpolate.interp1d(xset, yset, kind='quadratic')
 
-colorlist = ["green", "blue", "red", "pink"]
+colorlist = ["turquoise", "indigo", "red", "lime"]
 
 
-def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001):
+def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001):
     R = 8.31446261815324  # J/K/mol
     MH2 = 2 * 1.00784  # u = g/mol
     RH2 = R / MH2  # J/K/mol / [g/mol] = J*mol/K/mol/g = J/K/g = kJ/K.kg
@@ -68,10 +82,11 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     # nodes = 50
     # h_balloon = 15000  # m
     h_ground = 0  # m
+    # cross_area_alu =
 
     # drag coeff for balloons
-    Frontal_area = 593.2
-    Cd_top_balloon = 0.04
+    Frontal_area = 1225.2
+    Cd_top_balloon = 0.0112
     Cd_tan_balloon = 0.2
 
     # Create tandem balloon force
@@ -214,23 +229,23 @@ def run_progamm(Cd=1.2, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         x = x + vx * dt
         y = y + vy * dt
         plot_wind = False
-    return xlist, ylist, max_stress, Tension
+    return xlist, ylist, max_stress, Tension / crossA, L
 
 
 wind_profile_select = 2
-t_end = 1000
+t_end = 100
 xlists = []
 ylists = []
 max_stress_list = []
 end_tension_list = []
-
+end_lift_list = []
 
 ### animation ###
 
-animations = 4
+animations = 2
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
 excess_L_list = [5000, 5000, 5000, 5000]  # excess lift of top balloon
-radius_items = [0.004, 0.005, 0.006, 0.007]  # radius of tether
+radius_items = [0.004, 0.007, 0.006, 0.007]  # radius of tether
 height_items = [20000, 20000, 20000, 20000]  # top balloon height
 node_amount = [75, 75, 75, 75]  # amount of nodes to use
 dt_list = [0.0025, 0.0025, 0.005, 0.01]
@@ -238,13 +253,19 @@ loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
     excess_L = excess_L_list[i]  # N - excess lift
-    xlist, ylist, max_stress, End_Tension = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i],
+    xlist, ylist, max_stress, End_Tension, end_lift = run_progamm(Cd=cd_items[i], r=radius_items[i], h_balloon=height_items[i],
                                                         nodes=node_amount[i], loc_lst=loc_lsts[i], dt=dt_list[i])
     xlists.append(xlist)
     ylists.append(ylist)
     max_stress_list.append(max_stress / 10 ** 6)
     end_tension_list.append(End_Tension)
-    print(f"Done with tether {i + 1}, it took {round(time.time() - begin_time)} sec")
+    end_lift_list.append(end_lift)
+    time_in_sec = round(time.time() - begin_time)
+    time_in_min = 0
+    if time_in_sec>59:
+        time_in_min = round((time.time() - begin_time)/60)
+    time_in_sec -= time_in_min*60
+    print(f"Done with tether {i + 1}, it took {time_in_min} min and {time_in_sec} sec")
 print(max_stress_list)
 begin_time = time.time()
 
@@ -258,7 +279,6 @@ def animate(i):
         balloon = balloons[item]
         xlist = xlists[item]
         ylist = ylists[item]
-        tand_balloon = tand_balloons[item]
 
         # if already done reprint last state
         if i >= len(xlist):
@@ -272,20 +292,22 @@ def animate(i):
         balloon_y = y[-1]
         line.set_data(x, y)  # update the data.
         balloon.set_data(balloon_x, balloon_y)
+        # add to objects list
+        item_list.append(line)
+        item_list.append(balloon)
 
         # now for tand balloons
         loc_lst = loc_lsts[item]
         tand_x = []
         tand_y = []
-        for loc_frac in loc_lst:  # loop
-            loc = round(loc_frac * len(x))
-            tand_x.append(x[loc])
-            tand_y.append(y[loc])
-        tand_balloon.set_data(tand_x, tand_y)
-        # add to total return list
-        item_list.append(tand_balloon)
-        item_list.append(line)
-        item_list.append(balloon)
+        if loc_lst:
+            tand_balloon = tand_balloons[item]
+            for loc_frac in loc_lst:  # loop
+                loc = round(loc_frac * len(x))
+                tand_x.append(x[loc])
+                tand_y.append(y[loc])
+            tand_balloon.set_data(tand_x, tand_y)
+            item_list.append(tand_balloon)
 
     # time text update
     time_text.set_text(time_template % (i))
@@ -296,8 +318,8 @@ def animate(i):
 
 
 # define plot scales for animation
-max_x_value = 0
-min_x_value = 0
+# max_x_value = 0
+# min_x_value = 0
 
 # for i in range(len(xlists)):
 #     for xlist in xlists[i]:
@@ -312,7 +334,7 @@ min_x_value = 0
 fig = plt.figure()
 title = f"Final dynamic response to wind profile {wind_profile_select}\n" \
         f" animated for a total of {t_end} [sec]"
-axis = plt.axes(xlim=(0 - 100, 20000 + 2000), xlabel="Horizontal distance [meters]",
+axis = plt.axes(xlim=(-100, 20000 + 2000), xlabel="Horizontal distance [meters]",
                 ylim=(-100, 20000 + 2000), ylabel="Altitude [meters]", title=title)
 
 # make lists for objects
@@ -325,11 +347,12 @@ for item in range(animations):
     label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
     line, = axis.plot([], [], c=colorlist[item], label=label)
     balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"Balloon {item + 1}", c="black", markersize=20)
-    tand_balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"tand_balloons {item + 1}", c="gray",
-                              markersize=10)
+    if loc_lsts[item]:
+        tand_balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"tand_balloons {item + 1}", c="gray",
+                                  markersize=10)
+        tand_balloons.append(tand_balloon)
     lines.append(line)
     balloons.append(balloon)
-    tand_balloons.append(tand_balloon)
 
 # initialize time text
 time_template = 'time= %.1fs'
@@ -349,13 +372,9 @@ ani = animation.FuncAnimation(fig, animate, frames=t_longest, interval=60, blit=
 # save animation to Animations folder
 name = f'prr {t_longest}'
 save_name = ("./Animations/" + name + ".gif")
-ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
 print(f"Animating took {time.time() - begin_time} [sec]")
+ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
 plt.show()
-plot_response(xlists, ylists, loc_lsts)
+plot_response(xlists, ylists, loc_lsts, end_tension_list, end_lift_list)
 
-for numb, end_tension in enumerate(end_tension_list):
-    label = f"Max tension = {max(end_tension)}"
-    plt.plot(range(len(end_tension)), end_tension, c=colorlist[numb], label=label)
-plt.legend()
-plt.show()
+
