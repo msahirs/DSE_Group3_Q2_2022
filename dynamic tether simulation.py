@@ -300,7 +300,7 @@ def animate(i):
 
     return tuple(item_list)
 
-
+# dummy
 # define plot scales for animation
 max_x_value = 0
 min_x_value = 0
