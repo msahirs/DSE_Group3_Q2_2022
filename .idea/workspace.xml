@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="Added ChatGTP Flappy Bird">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -46,7 +47,7 @@
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
-  <component name="RunManager" selected="Python.FlappyBird">
+  <component name="RunManager" selected="Python.Corona_discharge_losses_calculator">
     <configuration name="Corona discharge Losses Calculator" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -183,10 +184,10 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Corona_discharge_losses_calculator" />
         <item itemvalue="Python.FlappyBird" />
         <item itemvalue="Python.Voltage_calculations" />
         <item itemvalue="Python.PolarPlot" />
-        <item itemvalue="Python.Corona_discharge_losses_calculator" />
         <item itemvalue="Python.Wire_structure_calculations" />
       </list>
     </recent_temporary>
@@ -242,7 +243,14 @@
       <option name="project" value="LOCAL" />
       <updated>1673621955412</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Added ChatGTP Flappy Bird">
+      <created>1673622381429</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1673622381429</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
