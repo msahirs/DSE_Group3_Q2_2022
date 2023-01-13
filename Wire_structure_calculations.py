@@ -13,7 +13,7 @@ safety_factor = 4 #dimensionless
 material_density = 980 #kg / m^3
 gravitational_constant = 9.80665 #m/s^2
 wire_length = 20000 #[m]
-Fd = 10000 #[N], total drag working on the tether
+Fd = 5135 #[N], total drag working on the tether
 wire_electric_weight = Corona_discharge_losses_calculator.M_wire_total #[kg]
 i =1
 
