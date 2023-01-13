@@ -141,6 +141,8 @@ class solar_atmosphere():
 
 def get_flux(zenith,incidence,slope,p_ratio,day):
     
+    
+    
     atmos = solar_atmosphere()
     
 

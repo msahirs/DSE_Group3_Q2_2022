@@ -45,9 +45,12 @@ def main():
             # subprocess.run([APP_PATH, *line], check = True)
             raw_out = subprocess.Popen([APP_PATH, *line], stdout=subprocess.PIPE)
             decoded_out = raw_out.communicate()[0].decode()
-            # print(decoded_out)
+            
+            if i%100 == 0:
+                print("SPA at datapoint =",i)
+
             decoded_out = np.fromstring(decoded_out, dtype = float, sep = " ")
-            # print(decoded_out)
+            
             SPA_output[i,:] = decoded_out
 
     if not os.path.exists(os.path.join(curr_dir,"data")):
