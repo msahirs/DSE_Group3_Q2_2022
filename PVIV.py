@@ -52,12 +52,11 @@ def iv(T):
 
 
 # Single input
-T_new = 42.84  # Celcius
+T_new = 40  # Celcius
 
 eff_loss, V_list, I_list, P_list, a, b, c = iv(T_new)
 
 # Plot IV
-
 plt.figure(1)
 plt.ylabel('mA')
 plt.xlabel('mV')
@@ -77,7 +76,7 @@ plt.title('P-V Curve')
 plt.ylim(0, np.amax(P_list) * 1.05)
 plt.xlim(0, V_oc * 1.05)
 plt.plot(V_list, P_list, color='b', label='28 °C')
-#plt.plot(a, c, color='r', label=str(T_new) + ' °C')
+plt.plot(a, c, color='r', label=str(T_new) + ' °C')
 plt.legend()
 
 print((np.amax(c) - np.amax(P_list)) / np.amax(P_list) *100, '% loss')

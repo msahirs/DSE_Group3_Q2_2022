@@ -5,10 +5,9 @@ import ISA_general
 import datetime
 import PVIV
 
-
 # Input Variables
 A = 2200  # Area of solar cell configuration [m^2]
-dh = 1 # Distance between pv array and balloon [m]
+dh = 1  # Distance between pv array and balloon [m]
 h = 20000.0  # Height [m]
 v_wind = 5  # Wind speed [m/s]
 albedo = 0.1  # Earth's albedo [-]
@@ -27,11 +26,10 @@ Pr = mu * Cp / k  # Prantl number [-]
 alpha = k / rho / Cp  # Thermal diffusivity of air [m^2/s]
 beta = 1 / T_air  # Thermal expansion coefficient [1/K] (approx)
 Cp_bottom = Cp * A * dh * rho
-L_charac = 2 * np.sqrt(A/np.pi)  # Characteristic length [m]
+L_charac = 2 * np.sqrt(A / np.pi)  # Characteristic length [m]
 R_charac = L_charac / 2
 A_segment_ps = 0.5 * R_charac * 2 * np.degrees(np.arccos((R_charac - v_wind) / R_charac))
 New_air_ps = A_segment_ps / A
-
 
 # Solar cell constants and calculations (Germanium)
 epsilon = 0.9  # Ge substrate emission coefficient [-]
@@ -46,8 +44,6 @@ Cp_cfrp = 1040  # Specific heat capacity of CFRP [J/kg/K]
 k_cfrp_hor = 250  # Conductivity (hor) of CFRP [W/m/K]
 k_cfrp_ver = 3  # Conductivity (ver) of CFRP [W/m/K]
 epsilon_cfrp = 0.88  # CFRP emission coefficient [-]
-
-
 
 # Initializing
 t_max = 86400
@@ -66,14 +62,21 @@ T_list = []
 T_bottom = T_air
 T_bottom_list = []
 q = [[], [], [], [], [], [], []]  # list of all heat flows: absorption, emission, free, forced, emission, free, forced
+eff_list = []
 
 for t in range(len(t_list)):
     T_list.append(T - 273.15)
     T_bottom_list.append(T_bottom - 273.15)
     I_sun = flux_interp[t]
 
+    if T - 273.15 < 28:
+        eff = 0.35
+    else:
+        power_pc = np.amax(PVIV.iv(T - 273.15)[6])
+        eff = power_pc / 4737.063674474133 * 0.35
+
     # direct absorption (from sun & earth)
-    alpha_ab = 0.65  # TBD
+    alpha_ab = 1 - eff
     I_ab = I_sun * (1 - refl_top)
     q_abs = I_ab * alpha_ab * A
     q[0].append(q_abs)
@@ -96,7 +99,6 @@ for t in range(len(t_list)):
     q_forced_conv = h_forced * A * (T - T_air)
     q[3].append(q_forced_conv)
 
-
     # CFRP emission
     q_emission_cfrp = sigma * epsilon_cfrp * (T ** 4 - T_bottom ** 4) * (A * 0.9)
     q[4].append(q_emission_cfrp)
@@ -117,18 +119,19 @@ for t in range(len(t_list)):
     q[6].append(q_cfrp_forced_conv)
 
     # Time step
-    '''
-    dT = (q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
+
+    dT = (
+                     q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
     dT_bottom = (q_emission_cfrp + q_cfrp_free_conv + q_cfrp_forced_conv) / Cp_bottom * dt
-    T_bottom = (T_bottom + dT_bottom) * (1-New_air_ps) + T_air * New_air_ps
+    T_bottom = (T_bottom + dT_bottom) * (1 - New_air_ps) + T_air * New_air_ps
     '''
     dT = (q_abs - q_forced_conv - q_free_conv - q_emission) / Cp_module * dt
     T = T + dT
     T_bottom = 0
+    '''
 
-
-
+'''
 # Finding maxima and printing
 max_index = np.argmax(T_list)
 print("\nMax temperature: ", T_list[max_index])
@@ -149,7 +152,7 @@ print(round(q[5][max_index]), "Watts released trough bottom free conv",
 print(round(q[6][max_index]), "Watts released trough bottom forced conv",
       round(q[6][max_index] / q[0][max_index] * 100, 2),
       "%")
-
+'''
 # Plotting
 fig, ax1 = plt.subplots()
 
@@ -173,7 +176,7 @@ initial_time = 2
 labels = []
 zero = datetime.datetime.min
 for i in range(math.floor(len(t_list) / (div * 3600))):
-    timestep = datetime.timedelta(hours = initial_time, seconds = i * div * 3600)
+    timestep = datetime.timedelta(hours=initial_time, seconds=i * div * 3600)
     labels.append((zero + timestep).time())
 
 # labels = np.array([datetime.time(initial_time + div * i, 0) for i in range(math.floor(len(t_list) / div))])
@@ -185,6 +188,6 @@ fig.tight_layout()
 print(PVIV.iv(np.amax(T_list))[0], 'mpp eff loss')
 print(np.amax(flux_interp), 'mpp flux')
 print(np.where(flux_interp == np.amax(flux_interp)), 'mpp time')
-plt.show()
 
+plt.show()
 
