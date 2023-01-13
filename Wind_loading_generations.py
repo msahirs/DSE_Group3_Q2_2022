@@ -100,9 +100,9 @@ def calc_drag_on_wire(x, y, wind_profile, length_of_element, r, Cd):
 
     for node_numb in range(len(x)):
         velocity = wind_profile[node_numb]
-        density = ISA(y[node_numb])[2]
-        area = r * length_of_element  # should be times 2, but next equation should be halved, so it cancelled
-        drag_on_segment = Cd * density * velocity * abs(velocity) * area
+        density_air = ISA(y[node_numb])[2]
+        area = r * length_of_element  # should be times 2 for diameter, but next equation should be halved, so it cancelled
+        drag_on_segment = Cd * density_air * velocity * abs(velocity) * area
         drag_on_wire.append(drag_on_segment)
     return drag_on_wire
 

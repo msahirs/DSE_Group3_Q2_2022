@@ -19,7 +19,7 @@ def ISA(h):
     p1 = p0 * (T1 / T0) ** (-g0 / (a1 * R))
     rho1 = p1 / (R * T1)
     if h <= 11000:
-        T = T1
+        Temp = T1
         p = p1
         rho = rho1
     else:
@@ -27,7 +27,7 @@ def ISA(h):
         p2 = p1 * e ** (-g0 / (R * T1) * (h2 - h1))
         rho2 = p2 / (R * T1)
         if h <= 20000:
-            T = T1
+            Temp = T1
             p = p2
             rho = rho2
         else:
@@ -37,7 +37,7 @@ def ISA(h):
             p3 = p2 * (T3 / T1) ** (-g0 / (a3 * R))
             rho3 = p3 / (R * T3)
             if h <= 32000:
-                T = T3
+                Temp = T3
                 p = p3
                 rho = rho3
             else:
@@ -47,7 +47,7 @@ def ISA(h):
                 p4 = p3 * (T4 / T3) ** (-g0 / (a4 * R))
                 rho4 = p4 / (R * T4)
                 if h <= 47000:
-                    T = T4
+                    Temp = T4
                     p = p4
                     rho = rho4
                 else:
@@ -64,7 +64,7 @@ def ISA(h):
                         p6 = p5 * (T6 / T4) ** (-g0 / (a6 * R))
                         rho6 = p6 / (R * T6)
                         if h <= 71000:
-                            T = T6
+                            Temp = T6
                             p = p6
                             rho = rho6
                         else:
@@ -74,10 +74,10 @@ def ISA(h):
                             p7 = p6 * (T7 / T6) ** (-g0 / (a7 * R))
                             rho7 = p7 / (R * T7)
                             if h <= 86000:
-                                T = T7
+                                Temp = T7
                                 p = p7
                                 rho = rho7
-    return T, p, rho
+    return Temp, p, rho
 
 
 def ISA_from_everything(altitude):
