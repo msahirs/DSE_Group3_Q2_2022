@@ -1,12 +1,15 @@
-import subprocess
+from subprocess import Popen, PIPE, STDOUT
 import os
-import csv
 import numpy as np
+import pandas as pd
+from multiprocessing.dummy import Pool
 
 curr_dir = os.getcwd()
+
+P_COUNT = 10
 APP_NAME = "SPA.exe"
 APP_PATH = ""
-EXP_DATA = os.path.join(curr_dir,"data","sweep_parameters.csv")
+EXP_DATA = os.path.join(curr_dir,"data","sweep_parameters.pkl")
 SPA_OUTPUT_HEADERS = ["JULIAN DAY", "L", "B", "R","H","DELTA PSI",
                     "DELTA EPSILON","EPSILON","ZENITH","AZIMUTH",
                     "INCIDENCE","DEL_E"]
@@ -23,35 +26,68 @@ if not os.path.exists(EXP_DATA):
     raise ImportError("Datafile not found. Maybe run input generator file\n",
                         "Program Terminating")
 
-def row_count(input):
-    with open(input) as f:
-        for i, l in enumerate(f):
-            pass
-    return i
+def get_lines(process):
+    return process.communicate()[0].decode().splitlines()
 
 def main():
+
+    data = pd.read_pickle(EXP_DATA, compression='zip')
     
-    line_count = row_count(EXP_DATA)
+    line_count = data.shape[0]
 
-    with open(EXP_DATA, 'r') as datafile:
+    print(f"Input data of {line_count} rows")
+    
+    SPA_output = np.zeros((line_count,len(SPA_OUTPUT_HEADERS)))
 
-        parser = csv.reader(datafile)
-        next(parser)
+    p_offset = line_count % P_COUNT != 0
+    p_iter = line_count//P_COUNT
 
-        SPA_output = np.zeros((line_count,len(SPA_OUTPUT_HEADERS)))
+    for c in range(p_iter):
+        
+        if p_offset != 0 & c*P_COUNT >= line_count:
+            input = [data.iloc[line_count-1 - p_offset,:].astype(str) for i in reversed(range(p_offset))]
+        
+        else:
+            input = [data.iloc[c*P_COUNT + i,:].astype(str) for i in range(P_COUNT)]
 
-        for i, line in enumerate(parser):
+        # print(input)
+
+        # raise"error"
+        
+        # subprocess.run([APP_PATH, *line], check = True)
+        # run commands in parallel
+        raw_out = [Popen([APP_PATH, *input[i]], shell=True,
+                   stdin=None, stdout=PIPE, stderr=STDOUT, close_fds=True).communicate()[0].decode().replace(" \r\n","") for i in range(P_COUNT)]
+        
+        
             
-            # subprocess.run([APP_PATH, *line], check = True)
-            raw_out = subprocess.Popen([APP_PATH, *line], stdout=subprocess.PIPE)
-            decoded_out = raw_out.communicate()[0].decode()
-            
-            if i%100 == 0:
-                print("SPA at datapoint =",i)
 
-            decoded_out = np.fromstring(decoded_out, dtype = float, sep = " ")
-            
-            SPA_output[i,:] = decoded_out
+        
+
+        
+
+        # outputs = Pool(len(raw_out)).map(get_lines, raw_out)
+        
+
+
+
+        if p_offset != 0 & c*P_COUNT >= line_count:
+
+            for x in reversed(range(len(raw_out))):
+                
+                SPA_output[line_count-1-x,:] = np.fromstring(raw_out[x], dtype = float, sep = " ")
+        
+        else:
+
+            for x in range(len(raw_out)):
+                
+                
+                SPA_output[c*P_COUNT + x,:] = np.fromstring(raw_out[x], dtype = float, sep = " ")
+
+        if c*P_COUNT > 500:
+            print( "Done")
+
+            return 0
 
     if not os.path.exists(os.path.join(curr_dir,"data")):
         os.mkdir("data")
@@ -62,5 +98,6 @@ def main():
     print("SPA done! Data file successfully written") 
 
 if __name__ == '__main__':
+
     main()
 
