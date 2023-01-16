@@ -1,5 +1,5 @@
 import time
-
+import math
 import matplotlib.animation as animation
 import matplotlib.pyplot as plt
 import numpy as np
@@ -98,19 +98,22 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     Cd_tan_balloon = 0.2
 
     # Create tandem balloon force
-    L_tandem = 2000  # Lift force [N] of the tandem balloon
+    L_tandem = 1000  # Lift force [N] of the tandem balloon
     D_tandem = 50
     # loc_lst = [0.2]  # Fractions of the tether where the tandem balloon is located
 
     rho_umpf = 950  # UHMWPE density, kg/m^3
-    rho_al = 70  # aluminium density, kg/m^3
+    rho_al = 2710  # aluminium density, kg/m^3
     A_umpf = 100e-6  # initial guess, m^2
-    A_al = 16e-6  # m^2
+    r1 = 0.000782390181755427  # m
+    r2 = 0.00365342418165717  # m
+    r3 = 0.00373626051656261  # m
+    A_al = np.pi * (r1**2 - r2**2 + r3**2)  # m^2
     sigma_max = 250e6  # maximum allowable stress, Pa
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
     g = 9.81  # m/s
-    C = 0.1  # Ns/m
+    C = 2.5  # Ns/m
     plot_wind = False
 
     # Initiate nodes
@@ -163,15 +166,15 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
 
         # Calculate new area and mass
         crossA = A_umpf + A_al  # m^2
-        r = np.sqrt(crossA / np.pi)
-        radius_list.append(r*100)
+        r = np.sqrt(crossA / np.pi)  # m
+        radius_list.append(r*1000)  # mm
         m = L0 * (rho_umpf * A_umpf + rho_al * A_al) * np.ones(nodes)
         m[0] = m[0] * 0.5
         m[-1] = m[-1] * 0.5
         W = m * g
 
         # Calculate tension forces in all segments
-        Tension = crossA * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
+        Tension = A_umpf * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
         theta = np.arctan2((x[1:] - x[:-1]), (y[1:] - y[:-1]))
 
         Tx = Tension * np.sin(theta)
@@ -233,7 +236,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         ax[1:] = Fx[1:] / m[1:] * min(t, 1)
         ay[1:] = Fy[1:] / m[1:] * min(t, 1)
 
-        if t > 10 and counter % 100 == 0:
+        if t > 10 and counter % 1000 == 0:
             A_umpf = A_umpf * np.max(Tension / A_umpf) / sigma_max
             # print(f'Area of the UHMWPE is {A_umpf} m^2')
             # L += (250e6 - np.max(Tension / crossA)) * crossA
@@ -244,11 +247,16 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         x = x + vx * dt
         y = y + vy * dt
         plot_wind = False
+    print(f'The final location is ({round(x[-1]/1000,2)}, {round(y[-1]/1000,2)})')
+    print(f'The final maximum stress is {np.max(Tension / A_umpf)} Pa, total lift is {L/1000} kN')
+    print(f'Area of the UHMWPE is {A_umpf * 1e6} mm^2, radius is {r*1000} mm')
+    print(f'The tether weighs {np.sum(W)/1000} kN')
+    print(f'The aluminium core weighs {rho_al * A_al * (h_balloon - h_ground) * g / 1000} kN')
     return xlist, ylist, Tension / A_umpf, L, radius_list
 
 
 wind_profile_select = 4
-t_end = 200
+t_end = 5000
 xlists = []
 ylists = []
 max_stress_list = []
@@ -258,13 +266,14 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 1
+
+animations = 2
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [2000, 5000, 5000, 5000]  # excess lift of top balloon
-radius_items = [0.004, 0.007, 0.006, 0.007]  # radius of tether
-height_items = [20000, 20000, 20000, 20000]  # top balloon height
-node_amount = [75, 75, 75, 75]  # amount of nodes to use
-dt_list = [0.0025, 0.0025, 0.005, 0.01]
+excess_L_list = [0, 1000, 2000, 1000]  # excess lift of top balloon
+radius_items = [0.0, 0.0, 0.0, 0.0]  # radius of tether
+height_items = [20000, 20000, 17000, 17000]  # top balloon height
+node_amount = [100, 100, 100, 100]  # amount of nodes to use
+dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
 loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
@@ -282,8 +291,8 @@ for i in range(animations):
     radius_lists_during_programm.append(radius_list_during_program)
     time_in_sec = round(time.time() - begin_time)
     time_in_min = 0
-    if time_in_sec > 59:
-        time_in_min = round((time.time() - begin_time) / 60)
+    if time_in_sec >= 60:
+        time_in_min = math.floor((time.time() - begin_time) / 60)
     time_in_sec = time_in_sec - time_in_min * 60
     print(f"Done with tether {i + 1}, it took {time_in_min} min and {time_in_sec} sec")
 begin_time = time.time()
@@ -366,12 +375,15 @@ for item in range(animations):
     label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
     line, = axis.plot([], [], c=colorlist[item], label=label)
     balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"Balloon {item + 1}", c="black", markersize=20)
-    if loc_lsts[item]:
+    if loc_lsts[item] != []:
         tand_balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"tand_balloons {item + 1}", c="gray",
                                   markersize=10)
         tand_balloons.append(tand_balloon)
+    else:
+        tand_balloons.append([])
     lines.append(line)
     balloons.append(balloon)
+
 
 # initialize time text
 time_template = 'time= %.1fs'
@@ -391,13 +403,15 @@ ani = animation.FuncAnimation(fig, animate, frames=t_longest, interval=60, blit=
 # save animation to Animations folder
 name = f'prr {t_longest}'
 save_name = ("./Animations/" + name + ".gif")
-print(f"Animating took {time.time() - begin_time} [sec]")
+
 ani.save(save_name, dpi=300, writer=PillowWriter(fps=25))
+print(f"Animating took {time.time() - begin_time} [sec]")
 plt.show()
+
 plot_response(xlists, ylists, loc_lsts, end_tension_list, end_lift_list)
 
 for item in range(len(radius_lists_during_programm)):
     label = f"Tether {item + 1}, excess lift = {excess_L_list[item]} [m]"
-    plt.plot(np.array(radius_lists_during_programm[item]) / 1000, label=label, c=colorlist[item])
+    plt.plot(np.array(radius_lists_during_programm[item]), label=label, c=colorlist[item])
 plt.legend()
 plt.show()
