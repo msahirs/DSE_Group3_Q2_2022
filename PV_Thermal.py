@@ -6,7 +6,7 @@ import datetime
 import PVIV
 
 # Input Variables
-A = 2716  # Area of solar cell configuration [m^2]
+A = 2726  # Area of solar cell configuration [m^2]
 dh = 1  # Distance between pv array and balloon [m]
 h = 20000.0  # Height [m]
 v_wind = 5  # Wind speed [m/s]
@@ -117,6 +117,7 @@ for t in range(len(t_list)):
     q[6].append(q_cfrp_forced_conv)
 
     # Time step
+
     dT = (
                      q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
@@ -182,9 +183,19 @@ for i in range(len(labels)):
 plt.xticks(np.arange(initial_time * 3600, t_max, t_max / (24 / div)), labels)
 fig.tight_layout()
 
+
 print(sum(q[7]) / 10 ** 9, 'Power generated in 24H (GJ)')
-print(sum(q[7]) / 3600000, 'Power generated in kWh')
-print(np.amax(flux_interp), 'mpp Flux (W/m2)')
-print(np.where(flux_interp == np.amax(flux_interp)), 'mpp Time (s)')
+print(sum(q[7]) / 3600000, 'Power generated in 24H (kWh)')
+print(np.amax(flux_interp), 'Max Flux (W/m2)')
+print(np.where(flux_interp == np.amax(flux_interp)), 'Max Flux Time (s)')
+print(np.amax(T_list), 'Max Temperature')
+print(np.amax(PVIV.iv(np.amax(T_list))[2]), 'Power per cell at max temp (mW/m2)')
+print((np.amax(PVIV.iv(np.amax(T_list))[2])-np.amax(PVIV.iv(28)[2]))/np.amax(PVIV.iv(28)[2])*100, 'Percent eff loss')
+print(np.amax(PVIV.iv(np.amax(T_list))[2]) / power_pc * 0.35, 'Eff at max temp')
+print(301.5*402*10**-6, 'Panel area (m2) at 12 cells')
+print(np.amax(PVIV.iv(np.amax(T_list))[2])/1000*12, 'W per panel')
+print(np.amax(PVIV.iv(np.amax(T_list))[2])/1000/(301.5*402*10**-6)*12, 'W/m2 of a panel')
+print(1074762 / (np.amax(PVIV.iv(np.amax(T_list))[2])/1000/(301.5*402*10**-6)*12), 'Panels for 1074762 W')
+
 
 plt.show()

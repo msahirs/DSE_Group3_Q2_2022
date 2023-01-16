@@ -42,7 +42,7 @@ def iv(T):
 
 '''
 # Single input
-T_new = 40  # Celcius
+T_new = 44.6  # Celcius
 
 a, b, c = iv(T_new)
 
