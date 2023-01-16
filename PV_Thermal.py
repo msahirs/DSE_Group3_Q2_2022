@@ -6,11 +6,10 @@ import datetime
 import PVIV
 
 # Input Variables
-A = 2200  # Area of solar cell configuration [m^2]
+A = 2716  # Area of solar cell configuration [m^2]
 dh = 1  # Distance between pv array and balloon [m]
 h = 20000.0  # Height [m]
 v_wind = 5  # Wind speed [m/s]
-albedo = 0.1  # Earth's albedo [-]
 
 # Constants
 Cp = 1005  # Specific heat capacity of air [J/kg/K]
@@ -18,6 +17,19 @@ k = 2 * 10 ** (-3)  # Thermal conductivity of air [W/m/K]
 g = 9.81  # Gravitational acceleration [m/s^2]
 sigma = 5.67 * 10 ** (-8)  # Boltzmann constant [W/m^2/K^4]
 I_earth = 237  # Earth's infrared emission [W/m^2]
+
+# Solar cell constants and calculations (Germanium)
+epsilon = 0.9  # Ge substrate emission coefficient [-]
+refl_top = 0.02  # Reflectivity of solar cell cap [-]
+Rho_Ge = 5323  # Ge substrate density [kg/m^3]
+Cp_Ge = 3200  # Specific heat capacity of  Ge [J/kg/K]
+d_Ge = 75 * 10 ** (-6)  # Approx thickness Ge substrate [m]
+Cp_module = Rho_Ge * Cp_Ge * d_Ge * A  # Heat capacity of PV [J/K]
+power_pc = np.amax(PVIV.iv(28)[2])
+
+# Backplane constants and calculations (CFRP)
+Cp_cfrp = 1040  # Specific heat capacity of CFRP [J/kg/K]
+epsilon_cfrp = 0.88  # CFRP emission coefficient [-]
 
 # Air Calculations
 T_air, P, rho, mu = ISA_general.ISA(h)
@@ -31,38 +43,23 @@ R_charac = L_charac / 2
 A_segment_ps = 0.5 * R_charac * 2 * np.degrees(np.arccos((R_charac - v_wind) / R_charac))
 New_air_ps = A_segment_ps / A
 
-# Solar cell constants and calculations (Germanium)
-epsilon = 0.9  # Ge substrate emission coefficient [-]
-refl_top = 0.02  # Reflectivity of solar cell cap [-]
-Rho_Ge = 5323  # Ge substrate density [kg/m^3]
-Cp_Ge = 3200  # Specific heat capacity of  Ge [J/kg/K]
-d_Ge = 75 * 10 ** (-6)  # Approx thickness Ge substrate [m]
-Cp_module = Rho_Ge * Cp_Ge * d_Ge * A  # Heat capacity of PV [J/K]
-
-# Backplane constants and calculations (CFRP)
-Cp_cfrp = 1040  # Specific heat capacity of CFRP [J/kg/K]
-k_cfrp_hor = 250  # Conductivity (hor) of CFRP [W/m/K]
-k_cfrp_ver = 3  # Conductivity (ver) of CFRP [W/m/K]
-epsilon_cfrp = 0.88  # CFRP emission coefficient [-]
-
 # Initializing
 t_max = 86400
 dt = 1
-t_list = np.arange(0, t_max, dt)
+t_list = np.linspace(0, t_max, int(t_max / dt) + 1)
 
 solar_irr = np.genfromtxt('data/merged_fluxes.csv', delimiter=',')
 flux = solar_irr[:, 30]
 steps = flux.size
 time_step = (solar_irr[1, 4] - solar_irr[0, 4]) * 60  # seconds
-time_flux = np.arange(0, 86400, time_step)
+time_flux = np.linspace(0, 86400, int(86400 / time_step))
 flux_interp = np.interp(t_list, time_flux, flux)
 
 T = T_air
 T_list = []
 T_bottom = T_air
 T_bottom_list = []
-q = [[], [], [], [], [], [], []]  # list of all heat flows: absorption, emission, free, forced, emission, free, forced
-eff_list = []
+q = [[], [], [], [], [], [], [], []]  # abs, emis, free, forced, emis, free, forced, gen
 
 for t in range(len(t_list)):
     T_list.append(T - 273.15)
@@ -72,13 +69,14 @@ for t in range(len(t_list)):
     if T - 273.15 < 28:
         eff = 0.35
     else:
-        power_pc = np.amax(PVIV.iv(T - 273.15)[6])
-        eff = power_pc / 4737.063674474133 * 0.35
+        eff = np.amax(PVIV.iv(T - 273.15)[2]) / power_pc * 0.35
 
-    # direct absorption (from sun & earth)
+    # direct absorption
     alpha_ab = 1 - eff
-    I_ab = I_sun * (1 - refl_top)
-    q_abs = I_ab * alpha_ab * A
+    I_inc = I_sun * (1 - refl_top)
+    q_gen = I_inc * eff * A
+    q[7].append(q_gen)  # Joule per timestep
+    q_abs = I_inc * alpha_ab * A
     q[0].append(q_abs)
 
     # emission radiation
@@ -119,7 +117,6 @@ for t in range(len(t_list)):
     q[6].append(q_cfrp_forced_conv)
 
     # Time step
-
     dT = (
                      q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
@@ -166,7 +163,7 @@ ax1.tick_params(axis='y', labelcolor=color)
 # Second graph
 ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
 color = 'tab:blue'
-ax2.set_ylabel('Temperature (C)', color=color)  # we already handled the x-label with ax1
+ax2.set_ylabel('Temperature (C)', color=color)
 ax2.plot(t_list, T_list, color=color)
 ax2.tick_params(axis='y', labelcolor=color)
 
@@ -185,9 +182,9 @@ for i in range(len(labels)):
 plt.xticks(np.arange(initial_time * 3600, t_max, t_max / (24 / div)), labels)
 fig.tight_layout()
 
-print(PVIV.iv(np.amax(T_list))[0], 'mpp eff loss')
-print(np.amax(flux_interp), 'mpp flux')
-print(np.where(flux_interp == np.amax(flux_interp)), 'mpp time')
+print(sum(q[7]) / 10 ** 9, 'Power generated in 24H (GJ)')
+print(sum(q[7]) / 3600000, 'Power generated in kWh')
+print(np.amax(flux_interp), 'mpp Flux (W/m2)')
+print(np.where(flux_interp == np.amax(flux_interp)), 'mpp Time (s)')
 
 plt.show()
-
