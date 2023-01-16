@@ -10,15 +10,15 @@ def merge_CSVs(file_a,file_b,output_dir):
     b = pd.read_csv(file_b)
     comb = pd.concat([a,b],axis=1)
     
-    with open(os.path.join(os.getcwd(),output_dir,"merged.csv"), 'w',) as f:\
+    with open(os.path.join(os.getcwd(),output_dir,"merged_SA.csv"), 'w',) as f:\
         comb.to_csv(f,index = False)
 
     # merged.to_csv(os.path.join(os.getcwd(),output_dir,"merged.csv"), index=False)
 
 cwd = os.getcwd()
 
-file_b = os.path.join(cwd,"data","SPA_Output.csv")
-file_a = os.path.join(cwd,"data","sweep_parameters.csv")
+file_b = os.path.join(cwd,"data","input_archive","relev_locs","SPA_Output_SA.csv")
+file_a = os.path.join(cwd,"data","input_archive","relev_locs","sweep_parameters_SA.csv")
 
-merge_CSVs(file_a,file_b,"data")
+merge_CSVs(file_a,file_b,"data/input_archive/relev_locs")
 
