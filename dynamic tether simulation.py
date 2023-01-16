@@ -97,12 +97,10 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     Cd_top_balloon = 0.0112
     Cd_tan_balloon = 0.2
 
-    # Initiate tandem balloons
-    tandem_spacing = 0.05
-    D_tandem = 400  # Initial estimate for the drag force [N] of the tandem balloon (updated later)
-    loc_lst = np.arange(0.1, 1., tandem_spacing)  # Fractions of the tether where the tandem balloon is located
-    L_tandem = 0 # (h_balloon - h_ground) * tandem_spacing * crossA * density * g
-    # Lift force [N] of the tandem balloon needed to lift the tether section between two balloons = [0.2]  # Fractions of the tether where the tandem balloon is located
+    # Create tandem balloon force
+    L_tandem = 2000  # Lift force [N] of the tandem balloon
+    D_tandem = 50
+    # loc_lst = [0.2]  # Fractions of the tether where the tandem balloon is located
 
     rho_umpf = 950  # UHMWPE density, kg/m^3
     rho_al = 2710  # aluminium density, kg/m^3
@@ -255,7 +253,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
 
 
 wind_profile_select = 4
-t_end = 5000
+t_end = 5
 xlists = []
 ylists = []
 max_stress_list = []
@@ -265,14 +263,14 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 2
+animations = 3
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [2000, 3000, -2000, 5000]  # excess lift of top balloon
-radius_items = [0.006, 0.006, 0.006, 0.006]  # radius of tether
-height_items = [18000, 18000, 18000, 18000]  # top balloon height
+excess_L_list = [2000, 1000, 2000, 1000]  # excess lift of top balloon
+radius_items = [0.0, 0.0, 0.0, 0.0]  # radius of tether
+height_items = [20000, 20000, 17000, 17000]  # top balloon height
 node_amount = [100, 100, 100, 100]  # amount of nodes to use
 dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
-loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
+loc_lsts = [[0.8], [], [0.8], [0.8]]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
     excess_L = excess_L_list[i]  # N - excess lift
@@ -289,8 +287,8 @@ for i in range(animations):
     radius_lists_during_programm.append(radius_list_during_program)
     time_in_sec = round(time.time() - begin_time)
     time_in_min = 0
-    if time_in_sec > 59:
-        time_in_min = math.floor(round((time.time() - begin_time) / 60))
+    if time_in_sec >= 60:
+        time_in_min = math.floor((time.time() - begin_time) / 60)
     time_in_sec = time_in_sec - time_in_min * 60
     print(f"Done with tether {i + 1}, it took {time_in_min} min and {time_in_sec} sec")
 begin_time = time.time()
