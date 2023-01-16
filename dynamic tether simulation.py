@@ -107,7 +107,10 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     rho_umpf = 950  # UHMWPE density, kg/m^3
     rho_al = 2710  # aluminium density, kg/m^3
     A_umpf = 100e-6  # initial guess, m^2
-    A_al = 16e-6  # m^2
+    r1 = 0.000782390181755427  # m
+    r2 = 0.00365342418165717  # m
+    r3 = 0.00373626051656261  # m
+    A_al = np.pi * (r1**2 - r2**2 + r3**2)  # m^2
     sigma_max = 250e6  # maximum allowable stress, Pa
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
@@ -265,11 +268,11 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 2
+animations = 1
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [2000, 3000, -2000, 5000]  # excess lift of top balloon
+excess_L_list = [6000, 7000, -2000, 5000]  # excess lift of top balloon
 radius_items = [0.006, 0.006, 0.006, 0.006]  # radius of tether
-height_items = [18000, 18000, 18000, 18000]  # top balloon height
+height_items = [18000, 17000, 18000, 18000]  # top balloon height
 node_amount = [100, 100, 100, 100]  # amount of nodes to use
 dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
 loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
