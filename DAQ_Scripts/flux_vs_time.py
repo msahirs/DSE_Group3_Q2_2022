@@ -23,6 +23,7 @@ formatter = dates.DateFormatter('%Y/%m/%d %H:%M:%S')
 y_axis = f_data.iloc[:,-3]
 
 plt.plot( x_axis, y_axis, 'o' )
+
 ax = plt.gcf().axes[0] 
 ax.xaxis.set_major_formatter(formatter)
 plt.gcf().autofmt_xdate(rotation=25)
