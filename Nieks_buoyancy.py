@@ -7,8 +7,8 @@ h = 0 # height [m]
 
 g0 = 9.80665 # gravity constant [kg/m**2]
 
-mass_extra = 4344/g0
-mass_original = 4000
+mass_extra = 1500/g0
+mass_original = 4500
 mass = mass_original + mass_extra
 
 W = mass * g0
@@ -21,16 +21,14 @@ def Volume_calc(h, temp):
     ISA = I(h)
     rho_a_h = ISA[2]  # density [kg/m**3]
     p_gas_h = ISA[1]  # pressure at altitude of h2
-    Pd = 0.5 * rho_a_h * 50 ** 2  # dynamic pressure
+    Pd = 0.5 * rho_a_h * 30 ** 2  # dynamic pressure
     d_p_gas = 2 * Pd  # pressure diff ( twice dynamic press) [N/m**2]
     d_T_gas = temp # temp diff [K]
     T_a = ISA[0]  # ambient temp [K]
 
     V_h = W / (g0 * (rho_a_h - ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas)))))
-    if h == 20000:
-        print(V_h)
-        print(d_p_gas)
-    return V_h
+    return V_h,d_p_gas
+print(Volume_calc(20000,0))
 
 def Lift_calc(h, V, temp):
     ISA = I(h)
@@ -45,7 +43,7 @@ def Lift_calc(h, V, temp):
 
     return lift
 
-
+print(Lift_calc(20000, 57000, 0))
 
 
 h1 = []
