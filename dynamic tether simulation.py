@@ -98,7 +98,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     Cd_tan_balloon = 0.2
 
     # Create tandem balloon force
-    L_tandem = 2000  # Lift force [N] of the tandem balloon
+    L_tandem = 1000  # Lift force [N] of the tandem balloon
     D_tandem = 50
     # loc_lst = [0.2]  # Fractions of the tether where the tandem balloon is located
 
@@ -266,11 +266,12 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 1
+
+animations = 2
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [6000, 7000, -2000, 5000]  # excess lift of top balloon
-radius_items = [0.006, 0.006, 0.006, 0.006]  # radius of tether
-height_items = [18000, 17000, 18000, 18000]  # top balloon height
+excess_L_list = [0, 1000, 2000, 1000]  # excess lift of top balloon
+radius_items = [0.0, 0.0, 0.0, 0.0]  # radius of tether
+height_items = [20000, 20000, 17000, 17000]  # top balloon height
 node_amount = [100, 100, 100, 100]  # amount of nodes to use
 dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
 loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
@@ -374,12 +375,15 @@ for item in range(animations):
     label = f"Tether {item + 1}, Cd = {cd_items[item]}, radius = {radius_items[item]}, excess Lift = {excess_L_list[item]}"
     line, = axis.plot([], [], c=colorlist[item], label=label)
     balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"Balloon {item + 1}", c="black", markersize=20)
-    if loc_lsts[item]:
+    if loc_lsts[item] != []:
         tand_balloon, = axis.plot([], [], marker='.', linestyle="None", label=f"tand_balloons {item + 1}", c="gray",
                                   markersize=10)
         tand_balloons.append(tand_balloon)
+    else:
+        tand_balloons.append([])
     lines.append(line)
     balloons.append(balloon)
+
 
 # initialize time text
 time_template = 'time= %.1fs'
