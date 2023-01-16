@@ -97,10 +97,12 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     Cd_top_balloon = 0.0112
     Cd_tan_balloon = 0.2
 
-    # Create tandem balloon force
-    L_tandem = 2000  # Lift force [N] of the tandem balloon
-    D_tandem = 50
-    # loc_lst = [0.2]  # Fractions of the tether where the tandem balloon is located
+    # Initiate tandem balloons
+    tandem_spacing = 0.05
+    D_tandem = 400  # Initial estimate for the drag force [N] of the tandem balloon (updated later)
+    loc_lst = np.arange(0.1, 1., tandem_spacing)  # Fractions of the tether where the tandem balloon is located
+    L_tandem = 0 # (h_balloon - h_ground) * tandem_spacing * crossA * density * g
+    # Lift force [N] of the tandem balloon needed to lift the tether section between two balloons = [0.2]  # Fractions of the tether where the tandem balloon is located
 
     rho_umpf = 950  # UHMWPE density, kg/m^3
     rho_al = 2710  # aluminium density, kg/m^3
@@ -171,7 +173,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         W = m * g
 
         # Calculate tension forces in all segments
-        Tension = crossA * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
+        Tension = A_umpf * E / L0 * (np.sqrt((y[1:] - y[:-1]) ** 2 + (x[1:] - x[:-1]) ** 2) - L0)
         theta = np.arctan2((x[1:] - x[:-1]), (y[1:] - y[:-1]))
 
         Tx = Tension * np.sin(theta)
@@ -244,11 +246,16 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         x = x + vx * dt
         y = y + vy * dt
         plot_wind = False
+    print(f'The final location is ({round(x[-1]/1000,2)}, {round(y[-1]/1000,2)})')
+    print(f'The final maximum stress is {np.max(Tension / A_umpf)} Pa, total lift is {L/1000} kN')
+    print(f'Area of the UHMWPE is {A_umpf * 1e6} mm^2, radius is {r*1000} mm')
+    print(f'The tether weighs {np.sum(W)/1000} kN')
+    print(f'The aluminium core weighs {rho_al * A_al * (h_balloon - h_ground) * g / 1000} kN')
     return xlist, ylist, Tension / A_umpf, L, radius_list
 
 
 wind_profile_select = 4
-t_end = 200
+t_end = 5000
 xlists = []
 ylists = []
 max_stress_list = []
@@ -258,13 +265,13 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-animations = 3
+animations = 2
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [0, 2000, -2000, 5000]  # excess lift of top balloon
-radius_items = [0.004, 0.007, 0.006, 0.007]  # radius of tether
-height_items = [20000, 20000, 20000, 20000]  # top balloon height
-node_amount = [75, 75, 75, 75]  # amount of nodes to use
-dt_list = [0.0025, 0.0025, 0.0025, 0.01]
+excess_L_list = [2000, 3000, -2000, 5000]  # excess lift of top balloon
+radius_items = [0.006, 0.006, 0.006, 0.006]  # radius of tether
+height_items = [18000, 18000, 18000, 18000]  # top balloon height
+node_amount = [100, 100, 100, 100]  # amount of nodes to use
+dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
 loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
 for i in range(animations):
     begin_time = time.time()
