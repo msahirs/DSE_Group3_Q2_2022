@@ -1,5 +1,6 @@
 import math as m
 
+
 Areasolarpanels = 2726 # [m]
 r_solarpanels = m.sqrt(Areasolarpanels/m.pi)
 V_h = 35448.8825891154 # [m^3]
@@ -8,11 +9,11 @@ Excesslift = 2000 # N
 Lift = 44965.13311704596 # N
 gasbags = int(Lift/Excesslift) + 1
 admissiblestress=250000000
-print(gasbags)
+print('number gasbags',gasbags)
 
 r = (1+(1/3)) * r_solarpanels
 
-thickness_skin = d_P_gas * r / (2*admissiblestress)
+thickness_skin = 1.2 * d_P_gas * r / (2*admissiblestress)
 
 b = r
 c = V_h / (4/3 * m.pi * (b**2))
@@ -35,14 +36,14 @@ v_skinlatex = A * t_latex
 density_skinlatex = 1.2 * 68.886
 
 mass_skin_latex = v_skinlatex * density_skinlatex
-print(h)
-print(width)
-print(mass_skin_latex)
-print(mass_skinfibre)
+print('altitude',h)
+print('width',width)
+print('m skin latex',mass_skin_latex)
+print('m skin fibre',mass_skinfibre)
 
 area_gasbags = gasbags * 2 * m.pi * c * b
 
 mass_gasbags = area_gasbags * ((t_latex * density_skinlatex) + (thickness_skin*density_fibre))
 
 total_mass = mass_gasbags + mass_skin_latex
-print(total_mass)
+print('m tot',total_mass)

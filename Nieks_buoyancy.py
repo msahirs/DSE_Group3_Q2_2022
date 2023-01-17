@@ -34,7 +34,7 @@ def Lift_calc(h, V, temp):
     ISA = I(h)
     rho_a_h = ISA[2]  # density [kg/m**3]
     p_gas_h = ISA[1]  # pressure at altitude of h2
-    Pd = 0.5 * rho_a_h * 50 ** 2  # dynamic pressure
+    Pd = 0.5 * rho_a_h * 30 ** 2  # dynamic pressure
     d_p_gas = 2 * Pd  # pressure diff ( twice dynamic press) [kg/m**2]
     d_T_gas = temp  # temp diff [K]
     T_a = ISA[0]  # ambient temp [K]
