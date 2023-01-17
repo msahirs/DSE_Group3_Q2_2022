@@ -54,7 +54,23 @@ steps = flux.size
 time_step = (solar_irr[1, 4] - solar_irr[0, 4]) * 60  # seconds
 time_flux = np.linspace(0, 86400, int(86400 / time_step))
 flux_interp = np.interp(t_list, time_flux, flux)
+'''
+solar_irr = np.genfromtxt('data/input_archive/elevation_gain/merged_all.csv',  delimiter=',')
+flux_all = solar_irr[:, 30]
+altitudes = solar_irr[:, 11]
+flux = [] # 1440
+q = 0
+for i in range(1000+1440*q, 1440+1440*q):
+    flux.append(flux_all[i])
+for j in range(0+1440*q, 1000+1440*q):
+    flux.append(flux_all[j])
 
+time_step = (solar_irr[1, 4] - solar_irr[0, 4]) * 60  # seconds
+time_flux = np.linspace(0, 86400, int(86400 / time_step))
+flux_interp = np.interp(t_list, time_flux, flux)
+plt.plot(flux)
+plt.show()
+'''
 T = T_air
 T_list = []
 T_bottom = T_air
@@ -119,7 +135,7 @@ for t in range(len(t_list)):
     # Time step
 
     dT = (
-                     q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
+                 q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
     dT_bottom = (q_emission_cfrp + q_cfrp_free_conv + q_cfrp_forced_conv) / Cp_bottom * dt
     T_bottom = (T_bottom + dT_bottom) * (1 - New_air_ps) + T_air * New_air_ps
@@ -129,28 +145,18 @@ for t in range(len(t_list)):
     T_bottom = 0
     '''
 
-'''
 # Finding maxima and printing
 max_index = np.argmax(T_list)
 print("\nMax temperature: ", T_list[max_index])
-print("At this point in time the heat balance consists of:")
-print(round(q[0][max_index]), "Watts absorbed")
-print(round(q[1][max_index]), "Watts released through top radiation", round(q[1][max_index] / q[0][max_index] * 100, 2),
-      "%")
-print(round(q[2][max_index]), "Watts released trough top free conv", round(q[2][max_index] / q[0][max_index] * 100, 2),
-      "%")
-print(round(q[3][max_index]), "Watts released trough top forced conv",
-      round(q[3][max_index] / q[0][max_index] * 100, 2), "%")
-print(round(q[4][max_index]), "Watts released through bottom radiation",
-      round(q[4][max_index] / q[0][max_index] * 100, 2),
-      "%")
-print(round(q[5][max_index]), "Watts released trough bottom free conv",
-      round(q[5][max_index] / q[0][max_index] * 100, 2),
-      "%")
-print(round(q[6][max_index]), "Watts released trough bottom forced conv",
-      round(q[6][max_index] / q[0][max_index] * 100, 2),
-      "%")
-'''
+print("Total:")
+print(sum(q[0]), "Joule absorbed")
+print(sum(q[1]), "Watts released through top radiation", sum(q[1]) / sum(q[0]) * 100, "%")
+print(sum(q[2]), "Watts released trough top free conv", sum(q[2]) / sum(q[0]) * 100, "%")
+print(sum(q[3]), "Watts released trough top forced conv", sum(q[3]) / sum(q[0]) * 100, "%")
+print(sum(q[4]), "Watts released through bottom radiation", sum(q[4]) / sum(q[0]) * 100, "%")
+print(sum(q[5]), "Watts released trough bottom free conv", sum(q[5]) / sum(q[0]) * 100, "%")
+print(sum(q[6]), "Watts released trough bottom free conv", sum(q[6]) / sum(q[0]) * 100, "%")
+
 # Plotting
 fig, ax1 = plt.subplots()
 
@@ -183,19 +189,18 @@ for i in range(len(labels)):
 plt.xticks(np.arange(initial_time * 3600, t_max, t_max / (24 / div)), labels)
 fig.tight_layout()
 
-
 print(sum(q[7]) / 10 ** 9, 'Power generated in 24H (GJ)')
 print(sum(q[7]) / 3600000, 'Power generated in 24H (kWh)')
 print(np.amax(flux_interp), 'Max Flux (W/m2)')
 print(np.where(flux_interp == np.amax(flux_interp)), 'Max Flux Time (s)')
 print(np.amax(T_list), 'Max Temperature')
 print(np.amax(PVIV.iv(np.amax(T_list))[2]), 'Power per cell at max temp (mW/m2)')
-print((np.amax(PVIV.iv(np.amax(T_list))[2])-np.amax(PVIV.iv(28)[2]))/np.amax(PVIV.iv(28)[2])*100, 'Percent eff loss')
-print(np.amax(PVIV.iv(np.amax(T_list))[2]) / power_pc * 0.35, 'Eff at max temp')
-print(301.5*402*10**-6, 'Panel area (m2) at 12 cells')
-print(np.amax(PVIV.iv(np.amax(T_list))[2])/1000*12, 'W per panel')
-print(np.amax(PVIV.iv(np.amax(T_list))[2])/1000/(301.5*402*10**-6)*12, 'W/m2 of a panel')
-print(1074762 / (np.amax(PVIV.iv(np.amax(T_list))[2])/1000/(301.5*402*10**-6)*12), 'Panels for 1074762 W')
-
+print((np.amax(PVIV.iv(np.amax(T_list))[2]) - np.amax(PVIV.iv(28)[2])) / np.amax(PVIV.iv(28)[2]) * 100,
+      'Percent eff loss')
+print(np.amax(PVIV.iv(np.amax(T_list))[2]) / power_pc * 35, 'Eff at max temp')
+print(301.5 * 402 * 10 ** -6, 'Panel area (m2) at 12 cells')
+print(np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 * 12, 'W per panel')
+print(np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 / (301.5 * 402 * 10 ** -6) * 12, 'W/m2 of a panel')
+print(1074762 / (np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 / (301.5 * 402 * 10 ** -6) * 12), 'Panels for 1074762 W')
 
 plt.show()
