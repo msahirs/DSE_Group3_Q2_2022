@@ -1,12 +1,22 @@
 import math as m
 import matplotlib.pyplot as plt
 import numpy as np
-beams = 16
+beams = 32
 angleused = 2*m.pi / beams
 
 Fullarea = 2700
 
-density_solarpanels = 0.45
+density_solarpanels = 4.5 # [kg/m**2]
+
+densitynotsquaremetre_carbonfibre = 0.0444 # [kg/m**3]
+
+thickness_carbonfibre = 2.5*(10**(-5)) # micrometer
+
+density_carbonfibre = 0.0444 * thickness_carbonfibre
+
+density_mass = density_carbonfibre + density_solarpanels
+
+
 r = m.sqrt(Fullarea/m.pi)\
 
 a = m.sqrt(r**2 + r**2 - (2*r*r*m.cos(angleused)))
@@ -23,7 +33,7 @@ d_per = d/percentage / 100
 x1 = np.linspace(0,b_per*r,92)
 x2 = np.linspace(b_per*r,r,8)
 
-densitynewtons = 4.5 * 9.81 * (r/100) * 2
+densitynewtons = density_mass * 9.81 * (r/100) * 2
 
 
 m1 = x1 * (a/2/b)
