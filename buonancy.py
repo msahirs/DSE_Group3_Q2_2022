@@ -63,6 +63,6 @@ plt.plot(h1, rho)
 plt.grid()
 plt.show()
 # plt.plot(h1, Vp)
-# plt.plot(Temps1, Vp)
+
 # plt.plot(h2, L)
 plt.show()
