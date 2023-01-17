@@ -40,7 +40,7 @@ print(width)
 print(mass_skin_latex)
 print(mass_skinfibre)
 
-area_gasbags = gasbags * 2 * m.pi * c * b
+area_gasbags = gasbags * 0.5 * m.pi * c * b
 
 mass_gasbags = area_gasbags * ((t_latex * density_skinlatex) + (thickness_skin*density_fibre))
 
