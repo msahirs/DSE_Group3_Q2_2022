@@ -69,7 +69,8 @@ ax.plot(f, (P_loss_inductance))
 ax.set_xlabel('Frequency [Hz]')
 ax.set_ylabel('Loss [KW]')
 #ax.set_title('Line Graph')
-plt.show()
+#plt.show()
+#print(Area_wire)
 
 
 
@@ -80,5 +81,5 @@ plt.show()
 #print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
 #print("Your power loss due to inductive losses is: ", np.round(P_loss_inductance, 2), "kilowatts.")
 #print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
-#print("The wire cross section is: ", np.round(Area_wire, 2), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
+print("The wire cross section is: ", np.round(Area_wire, 4), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
 

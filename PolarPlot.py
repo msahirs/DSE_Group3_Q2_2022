@@ -5,21 +5,21 @@ from sympy import symbols, solve
 import Corona_discharge_losses_calculator
 import Wire_structure_calculations
 
-A_wire_electric = Corona_discharge_losses_calculator.Area_wire #Single stand wire thickness necessary for power transmission
+A_wire_electric = Corona_discharge_losses_calculator.Area_wire #Single stand wire thickness necessary for power transmission [cm2]
 A_wire_struc    = Wire_structure_calculations.Area_wire_cm  #wire thickness necessary to carry loads
 
 x = symbols('x')
 
-eq_r1 = (4/3)*np.pi*x**3-A_wire_electric
-r1 = solve(eq_r1)[0]
+eq_r1 = np.pi*x**2-A_wire_electric
+r1 = solve(eq_r1)[1]
 print(r1)
 
-eq_r2 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r1**3) - A_wire_struc
-r2 = solve(eq_r2)[0]
+eq_r2 = (np.pi*x**2)-(np.pi*r1**2) - A_wire_struc
+r2 = solve(eq_r2)[1]
 print(r2)
 
-eq_r3 = ((4/3)*np.pi*x**3)-((4/3)*np.pi*r2**3) - A_wire_electric
-r3 = solve(eq_r3)[0]
+eq_r3 = (np.pi*x**2)-(np.pi*r2**2) - A_wire_electric
+r3 = solve(eq_r3)[1]
 print(r3)
 
 ins_thickness = r2-r1
