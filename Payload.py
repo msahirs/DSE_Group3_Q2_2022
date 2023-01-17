@@ -7,7 +7,7 @@ angleused = 2*m.pi / beams
 Length = 29.
 Fullarea = np.pi * Length**2
 
-density_solarpanels = 4.5 # [kg/m**2]
+density_solarpanels = 0.45 # [kg/m**2]
 
 densitynotsquaremetre_carbonfibre = 0.0444 # [kg/m**3]
 
@@ -84,6 +84,7 @@ print("Location resulting force:", locationresultantforce)
 
 plt.plot(x1, w1, 'r')
 plt.plot(x2, w2, 'b')
-plt.legend()
+plt.xlabel("Distance beam [m]")
+plt.ylabel("Distributed load [N]")
 plt.show()
 

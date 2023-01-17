@@ -7,13 +7,17 @@ h = 0 # height [m]
 
 g0 = 9.80665 # gravity constant [kg/m**2]
 
-mass_extra = 1500/g0
-mass_original = 4500
-mass = mass_original + mass_extra
+mass_structure = 1150
+mass_excesslift = 6000/g0
+mass_balloon = 200
+mass_payload = 150
+mass_solar = 1200
+mass_tether = 17660/g0
+mass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure + mass_excesslift
 
 W = mass * g0
 
-
+print(W)
 
 R_gas = 4116 # specific gas constant [J/(kg*K)
 
@@ -28,7 +32,7 @@ def Volume_calc(h, temp):
 
     V_h = W / (g0 * (rho_a_h - ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas)))))
     return V_h,d_p_gas
-print(Volume_calc(20000,0))
+print(Volume_calc(18000,0))
 
 def Lift_calc(h, V, temp):
     ISA = I(h)
@@ -43,7 +47,7 @@ def Lift_calc(h, V, temp):
 
     return lift
 
-print(Lift_calc(20000, 57000, 0))
+print(Lift_calc(18000, 45492.470109921694, 0))
 
 
 h1 = []
