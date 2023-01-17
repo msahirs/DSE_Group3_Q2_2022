@@ -40,10 +40,10 @@ def Lift_calc(h, V, temp):
 
     return lift
 
-for j in range(101):
-    h = j * 200
+for j in range(241):
+    h = j * 100
     V_p, rho_a, rho_gas, p_gas = Volume_calc(h, 0)
-    h1.append(h)
+    h1.append(h/1000)
     Vp.append(V_p)
     V_p0, rho_a0, rho_gas0, p_gas0 = Volume_calc(0, 0)
     rho.append(100 - (rho_gas/rho_gas0)* 100)
@@ -51,18 +51,37 @@ for j in range(101):
 
 
 for i in range(101):
-    h = i * 200
-    up = Lift_calc(h, 7238, 70)/ g0
-    L.append(up)
-    h2.append(h)
+    temps = i
+    up = Lift_calc(18000, 60000, temps)
+    L.append(up/1000)
+    Temps1.append(temps)
 
 # print(Volume_calc(20000, 50))
-plt.xlabel('altitude (m)')
-plt.ylabel('percentage of size ballonet needed')
-plt.plot(h1, rho)
-plt.grid()
-plt.show()
-# plt.plot(h1, Vp)
 
-# plt.plot(h2, L)
+
+#####   sizing ballonet    ####
+
+# plt.xlabel('altitude (km)')
+# plt.ylabel('percentage of size ballonet over entire volume (-)')
+# plt.xlim(0, 22)
+# plt.ylim(0,100)
+# plt.plot(h1, rho)
+# plt.grid()
+# plt.show()
+
+######  Changing lift for varying diff temp   ####
+
+# plt.plot(Temps1, L)
+# plt.xlim(0, 100)
+# plt.title('Volume of at 18 km altitude')
+# plt.xlabel('Differential temperature (K)')
+# plt.ylabel('Lift (kN)')
+# plt.grid()
+
+######  Changing Volume for varying height  #####
+
+plt.xlabel('altitude (km)')
+plt.ylabel('Volume (m^3)')
+plt.xlim(0, 23)
+plt.plot(h1, Vp)
 plt.show()
