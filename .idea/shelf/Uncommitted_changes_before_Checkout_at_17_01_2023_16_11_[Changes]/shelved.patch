@@ -1,0 +1,38 @@
+Index: newballoonskin.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import math as m\r\n\r\nAreasolarpanels = 2726 # [m]\r\nr_solarpanels = m.sqrt(Areasolarpanels/m.pi)\r\nV_h = 35448.8825891154 # [m^3]\r\nd_P_gas = 127.12485479797665 # [N/m^2]\r\nExcesslift = 2000 # N\r\nLift = 44965.13311704596 # N\r\ngasbags = int(Lift/Excesslift) + 1\r\nadmissiblestress=250000000\r\nprint(gasbags)\r\n\r\nr = (1+(1/3)) * r_solarpanels\r\n\r\nthickness_skin = d_P_gas * r / (2*admissiblestress)\r\n\r\nb = r\r\nc = V_h / (4/3 * m.pi * (b**2))\r\ne = m.sqrt(1-((c**2)/(b**2)))\r\nA = 2 * m.pi * (b**2) + m.pi * (c**2) / e * m.log10((1+e)/(1-e))\r\n\r\nh = (2*c)\r\nwidth = (2*b)\r\n\r\nV_skinfibre = thickness_skin *A\r\n\r\ndensity_fibre = 970 # [kg /m3]\r\n\r\nmass_skinfibre = V_skinfibre * density_fibre\r\n\r\nt_latex = 0.051 * (10**-3)\r\n\r\nv_skinlatex = A * t_latex\r\n\r\ndensity_skinlatex = 1.2 * 68.886\r\n\r\nmass_skin_latex = v_skinlatex * density_skinlatex\r\nprint(h)\r\nprint(width)\r\nprint(mass_skin_latex)\r\nprint(mass_skinfibre)\r\n\r\narea_gasbags = gasbags * 2 * m.pi * c * b\r\n\r\nmass_gasbags = area_gasbags * ((t_latex * density_skinlatex) + (thickness_skin*density_fibre))\r\n\r\ntotal_mass = mass_gasbags + mass_skin_latex\r\nprint(total_mass)
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/newballoonskin.py b/newballoonskin.py
+--- a/newballoonskin.py	(revision c81bbe8811ced6f0de2bac33a1d0aed141a1b12a)
++++ b/newballoonskin.py	(date 1673967448897)
+@@ -10,7 +10,7 @@
+ admissiblestress=250000000
+ print(gasbags)
+ 
+-r = (1+(1/3)) * r_solarpanels
++r = (1+(1/5)) * r_solarpanels
+ 
+ thickness_skin = d_P_gas * r / (2*admissiblestress)
+ 
+Index: Nieks_buoyancy.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from ISA import ISA as I\r\nimport matplotlib.pyplot as plt\r\n\r\n\r\nh = 0 # height [m]\r\n\r\n\r\ng0 = 9.80665 # gravity constant [kg/m**2]\r\n\r\nmass_structure = 1150\r\nmass_excesslift = 6000/g0\r\nmass_balloon = 200\r\nmass_payload = 150\r\nmass_solar = 1200\r\nmass_tether = 17660/g0\r\nmass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure + mass_excesslift\r\n\r\nW = mass * g0\r\n\r\nprint(W)\r\n\r\nR_gas = 4116 # specific gas constant [J/(kg*K)\r\n\r\ndef Volume_calc(h, temp):\r\n    ISA = I(h)\r\n    rho_a_h = ISA[2]  # density [kg/m**3]\r\n    p_gas_h = ISA[1]  # pressure at altitude of h2\r\n    Pd = 0.5 * rho_a_h * 30 ** 2  # dynamic pressure\r\n    d_p_gas = 2 * Pd  # pressure diff ( twice dynamic press) [N/m**2]\r\n    d_T_gas = temp # temp diff [K]\r\n    T_a = ISA[0]  # ambient temp [K]\r\n\r\n    V_h = W / (g0 * (rho_a_h - ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas)))))\r\n    return V_h,d_p_gas\r\nprint(Volume_calc(18000,0))\r\n\r\ndef Lift_calc(h, V, temp):\r\n    ISA = I(h)\r\n    rho_a_h = ISA[2]  # density [kg/m**3]\r\n    p_gas_h = ISA[1]  # pressure at altitude of h2\r\n    Pd = 0.5 * rho_a_h * 30 ** 2  # dynamic pressure\r\n    d_p_gas = 2 * Pd  # pressure diff ( twice dynamic press) [kg/m**2]\r\n    d_T_gas = temp  # temp diff [K]\r\n    T_a = ISA[0]  # ambient temp [K]\r\n\r\n    lift = (g0 * (rho_a_h - ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas))))) * V\r\n\r\n    return lift\r\n\r\nprint(Lift_calc(18000, 45492.470109921694, 0))\r\n\r\n\r\nh1 = []\r\nh2 = []\r\nVp = []\r\nL = []\r\n\r\n\r\nfor j in range(101):\r\n    h = j * 200\r\n    V_p = Volume_calc(h, 30)\r\n    h1.append(h)\r\n    Vp.append(V_p)\r\n\r\nfor i in range(101):\r\n    h = i *200 +10000\r\n    up = Lift_calc(h, 60000, 0)/ g0\r\n    L.append(up)\r\n    h2.append(h)\r\n\r\n# plt.plot(h1, Vp)\r\nplt.plot(h2, L)\r\nplt.show()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Nieks_buoyancy.py b/Nieks_buoyancy.py
+--- a/Nieks_buoyancy.py	(revision c81bbe8811ced6f0de2bac33a1d0aed141a1b12a)
++++ b/Nieks_buoyancy.py	(date 1673967272680)
+@@ -17,7 +17,7 @@
+ 
+ W = mass * g0
+ 
+-print(W)
++print('weight',W)
+ 
+ R_gas = 4116 # specific gas constant [J/(kg*K)
+ 
