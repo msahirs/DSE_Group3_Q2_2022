@@ -10,7 +10,7 @@ gasbags = int(Lift/Excesslift) + 1
 admissiblestress=250000000
 print(gasbags)
 
-r = (1+(1/3)) * r_solarpanels
+r = (1+(1/5)) * r_solarpanels
 
 thickness_skin = d_P_gas * r / (2*admissiblestress)
 

@@ -17,7 +17,7 @@ mass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure +
 
 W = mass * g0
 
-print(W)
+print('weight',W)
 
 R_gas = 4116 # specific gas constant [J/(kg*K)
 
