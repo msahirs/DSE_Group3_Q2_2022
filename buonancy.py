@@ -2,7 +2,7 @@ from ISA import ISA as I
 import matplotlib.pyplot as plt
 
 g0 = 9.80665 # gravity constant [kg/m**2]
-mass = 5500
+mass = 5970
 W = mass * g0
 R_gas =  4124 # specific gas constant [J/(kg*K)
 
@@ -52,17 +52,15 @@ for j in range(241):
 
 for i in range(101):
     temps = i
-    up = Lift_calc(18000, 60000, temps)
+    up = Lift_calc(18000, 53231, temps)
     L.append(up/1000)
     Temps1.append(temps)
-
-# print(Volume_calc(20000, 50))
 
 
 #####   sizing ballonet    ####
 
-# plt.xlabel('altitude (km)')
-# plt.ylabel('percentage of size ballonet over entire volume (-)')
+# plt.xlabel('Altitude (km)')
+# plt.ylabel('Percentage of size ballonet over total volume (-)')
 # plt.xlim(0, 22)
 # plt.ylim(0,100)
 # plt.plot(h1, rho)
@@ -73,15 +71,17 @@ for i in range(101):
 
 # plt.plot(Temps1, L)
 # plt.xlim(0, 100)
-# plt.title('Volume of at 18 km altitude')
+# plt.title('Volume of 53231 m^3 at 18 km altitude')
 # plt.xlabel('Differential temperature (K)')
 # plt.ylabel('Lift (kN)')
 # plt.grid()
+# plt.show()
 
 ######  Changing Volume for varying height  #####
 
-plt.xlabel('altitude (km)')
+plt.xlabel('Altitude (km)')
 plt.ylabel('Volume (m^3)')
-plt.xlim(0, 23)
+plt.xlim(15, 23)
 plt.plot(h1, Vp)
+plt.grid()
 plt.show()
