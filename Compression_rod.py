@@ -52,3 +52,34 @@ r0=math.sqrt(A/3.14+ri**2)
 print(r0)
 print("Carbon composite rod: mass ", m_rod,"kg, radius ", radius,"m, cross-sectional area ", A, "m^3")
 
+
+# I-Beam calculations
+sigma_max = (1-safety_f) * yield_str
+tau_max = (1-safety_f) * (yield_str / 2)
+
+# Inputs
+F_down = 1534
+x_down = 19.98
+F_up = 0.52 * F_down
+x_up = 27
+F_up2 = 0.52 * F_down
+x_up2 = 12
+
+F_0 = F_up + F_up2 - F_down
+M_0 = F_up * x_up + F_up2 * x_up2 - F_down * x_down
+print(F_0, M_0)
+
+tau_lim, sigma_lim = 0,0
+t = 0.01
+
+while tau_lim <= tau_max and sigma_lim <= sigma_max:
+    d = 100 * t
+    tau_lim = 9/16 * F_0 / t*d
+    sigma_lim = 3/8 * M_0 / (t*d*d)
+    t = t - 0.0000001
+
+A = 4 * d * t
+W_I = A * x_up * 2700
+
+print(t, d, A, W_I)
+print(tau_lim, sigma_lim)
