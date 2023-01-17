@@ -6,8 +6,8 @@ import datetime as dt
 
 curr_dir = os.getcwd()
 
-INP_DATA_FILE = os.path.join(curr_dir,"data","input_archive","elevation_gain","merged.csv")
-OUTPUT_DATA_FILE = "merged_all.csv"
+INP_DATA_FILE = os.path.join(curr_dir,"data","input_archive","relev_locs_zero","merged_ME.csv")
+OUTPUT_DATA_FILE = "merged_all_ME.csv"
 REF_DAY = dt.datetime(1970,1,1)
 
 # REF_DAY = np.datetime64('1970-01-01')
@@ -58,7 +58,7 @@ def main():
 
     merged_fluxes = pd.concat([csv2np,add_var], axis = 1)
 
-    with open(os.path.join(curr_dir,"data","input_archive","elevation_gain",OUTPUT_DATA_FILE), 'w',) as f:\
+    with open(os.path.join(curr_dir,"data","input_archive","relev_locs_zero",OUTPUT_DATA_FILE), 'w',) as f:\
         merged_fluxes.to_csv(f, index = False)
 
 

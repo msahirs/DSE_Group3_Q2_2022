@@ -14,7 +14,7 @@ list_csvs = []
 codes = []
 net_fluxes = []
 
-mypath = "data/input_archive/relev_locs/merged_all_*.csv"
+mypath = "data/input_archive/relev_locs_zero/merged_all_*.csv"
 
 fig1, ax1= plt.subplots()
 fig2, ax2= plt.subplots()
@@ -25,7 +25,7 @@ for filename in glob.glob(mypath):
     codes.append(code)
 
     f_data = pd.read_csv(filename)
-    f_data = f_data.iloc[::2]
+    f_data = f_data.iloc[::1]
 
     datelist = f_data.iloc[:,-1]
     len_dates = datelist.shape[0]
@@ -37,8 +37,6 @@ for filename in glob.glob(mypath):
     # f_data = f_data.assign(location = filename[-6:-4])
     
     # list_csvs.append(f_data)
-
-
 
     converted_dates = list(map(dt.datetime.strptime, datelist, len_dates*['%Y-%m-%d %H:%M:%S']))
     x_axis = converted_dates
@@ -58,10 +56,10 @@ fig1.autofmt_xdate(rotation=20)
 ax1.set_xlabel("Time")
 ax1.tick_params(axis='x', labelsize = 9)
 ax1.set_ylabel("Solar Irradiance")
-ax1.set_title("Variation of solar irradiance over 2022 at 18 km, for considered locations")
+ax1.set_title("Variation of solar irradiance over 2022 at 0 km, for considered locations")
 fig1.set_figheight(7)
 fig1.set_figwidth(13)
-fig1.savefig("data/input_archive/relev_locs/Irr_vs_time_locs.png")
+fig1.savefig("data/input_archive/relev_locs_zero/Irr_vs_time_locs.png")
 # plt.savefig("data/input_archive/relev_locs/Irr_vs_time_locs.png")
 
 
@@ -69,9 +67,9 @@ ax2.bar(codes,net_fluxes)
 # plt.xlabel("Time")
 ax2.set_ylabel("Solar Irradiance[W/m^2]")
 ax2.set_xlabel("Region Codes")
-ax2.set_title("Average solar irradiance for 2022 at 18 km, for considered locations")
+ax2.set_title("Average solar irradiance for 2022 at 0 km, for considered locations")
 fig2.set_figheight(7)
 fig2.set_figwidth(13)
-fig2.savefig("data/input_archive/relev_locs/avg_Irr_vs_locs.png")
+fig2.savefig("data/input_archive/relev_locs_zero/avg_Irr_vs_locs.png")
 
 plt.show()

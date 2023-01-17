@@ -46,8 +46,8 @@ main_data = np.tile(ref_angle_inp, (sweep_params.shape[0],1))
 # main_data[:,11] = sweep_params[:,4]
 main_data[:,3] = sweep_params[:,0]
 main_data[:,4] = sweep_params[:,1]
-main_data[:,5] = sweep_params[:,2]
-main_data[:,11] = sweep_params[:,3]
+main_data[:,2] = sweep_params[:,2]
+main_data[:,1] = sweep_params[:,3]
 # main_data[:,12] = pressures
 # main_data[:,13] = temperatures
 
