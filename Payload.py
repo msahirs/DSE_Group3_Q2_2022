@@ -1,10 +1,12 @@
 import math as m
 import matplotlib.pyplot as plt
 import numpy as np
-beams = 16
+
+beams = 24
 angleused = 2*m.pi / beams
 
-Fullarea = 2700
+Length = 29.
+Fullarea = np.pi * Length**2
 
 density_solarpanels = 0.45
 r = m.sqrt(Fullarea/m.pi)\
