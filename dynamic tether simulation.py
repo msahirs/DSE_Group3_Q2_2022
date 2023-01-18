@@ -93,8 +93,8 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     h_ground = 0  # m
 
     # drag coeff for balloons
-    Frontal_area = 1225.2
-    Cd_top_balloon = 0.0112
+    Frontal_area = 1225.2  #m^2
+    Cd_top_balloon = 0.112
     Cd_tan_balloon = 0.2
 
     # Create tandem balloon force
@@ -109,11 +109,12 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
     r2 = 0.00365342418165717  # m
     r3 = 0.00373626051656261  # m
     A_al = np.pi * (r1**2 - r2**2 + r3**2)  # m^2
+    A_umpf = np.pi * r ** 2 - A_al # initial guess, m^2
     sigma_max = 250e6  # maximum allowable stress, Pa
     # Cd = 1.2  # tether drag coeff
     E = 100e9  # Pa
     g = 9.81  # m/s
-    C = 2.5  # Ns/m
+    C = 0.5  # Ns/m
     plot_wind = False
 
     # Initiate nodes
@@ -249,7 +250,7 @@ def run_progamm(Cd=0.3, r=0.01, h_balloon=20000, nodes=50, loc_lst=[], dt=0.001)
         plot_wind = False
     print(f'The final location is ({round(x[-1]/1000,2)}, {round(y[-1]/1000,2)})')
     print(f'The final maximum stress is {np.max(Tension / A_umpf)} Pa, total lift is {L/1000} kN')
-    print(f'Area of the UHMWPE is {A_umpf * 1e6} mm^2, radius is {r*1000} mm')
+    print(f'Area of the UHMWPE is {A_umpf * 1e6} mm^2, total radius is {r*1000} mm')
     print(f'The tether weighs {np.sum(W)/1000} kN')
     print(f'The aluminium core weighs {rho_al * A_al * (h_balloon - h_ground) * g / 1000} kN')
     return xlist, ylist, Tension / A_umpf, L, radius_list
@@ -266,12 +267,11 @@ radius_lists_during_programm = []
 
 ### animation ###
 
-
 animations = 2
 cd_items = [0.3, 0.3, 0.3, 0.3]  # drag coeff of tether
-excess_L_list = [0, 1000, 2000, 1000]  # excess lift of top balloon
-radius_items = [0.0, 0.0, 0.0, 0.0]  # radius of tether
-height_items = [20000, 20000, 17000, 17000]  # top balloon height
+excess_L_list = [7000, 6000, 3000, 500]  # excess lift of top balloon
+radius_items = [0.004, 0.004, 0.004, 0.004]  # radius of tether
+height_items = [17000, 17000, 19000, 19000]  # top balloon height
 node_amount = [100, 100, 100, 100]  # amount of nodes to use
 dt_list = [0.0025, 0.0025, 0.0025, 0.0025]
 loc_lsts = [[], [], [], []]  # fraction on where tendem balloon is located
