@@ -11,7 +11,7 @@ g0 = 21.1   #[KV/cm] Disruptive Gradient in Air
 kd = 0.2      #air density factor
 a  = 1    #[cm] effective(?) radius of conductor
 d  = 5000   #[cm] Conductor Spacing
-f  = np.arange(1, 30000, 10)    #50000        #[Hz] Frequency
+f  = 0    #50000        #[Hz] Frequency
 ki = 0.95   #Wire irregularity factor
 #V0 = 442     #[KV] Line voltage to neutral
 DCV = g0*ki*a*kd*np.log(d/a) #KV
@@ -29,7 +29,7 @@ Amp_wire = P_design / (1000*V_design) #A
 R_al = 2.65*10**-6 #[Ohm/cm] Resistance
 #Area_wire = 0.4         #[cm^2] Surface area of wire
 Rho = 0.0027       #{kg/cm^3} Density
-L_wire = 2000000#[cm] Length of the wire
+L_wire = 2100000#[cm] Length of the wire
 Amp_load = 4      #amps per mm2 of wire
 
 Area_wire = (Amp_wire / (Amp_load))/100 #cm^2
@@ -78,7 +78,7 @@ ax.set_ylabel('Loss [KW]')
 #print("With a design voltage of ", round(V_design, 2), "kilovolts:")
 #print("The corona inception voltage is ", np.round(DCV, 2), "kilovolts.")
 #print("Your power loss due to corona is: ", np.round(P_loss, 2), "kilowatts per kilometer.")
-#print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
+print("Your power loss due to ohmic losses is: ", np.round(P_loss_ohmic, 2), "kilowatts.")
 #print("Your power loss due to inductive losses is: ", np.round(P_loss_inductance, 2), "kilowatts.")
 #print("Total loss is ", np.round(Loss_percent, 3), "percent of the total power to be transmitted.")
 print("The wire cross section is: ", np.round(Area_wire, 4), "square centimeters with a weight of ", np.round(M_wire_total, 2), "kilograms.")
