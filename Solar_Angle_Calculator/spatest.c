@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
         printf("%02d:%02d:%02d ", (int)(spa.sunset), (int)min, (int)sec); //Sunset
         */
 
-        printf("\n");
+        // printf("\n");
 
     } else printf("SPA Error Code: %d\n", result);
 

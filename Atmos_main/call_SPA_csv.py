@@ -6,7 +6,7 @@ import numpy as np
 curr_dir = os.getcwd()
 APP_NAME = "SPA.exe"
 APP_PATH = ""
-EXP_DATA = os.path.join(curr_dir,"data","input_archive","relev_locs_zero","sweep_parameters_ME.csv")
+EXP_DATA = os.path.join(curr_dir,"data","input_archive","elev_2","sweep_parameters.csv")
 SPA_OUTPUT_HEADERS = ["JULIAN DAY", "L", "B", "R","H","DELTA PSI",
                     "DELTA EPSILON","EPSILON","ZENITH","AZIMUTH",
                     "INCIDENCE","DEL_E"]
@@ -56,7 +56,7 @@ def main():
     if not os.path.exists(os.path.join(curr_dir,"data")):
         os.mkdir("data")
 
-    np.savetxt("./data/input_archive/relev_locs_zero/SPA_output_ME.csv", SPA_output, fmt = "%.3f", delimiter= ","
+    np.savetxt("./data/input_archive/elev_2/SPA_output.csv", SPA_output, fmt = "%.3f", delimiter= ","
             , header=','.join(SPA_OUTPUT_HEADERS)) 
 
     print("SPA done! Data file successfully written") 
