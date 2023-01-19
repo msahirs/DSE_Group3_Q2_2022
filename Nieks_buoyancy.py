@@ -7,13 +7,14 @@ h = 0 # height [m]
 
 g0 = 9.80665 # gravity constant [kg/m**2]
 
-mass_structure = 1150
+mass_structure = 1200 + 80 # (50 voor casing wire + 27 aansluiting beams + 2 ofzo wire)
 mass_excesslift = 6000/g0
-mass_balloon = 200
+mass_balloon = 130
 mass_payload = 150
-mass_solar = 1200
+mass_solar = 2661 * 0.6
 mass_tether = 17660/g0
-mass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure + mass_excesslift
+mass_electricalpayload = 86
+mass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure + mass_excesslift + mass_electricalpayload
 
 W = mass * g0
 
@@ -32,7 +33,7 @@ def Volume_calc(h, temp):
 
     V_h = W / (g0 * (rho_a_h - ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas)))))
     return V_h,d_p_gas
-print(Volume_calc(18000,0))
+print(Volume_calc(18000,40))
 
 def Lift_calc(h, V, temp):
     ISA = I(h)
