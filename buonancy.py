@@ -2,7 +2,7 @@ from ISA import ISA as I
 import matplotlib.pyplot as plt
 
 g0 = 9.80665 # gravity constant [kg/m**2]
-mass = 5970
+mass = 5653
 W = mass * g0
 R_gas =  4124 # specific gas constant [J/(kg*K)
 
@@ -52,36 +52,37 @@ for j in range(241):
 
 for i in range(101):
     temps = i
-    up = Lift_calc(18000, 53231, temps)
+    up = Lift_calc(18000, 49827.91610806447, temps)
     L.append(up/1000)
     Temps1.append(temps)
 
-
+print('Volume', Volume_calc(18000, 40))
 #####   sizing ballonet    ####
 
-# plt.xlabel('Altitude (km)')
-# plt.ylabel('Percentage of size ballonet over total volume (-)')
-# plt.xlim(0, 22)
-# plt.ylim(0,100)
-# plt.plot(h1, rho)
-# plt.grid()
-# plt.show()
+plt.xlabel('Altitude (km)')
+plt.ylabel('Percentage of size ballonet over total volume (-)')
+plt.xlim(0, 22)
+plt.ylim(0,100)
+plt.plot(h1, rho)
+plt.grid()
+plt.show()
 
 ######  Changing lift for varying diff temp   ####
 
-# plt.plot(Temps1, L)
-# plt.xlim(0, 100)
-# plt.title('Volume of 53231 m^3 at 18 km altitude')
-# plt.xlabel('Differential temperature (K)')
-# plt.ylabel('Lift (kN)')
-# plt.grid()
-# plt.show()
+plt.plot(Temps1, L)
+plt.xlim(0, 100)
+plt.title('Volume of 49828 m^3 at 18 km altitude')
+plt.xlabel('Differential temperature (K)')
+plt.ylabel('Lift (kN)')
+plt.grid()
+plt.show()
 
 ######  Changing Volume for varying height  #####
 
 plt.xlabel('Altitude (km)')
 plt.ylabel('Volume (m^3)')
-plt.xlim(15, 23)
+plt.xlim(10, 23)
+plt.ylim(0, 135000)
 plt.plot(h1, Vp)
 plt.grid()
 plt.show()
