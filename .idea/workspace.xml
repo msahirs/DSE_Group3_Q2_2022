@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="102cae27-1e74-4dbc-a6f0-9c6d723b2b32" name="Changes" comment="" />
+    <list default="true" id="102cae27-1e74-4dbc-a6f0-9c6d723b2b32" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/Graphs market compliance.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_13_38__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_13_38__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_13_40__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_13_40__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_15_32__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_09_01_2023_15_32__Changes_.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" beforeDir="false" afterPath="$PROJECT_DIR$/Corona_discharge_losses_calculator.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -31,12 +38,12 @@
     </file-type-list>
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="file://$PROJECT_DIR$/Voltage_calculations.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/PolarPlot.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Test.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Wire_structure_calculations.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FlappyBird.py" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/Corona_discharge_losses_calculator.py" root0="FORCE_HIGHLIGHTING" />
-    <setting file="file://$PROJECT_DIR$/Test.py" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Voltage_calculations.py" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
@@ -53,7 +60,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
   </component>
-  <component name="RunManager" selected="Python.Corona_discharge_losses_calculator">
+  <component name="RunManager" selected="Python.Graphs market compliance">
     <configuration name="Corona discharge Losses Calculator" type="PythonConfigurationType" factoryName="Python">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -96,7 +103,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="FlappyBird" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="Graphs market compliance" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
@@ -108,7 +115,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/FlappyBird.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Graphs market compliance.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -183,25 +190,25 @@
     <list>
       <item itemvalue="Python.Corona discharge Losses Calculator" />
       <item itemvalue="Python.Corona_discharge_losses_calculator" />
-      <item itemvalue="Python.FlappyBird" />
       <item itemvalue="Python.PolarPlot" />
       <item itemvalue="Python.Voltage_calculations" />
       <item itemvalue="Python.Wire_structure_calculations" />
+      <item itemvalue="Python.Graphs market compliance" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.Graphs market compliance" />
         <item itemvalue="Python.Corona_discharge_losses_calculator" />
         <item itemvalue="Python.Wire_structure_calculations" />
         <item itemvalue="Python.Voltage_calculations" />
         <item itemvalue="Python.PolarPlot" />
-        <item itemvalue="Python.FlappyBird" />
       </list>
     </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="35615044-fcdf-4d36-b9d5-19208efacb56" name="Changes" comment="" />
+      <changelist id="102cae27-1e74-4dbc-a6f0-9c6d723b2b32" name="Changes" comment="" />
       <created>1671713148401</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />

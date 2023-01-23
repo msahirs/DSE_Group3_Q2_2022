@@ -29,7 +29,7 @@ Amp_wire = P_design / (1000*V_design) #A
 R_al = 2.65*10**-6 #[Ohm/cm] Resistance
 #Area_wire = 0.4         #[cm^2] Surface area of wire
 Rho = 0.0027       #{kg/cm^3} Density
-L_wire = 2100000#[cm] Length of the wire
+L_wire = 1800000#[cm] Length of the wire
 Amp_load = 4      #amps per mm2 of wire
 
 Area_wire = (Amp_wire / (Amp_load))/100 #cm^2
