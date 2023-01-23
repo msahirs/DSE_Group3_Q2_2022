@@ -3,12 +3,12 @@ import numpy as np
 from Payload import distribution1, distribution2
 
 # Input
-length_top = 29.3
-length_bottom = 73.64/2 # Calculate
+length_top = 29.1
+length_bottom = 72/2 # Calculate
 beams = 12
-bottom_loading = 13.75 # Calculate
+bottom_loading = 13.5 # Calculate
 n = 1000
-compression_factor = 1.8 # Edit
+compression_factor = 2 # Edit
 d_bottom = 2
 d_top = 4
 
@@ -32,7 +32,8 @@ tau_max = (1-safety_f) * (yield_str / 2)
 # Top Beam
 x_solar, F_solar, F_tot, w_top = distribution1(top_loading, n, length_top, beams)
 F_0 = abs(F_solar - compression_factor * F_solar)
-M_0 = abs(F_solar * x_solar - compression_factor * F_solar * (x_solar - d_top))
+M_0 = abs(F_solar * x_solar - compression_factor * F_solar * (1/2 * x_solar))
+M_max = 0.25 * F_solar * x_solar
 
 print("Downwards force is:", F_solar)
 print("Force and moment at centre are:", F_0, M_0)
@@ -45,10 +46,10 @@ while tau_lim <= tau_max and sigma_lim <= sigma_max:
     d = 25 * t
     dim = [t, 2 * d, 2 * t, d]
     tau_lim = 9/16 * F_0 / (t*d)
-    sigma_lim = dim[1] * M_0 / moi(dim)[0]
+    sigma_lim = dim[1] * M_max / moi(dim)[0]
     t = t - 0.0000001
 
-W_top = 0.75 * moi(dim)[1] * length_top * 2700
+W_top = moi(dim)[1] * length_top * 2700
 
 print("Weight of top beam will be:", W_top)
 print(moi(dim)[1])
@@ -58,7 +59,7 @@ print(tau_lim, sigma_lim)
 # Bottom Beam
 x_h, F_h, F_tot, w_top = distribution2(bottom_loading, n, length_bottom, beams)
 F_0 = abs(F_h - compression_factor * F_solar)
-M_0 = abs((1.03 * F_h) * x_h - compression_factor * F_solar * (length_top + d_bottom))
+M_0 = abs(F_h * x_h - compression_factor * F_solar * (length_top + d_bottom))
 
 print("\nUpwards force is:", F_h, "acting at", x_h, "causing a moment of", x_h*F_h)
 print("Force and moment at centre are:", F_0, M_0)
@@ -74,7 +75,7 @@ while tau_lim <= tau_max and sigma_lim <= sigma_max:
     sigma_lim = dim[1] * M_0 / moi(dim)[0]
     t = t - 0.0000001
 
-W_bottom = 0.75 * moi(dim)[1] * length_top * 2700
+W_bottom = moi(dim)[1] * length_top * 2700
 
 print("Weight of bottom beam will be:", W_bottom)
 print(tau_lim, sigma_lim)
