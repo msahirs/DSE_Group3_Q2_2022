@@ -4,9 +4,9 @@ from Payload import distribution1, distribution2
 
 # Input
 length_top = 29.1
-length_bottom = 72/2 # Calculate
+length_bottom = 72.2/2 # Calculate
 beams = 12
-bottom_loading = 13.5 # Calculate
+bottom_loading = 13.46 # Calculate
 n = 1000
 compression_factor = 2 # Edit
 d_bottom = 2
