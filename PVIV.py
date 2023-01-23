@@ -40,14 +40,15 @@ def iv(T):
     P1_list = V1_list * I1_list / 1000
     return V1_list, I1_list, P1_list
 
-'''
+
 # Single input
-T_new = 44.6  # Celcius
+T_new = 42.847  # Celcius
 
 a, b, c = iv(T_new)
 
 # Plot IV
 plt.figure(1)
+plt.grid(axis='both')
 plt.ylabel('mA')
 plt.xlabel('mV')
 plt.title('I-V Curve')
@@ -59,6 +60,7 @@ plt.legend()
 
 # Plot PV
 plt.figure(2)
+plt.grid(axis='both')
 plt.ylabel('mW')
 plt.xlabel('mV')
 plt.yticks([500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500])
@@ -72,5 +74,5 @@ plt.legend()
 print((np.amax(c) - np.amax(P_list)) / np.amax(P_list) *100, '% loss')
 print(np.amax(P_list),  'mW/cell at 28C')
 print(np.amax(c), 'mW/cell at' + str(T_new) +' C')
+
 plt.show()
-'''
