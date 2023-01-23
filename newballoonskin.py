@@ -6,7 +6,6 @@ V_h = 49518.88738452703 # [m^3]
 d_P_gas = 108.57619006743589 # [N/m^2]
 Excesslift = 6000 # N
 Lift = 55086.390589999995 # N
-#gasbags = int(Lift/Excesslift) + 1
 gasbags = 12
 admissiblestress=250000000
 print(gasbags)
@@ -30,10 +29,12 @@ density_fibre = 970 # [kg /m3]
 mass_skinfibre = V_skinfibre * density_fibre
 
 t_latex = 0.051 * (10**-3)
-
+print(t_latex)
+print(thickness_skin)
+print(t_latex+thickness_skin)
 v_skinlatex = A * t_latex
 
-density_skinlatex = 1.2 * 68.886
+density_skinlatex = 68.886
 
 mass_skin_latex = v_skinlatex * density_skinlatex
 print(h)
@@ -44,6 +45,15 @@ print(mass_skinfibre)
 area_gasbags = gasbags * 0.5 * m.pi * c * b
 
 mass_gasbags = area_gasbags * ((t_latex * density_skinlatex) + (thickness_skin*density_fibre))
+
+mass_gasbags_latex = area_gasbags * t_latex * density_skinlatex
+mass_gasbags_fibre = area_gasbags * thickness_skin * density_fibre
+
+masslatex = mass_skin_latex + mass_gasbags_latex
+massfibre = mass_gasbags_fibre + mass_skinfibre
 print(mass_gasbags)
-total_mass = mass_gasbags + mass_skin_latex
+total_mass = mass_gasbags + mass_skin_latex + mass_skinfibre
 print(total_mass)
+
+print(masslatex)
+print(massfibre)
