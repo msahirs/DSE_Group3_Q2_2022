@@ -8,12 +8,12 @@ h = 0 # height [m]
 g0 = 9.80665 # gravity constant [kg/m**2]
 
 mass_structure = 1200 + 80 # (50 voor casing wire + 27 aansluiting beams + 2 ofzo wire)
-mass_excesslift = 6000/g0
-mass_balloon = 130
-mass_payload = 150
-mass_solar = 2661 * 0.6
-mass_tether = 17660/g0
-mass_electricalpayload = 86
+mass_excesslift = 610
+mass_balloon = 160
+mass_payload = 200
+mass_solar = 1600
+mass_tether = 1800
+mass_electricalpayload = 85
 mass = mass_tether + mass_solar + mass_payload + mass_balloon + mass_structure + mass_excesslift + mass_electricalpayload
 
 W = mass * g0
