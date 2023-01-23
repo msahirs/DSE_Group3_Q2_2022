@@ -27,10 +27,10 @@ def merge_CSVs(file_a,file_b,output_dir):
 
 cwd = os.getcwd()
 
-file_b = os.path.join(cwd,"data","input_archive","elev_2","SPA_output.csv")
-file_a = os.path.join(cwd,"data","input_archive","elev_2","sweep_parameters.csv")
+file_b = os.path.join(cwd,"data","input_archive","North_0","SPA_output.csv")
+file_a = os.path.join(cwd,"data","input_archive","North_0","sweep_parameters.csv")
 
-merge_CSVs(file_a,file_b,"data/input_archive/elev_2")
+merge_CSVs(file_a,file_b,"data/input_archive/North_0")
 
 
 
