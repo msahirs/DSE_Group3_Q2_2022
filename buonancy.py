@@ -2,7 +2,7 @@ from ISA import ISA as I
 import matplotlib.pyplot as plt
 
 g0 = 9.80665 # gravity constant [kg/m**2]
-mass = 5653
+mass = 5735
 W = mass * g0
 R_gas =  4124 # specific gas constant [J/(kg*K)
 
@@ -24,8 +24,9 @@ def Volume_calc(h, temp):
     rho_gas = ((p_gas_h + d_p_gas) / (R_gas * (T_a + d_T_gas)))
 
     V_h = W / (g0 * (rho_a_h - rho_gas))
+    mass_h2 = rho_gas * V_h
 
-    return V_h, rho_a_h, rho_gas, p_gas_h
+    return V_h, rho_a_h, rho_gas, p_gas_h, mass_h2
 
 def Lift_calc(h, V, temp):
     ISA = I(h)
@@ -42,17 +43,17 @@ def Lift_calc(h, V, temp):
 
 for j in range(241):
     h = j * 100
-    V_p, rho_a, rho_gas, p_gas = Volume_calc(h, 0)
+    V_p, rho_a, rho_gas, p_gas, mass = Volume_calc(h, 0)
     h1.append(h/1000)
     Vp.append(V_p)
-    V_p0, rho_a0, rho_gas0, p_gas0 = Volume_calc(0, 0)
+    V_p0, rho_a0, rho_gas0, p_gas0, mass= Volume_calc(0, 0)
     rho.append(100 - (rho_gas/rho_gas0)* 100)
 
 
 
 for i in range(101):
     temps = i
-    up = Lift_calc(18000, 49827.91610806447, temps)
+    up = Lift_calc(18000, 50556.925890248676, temps)
     L.append(up/1000)
     Temps1.append(temps)
 
@@ -71,7 +72,7 @@ plt.show()
 
 plt.plot(Temps1, L)
 plt.xlim(0, 100)
-plt.title('Volume of 49828 m^3 at 18 km altitude')
+plt.title('Volume of 50557 m^3 at 18 km altitude')
 plt.xlabel('Differential temperature (K)')
 plt.ylabel('Lift (kN)')
 plt.grid()
