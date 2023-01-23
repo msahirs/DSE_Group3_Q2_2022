@@ -24,7 +24,7 @@ def distribution2(dis_force, n, length, beams):
     w_i = 0
     circum = 2*np.pi*length
     max_width = circum / beams
-    x_eq = 1/2 * length
+    x_eq = 0.55 * length
     F_eq = 1/2 * length * max_width * dis_force
     F_tot = dis_force * np.pi * length**2
 

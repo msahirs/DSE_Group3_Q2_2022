@@ -27,10 +27,10 @@ yield_str = 276 * 10 ** 6  # Pa, when is the same for tension and compression
 tensile_str=yield_str
 compress_str=yield_str
 density=2700
-L_rod = 19.5 # m
+L_rod = 3 # m
 
 # Input
-F_tension = 24000 # N
+F_tension = 24000 # 24000 # N
 W_payload = 1500 # N
 safety_f = 0.25
 
