@@ -8,7 +8,7 @@ import PVIV
 # Input Variables
 A = 2665  # Area of solar cell configuration [m^2]
 dh = 1  # Distance between pv array and balloon [m]
-h = 20000.0  # Height [m]
+h = 16820.0  # Height [m]
 v_wind = 5  # Wind speed [m/s]
 
 # Constants
@@ -50,7 +50,7 @@ A_segment_ps = 0.5 * R_charac * 2 * np.degrees(np.arccos((R_charac - (v_wind * d
 New_air_ps = A_segment_ps / A
 
 '''
-solar_irr = np.genfromtxt('data/input_archive/relev_locs/merged_all_PA.csv', delimiter=',')
+solar_irr = np.genfromtxt('data/input_archive/relev_locs_zero/merged_all_PA.csv', delimiter=',')
 flux = solar_irr[:, 30]
 flux_max = np.amax(flux)
 index_max = np.where(flux == flux_max)
@@ -80,12 +80,27 @@ for j in range(0+1440*q, 1000+1440*q):
 time_step = (solar_irr[1, 4] - solar_irr[0, 4]) * 60  # seconds
 time_flux = np.linspace(0, 86400, int(86400 / time_step))
 flux_interp = np.interp(t_list, time_flux, flux)
-'''
+
 solar_irr = np.genfromtxt('data/merged_fluxes.csv', delimiter=',')
 flux = solar_irr[:, 30]
 time_step = (solar_irr[1, 4] - solar_irr[0, 4]) * 60  # seconds
 time_flux = np.linspace(0, 86400, int(86400 / time_step))
 flux_interp = np.interp(t_list, time_flux, flux)
+'''
+
+solar_irr = np.genfromtxt('data/input_archive/PA_16200/merged_Final.csv', delimiter=',')
+flux = solar_irr[:, 30]
+time_step = 10
+time_flux = np.linspace(0, 86400, int(86400 / time_step))
+flux_max = np.amax(flux)
+index_max = np.where(flux == flux_max)
+print(index_max)
+flux_curve1 = flux[6000:8639]
+flux_curve2 = flux[0:6001]
+flux_curve = res = [j for i in [flux_curve1, flux_curve2] for j in i]
+flux_interp = np.interp(t_list, time_flux, flux_curve)
+plt.plot(t_list, flux_interp)
+plt.show()
 
 T = T_air
 T_list = []
@@ -149,7 +164,7 @@ for t in range(len(t_list)):
     q[6].append(q_cfrp_forced_conv*dt)
 
     # Time step
-    '''
+
     dT = (
                  q_abs - q_forced_conv - q_free_conv - q_emission - q_emission_cfrp - q_cfrp_free_conv - q_cfrp_forced_conv) / Cp_module * dt
     T = T + dT
@@ -159,19 +174,19 @@ for t in range(len(t_list)):
     dT = (q_abs - q_forced_conv - q_free_conv - q_emission) / Cp_module * dt
     T = T + dT
     T_bottom = 0
-
+    '''
 
 # Finding maxima and printing
 max_index = np.argmax(T_list)
 print("\nMax temperature: ", T_list[max_index])
 print("Total:")
 print(sum(q[0]), "Joule absorbed")
-print(sum(q[1]), "Watts released through top radiation", sum(q[1]) / sum(q[0]) * 100, "%")
-print(sum(q[2]), "Watts released trough top free conv", sum(q[2]) / sum(q[0]) * 100, "%")
-print(sum(q[3]), "Watts released trough top forced conv", sum(q[3]) / sum(q[0]) * 100, "%")
-print(sum(q[4]), "Watts released through bottom radiation", sum(q[4]) / sum(q[0]) * 100, "%")
-print(sum(q[5]), "Watts released trough bottom free conv", sum(q[5]) / sum(q[0]) * 100, "%")
-print(sum(q[6]), "Watts released trough bottom free conv", sum(q[6]) / sum(q[0]) * 100, "%")
+print(sum(q[1]), "J released through top radiation", sum(q[1]) / sum(q[0]) * 100, "%")
+print(sum(q[2]), "J released trough top free conv", sum(q[2]) / sum(q[0]) * 100, "%")
+print(sum(q[3]), "J released trough top forced conv", sum(q[3]) / sum(q[0]) * 100, "%")
+print(sum(q[4]), "J released through bottom radiation", sum(q[4]) / sum(q[0]) * 100, "%")
+print(sum(q[5]), "J released trough bottom free conv", sum(q[5]) / sum(q[0]) * 100, "%")
+print(sum(q[6]), "J released trough bottom free conv", sum(q[6]) / sum(q[0]) * 100, "%")
 
 print('============================')
 print(sum(q[7]) / 10 ** 9, 'Power generated (GJ)')
@@ -187,6 +202,9 @@ print(301.5 * 402 * 10 ** -6, 'Panel area (m2) at 12 cells')
 print(np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 * 12, 'W per panel')
 print(np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 / (301.5 * 402 * 10 ** -6) * 12, 'W/m2 of a panel')
 print(1074762 / (np.amax(PVIV.iv(np.amax(T_list))[2]) / 1000 / (301.5 * 402 * 10 ** -6) * 12), 'm2 for 1074762 W')
+
+
+power_gen = np.divide(q[7], 1000)
 
 # Plotting
 fig, ax1 = plt.subplots()
@@ -205,7 +223,16 @@ color = 'tab:blue'
 ax2.set_ylabel('Temperature [C]', color=color)
 ax2.plot(t_list, T_list, color=color)
 ax2.tick_params(axis='y', labelcolor=color)
-plt.yticks([-60, -50, -40,-30, -20, -10, 0, 10, 20, 30, 40,50,60,70,80,90])
+plt.yticks([-60, -50, -40,-30, -20, -10, 0, 10, 20, 30, 40])
+'''
+# Second graph
+ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
+plt.grid(axis='both')
+color = 'tab:blue'
+ax2.set_ylabel('Effective Power Output [kW]', color=color)
+ax2.plot(t_list, power_gen, color=color)
+ax2.tick_params(axis='y', labelcolor=color)
+'''
 
 '''
 # Set x-axis labels
@@ -225,11 +252,11 @@ fig.tight_layout()
 '''
 # Set x-axis labels
 div = 4
-initial_time = 2
+initial_time = 0
 labels = []
 zero = datetime.datetime.min
 for i in range(math.floor(len(t_list) / (div * 3600))):
-    timestep = datetime.timedelta(hours=initial_time, seconds=i * div * 3600)
+    timestep = datetime.timedelta(hours=initial_time + 16, minutes=20, seconds=i * div * 3600)
     labels.append((zero + timestep).time())
 
 # labels = np.array([datetime.time(initial_time + div * i, 0) for i in range(math.floor(len(t_list) / div))])

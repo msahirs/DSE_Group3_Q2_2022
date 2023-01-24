@@ -11,6 +11,18 @@ d_V_oc = -6.2  # mV/K
 d_I_sc = 1.387  # mA/K
 d_V_mp = -6.7  # mV/K
 d_I_mp = 0.924  # mA/K
+'''
+# Values (based on Si)
+V_oc = 628  # mV
+I_sc = 45.8*100  # mA
+V_mp = 528  # mV
+I_mp = 43.4*100  # mA
+
+d_V_oc = -2.02  # mV/K
+d_I_sc = 0.03*100  # mA/K
+d_V_mp = -2.07  # mV/K
+d_I_mp = 0.004*100  # mA/K
+'''
 
 C2 = (V_mp / V_oc - 1) / (np.log(1 - I_mp / I_sc))
 C1 = (1 - I_mp / I_sc) * np.exp(- V_mp / C2 / V_oc)
