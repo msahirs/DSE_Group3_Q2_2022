@@ -11,7 +11,7 @@ REF_ANGLE_HEADERS = ["YEAR","MONTH","DAY","HOUR","MINUTE",
                     "FUNCTION"]
 
 
-ref_angle_inp = "2022 2 28 12 0 0 8 0 69.184 120.0 30.0 16820 90.3966 -7.70624 0 0 0.65 1".split(" ")
+ref_angle_inp = "2022 2 28 12 0 0 0 0 69.184 120.0 30.0 16820 90.3966 -7.70624 0 0 0.65 1".split(" ")
 ref_angle_inp = [float(x) for x in ref_angle_inp]
 ref_angle_inp = np.array(ref_angle_inp)
 
