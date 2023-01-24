@@ -3,14 +3,13 @@ import numpy as np
 from Payload import distribution1, distribution2
 
 # Input
-length_top = 29.1
-length_bottom = 72.2/2 # Calculate
+length_top = 42.1
+length_bottom = 90/2 # Calculate
 beams = 12
-bottom_loading = 13.46 # Calculate
+bottom_loading = 15.8 # Calculate
 n = 1000
-compression_factor = 2 # Edit
-d_bottom = 2
-d_top = 4
+compression_factor = 1 # Edit
+d_bottom = -10
 
 def moi(dim):
     I = 2*(1/3*dim[0]*dim[1] + dim[2]*dim[3])*dim[1]*dim[1]
@@ -32,14 +31,14 @@ tau_max = (1-safety_f) * (yield_str / 2)
 # Top Beam
 x_solar, F_solar, F_tot, w_top = distribution1(top_loading, n, length_top, beams)
 F_0 = abs(F_solar - compression_factor * F_solar)
-M_0 = abs(F_solar * x_solar - compression_factor * F_solar * (1/2 * x_solar))
+M_0 = abs(F_solar * x_solar - compression_factor * F_solar * (1 * x_solar))
 M_max = 0.25 * F_solar * x_solar
 
 print("Downwards force is:", F_solar)
 print("Force and moment at centre are:", F_0, M_0)
 
 tau_lim, sigma_lim = 0, 0
-d, t = 0.1, 0.1
+d, t = 0.2, 0.2
 dim = [t,d,t,d]
 
 while tau_lim <= tau_max and sigma_lim <= sigma_max:

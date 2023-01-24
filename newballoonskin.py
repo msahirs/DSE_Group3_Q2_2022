@@ -1,11 +1,11 @@
 import math as m
 
-Areasolarpanels = 2726 # [m]
+Areasolarpanels = 2661 # [m]
 r_solarpanels = m.sqrt(Areasolarpanels/m.pi)
-V_h = 49518.88738452703 # [m^3]
+V_h = 190414.92575926267 # [m^3]
 d_P_gas = 108.57619006743589 # [N/m^2]
 Excesslift = 6000 # N
-Lift = 55086.390589999995 # N
+Lift = 209340.04877387534 # N
 gasbags = 12
 admissiblestress=250000000
 print(gasbags)

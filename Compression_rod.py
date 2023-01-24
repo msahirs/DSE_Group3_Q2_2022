@@ -31,7 +31,7 @@ L_rod = 3 # m
 
 # Input
 F_tension = 24000 # 24000 # N
-W_payload = 1500 # N
+W_payload = 2000 # N
 safety_f = 0.25
 
 m_rod, radius, A = rod_load(F_tension, W_payload, safety_f, tensile_str, density)
